@@ -1,1 +1,0 @@
-console.log("Frontend Wizard de Carta de VAN iniciado...");
