@@ -1,3 +1,5 @@
+npm install @nestjs/swagger swagger-ui-express
+
 ---------  DOCKER ----------------
 * Primera vez baixando o código rode o comando;
 * Ele criará a imagem no docker
