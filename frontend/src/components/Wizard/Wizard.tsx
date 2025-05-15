@@ -107,15 +107,15 @@ export const Wizard: React.FC = () => {
       }}
     />
   ) : (
-    <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start">
+    <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2">
       <Stepper
         currentStep={
           ["bank", "products", "form", "validation"].indexOf(currentStep)
         }
         steps={steps}
       />
-      <Card className="w-full max-w-3xl mt-4">
-        <div className="px-8 py-8">{renderStep()}</div>
+      <Card className="w-full max-w-full sm:max-w-2xl md:max-w-3xl mt-4">
+        <div className="px-2 sm:px-6 md:px-8 py-6 sm:py-8">{renderStep()}</div>
       </Card>
     </div>
   );

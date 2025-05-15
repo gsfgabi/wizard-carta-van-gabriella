@@ -8,13 +8,16 @@ type ButtonProps = {
 };
 
 export function Button({ label, className = '', type = "button", ...rest }: ButtonProps) {
+  const responsiveClass = 'w-full sm:w-auto';
+
   return (
     <button
       type={type}
-      className={`btn btn-primary ${className}`}
+      className={`btn btn-primary ${responsiveClass} ${className}`}
       {...rest}
     >
       {label}
     </button>
   );
 }
+

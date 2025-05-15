@@ -6,10 +6,13 @@ type InputProps = {
   placeholder?: string;
   name?: string;
   value?: string;
+  className?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-export function Input({ label, type = "text", placeholder, ...rest }: InputProps) {
+export function Input({ label, type = "text", placeholder, className = '', ...rest }: InputProps) {
+  const responsiveClass = 'w-full sm:w-auto';
+
   return (
     <div className="form-control mb-4">
       <label className="label">
@@ -18,7 +21,7 @@ export function Input({ label, type = "text", placeholder, ...rest }: InputProps
       <input
         type={type}
         placeholder={placeholder}
-        className="input input-bordered w-full"
+        className={`input input-bordered ${responsiveClass} ${className}`}
         {...rest}
       />
     </div>
