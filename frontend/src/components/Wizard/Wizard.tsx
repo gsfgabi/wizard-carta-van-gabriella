@@ -1,35 +1,38 @@
-import React, { useState } from 'react';
-import { BankSelection } from './steps/BankSelection';
-import { ProductSelection } from './steps/ProductSelection';
-import { FormStep } from './steps/FormStep';
-import { ValidationStep } from './steps/ValidationStep';
-import Card from '../Card/Card';
+import React, { useState } from "react";
+import { BankSelection } from "./steps/BankSelection";
+import { ProductSelection } from "./steps/ProductSelection";
+import { FormStep } from "./steps/FormStep";
+import { ValidationStep } from "./steps/ValidationStep";
+import Card from "../Card/Card";
+import WizardIntro from "../../pages/WizardIntro";
+import Stepper from "../Stepper/StepperSteps";
 
-export type WizardStep = 'bank' | 'products' | 'form' | 'validation';
+export type WizardStep = "bank" | "products" | "form" | "validation";
 
 export const steps = [
-  'Banco',
-  'Produto',
-  'Dados da empresa e conta',
-  'Validação',
+  "Banco",
+  "Produto",
+  "Dados da empresa e conta",
+  "Validação",
 ];
 
 export const Wizard: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<WizardStep>('bank');
+  const [currentStep, setCurrentStep] = useState<WizardStep>("bank");
   const [selectedBank, setSelectedBank] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({});
+  const [showIntro, setShowIntro] = useState(true);
 
   const handleNext = () => {
     switch (currentStep) {
-      case 'bank':
-        setCurrentStep('products');
+      case "bank":
+        setCurrentStep("products");
         break;
-      case 'products':
-        setCurrentStep('form');
+      case "products":
+        setCurrentStep("form");
         break;
-      case 'form':
-        setCurrentStep('validation');
+      case "form":
+        setCurrentStep("validation");
         break;
       default:
         break;
@@ -38,14 +41,17 @@ export const Wizard: React.FC = () => {
 
   const handleBack = () => {
     switch (currentStep) {
-      case 'products':
-        setCurrentStep('bank');
+      case "bank":
+        setShowIntro(true);
         break;
-      case 'form':
-        setCurrentStep('products');
+      case "products":
+        setCurrentStep("bank");
         break;
-      case 'validation':
-        setCurrentStep('form');
+      case "form":
+        setCurrentStep("products");
+        break;
+      case "validation":
+        setCurrentStep("form");
         break;
       default:
         break;
@@ -54,15 +60,16 @@ export const Wizard: React.FC = () => {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 'bank':
+      case "bank":
         return (
           <BankSelection
             onSelect={setSelectedBank}
             selectedBank={selectedBank}
             onNext={handleNext}
+            onBack={handleBack}
           />
         );
-      case 'products':
+      case "products":
         return (
           <ProductSelection
             selectedProducts={selectedProducts}
@@ -71,7 +78,7 @@ export const Wizard: React.FC = () => {
             onBack={handleBack}
           />
         );
-      case 'form':
+      case "form":
         return (
           <FormStep
             formData={formData}
@@ -80,7 +87,7 @@ export const Wizard: React.FC = () => {
             onBack={handleBack}
           />
         );
-      case 'validation':
+      case "validation":
         return (
           <ValidationStep
             selectedProducts={selectedProducts}
@@ -92,11 +99,24 @@ export const Wizard: React.FC = () => {
     }
   };
 
-  return (
-    <Card className="w-full max-w-3xl mt-12">
-      <div className="px-8 py-8">
-        {renderStep()}
-      </div>
-    </Card>
+  return showIntro ? (
+    <WizardIntro
+      onStart={() => {
+        setShowIntro(false);
+        setCurrentStep("bank");
+      }}
+    />
+  ) : (
+    <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start">
+      <Stepper
+        currentStep={
+          ["bank", "products", "form", "validation"].indexOf(currentStep)
+        }
+        steps={steps}
+      />
+      <Card className="w-full max-w-3xl mt-4">
+        <div className="px-8 py-8">{renderStep()}</div>
+      </Card>
+    </div>
   );
-}; 
+};

@@ -1,6 +1,6 @@
 const colors = {
-  primary: '#8C3AC9',        // Fundo principal (roxo claro)
-  primaryDark: '#7B2CBF',    // Stepper e botões (roxo escuro)
+  primary: '#8D44AD',        // Fundo principal (roxo claro)
+  primaryDark: '#8D44AD',    // Stepper e botões (roxo escuro)
   card: '#FFFFFF',           // Card branco
   stepperCircle: '#FFFFFF',  // Círculo ativo do stepper
   stepperInactive: '#B39DDB',// Círculo inativo do stepper

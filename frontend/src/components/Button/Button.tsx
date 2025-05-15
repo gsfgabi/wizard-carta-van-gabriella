@@ -5,16 +5,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button: React.FC<ButtonProps> = ({ variant = 'primary', children, ...props }) => {
-  const base = 'px-6 py-2 rounded font-semibold transition-colors';
-  const variants = {
-    primary: 'bg-primary text-white hover:bg-primaryDark',
-    secondary: 'bg-white border border-primary text-primary hover:bg-primary/10',
-  };
+  const base = 'button'; // usa os estilos globais definidos para <button>
+  const variantClass = `button-${variant}`;
+
   return (
-    <button className={`${base} ${variants[variant]}`} {...props}>
+    <button className={`${base} ${variantClass}`} {...props}>
       {children}
     </button>
   );
 };
 
-export default Button; 
+export default Button;

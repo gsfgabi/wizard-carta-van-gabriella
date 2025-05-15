@@ -1,5 +1,6 @@
 import React from 'react';
 import Stepper from '../components/Stepper/Stepper';
+import Card from '../components/Card/Card';
 
 const steps = [
   'Banco',
@@ -13,7 +14,7 @@ const steps = [
 export default function WizardIntro({ onStart }: { onStart: () => void }) {
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-6xl">
+      <Card className="p-10 max-w-6xl">
         <h1 className="text-2xl font-bold text-center text-primary mb-2">
           Assistente de Emissão de Cartas de VAN
         </h1>
@@ -30,7 +31,7 @@ export default function WizardIntro({ onStart }: { onStart: () => void }) {
             Começar
           </button>
         </div>
-      </div>
+      </Card>
     </div>
   );
-} 
+}

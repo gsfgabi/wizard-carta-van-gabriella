@@ -1,70 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Combobox } from '@headlessui/react';
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import React, { useState, useEffect } from "react";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxButton,
+  ComboboxOptions,
+  ComboboxOption,
+} from "@headlessui/react";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import Button from "../../Button/Button"; // ajuste o caminho se necessário
 
 interface Bank {
   code: number;
   name: string;
-  vanPattern: string;
-  cnab240: boolean;
-  cnab400: boolean;
-  cnab444: boolean;
-  products: string;
 }
 
 interface BankSelectionProps {
   onSelect: (bankCode: number) => void;
   selectedBank: number | null;
   onNext: () => void;
+  onBack: () => void;
 }
 
 export const BankSelection: React.FC<BankSelectionProps> = ({
   onSelect,
   selectedBank,
   onNext,
+  onBack,
 }) => {
   const [banks, setBanks] = useState<Bank[]>([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Implementar chamada à API para buscar os bancos
-    const fetchBanks = async () => {
-      try {
-        // Simulação temporária
-        const mockBanks: Bank[] = [
-          {
-            code: 1,
-            name: 'Banco do Brasil',
-            vanPattern: 'CNAB240',
-            cnab240: true,
-            cnab400: false,
-            cnab444: false,
-            products: 'Boletos, Pagamentos, Extrato, DDA',
-          },
-          {
-            code: 341,
-            name: 'Itaú',
-            vanPattern: 'CNAB400',
-            cnab240: false,
-            cnab400: true,
-            cnab444: false,
-            products: 'Boletos, Pagamentos, Extrato',
-          },
-        ];
-        setBanks(mockBanks);
-        setLoading(false);
-      } catch (error) {
-        console.error('Erro ao buscar bancos:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchBanks();
+    setTimeout(() => {
+      setBanks([
+        { code: 33, name: "Banco Santander" },
+        { code: 1, name: "Banco do Brasil" },
+        { code: 341, name: "Itaú" },
+        { code: 104, name: "Caixa Econômica" },
+      ]);
+      setLoading(false);
+    }, 500);
   }, []);
 
   const filteredBanks =
-    query === ''
+    query === ""
       ? banks
       : banks.filter((bank) =>
           `${bank.code} - ${bank.name}`
@@ -73,39 +53,35 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
         );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium text-gray-900">
-          Selecione o Banco
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Escolha o banco para o qual deseja gerar a Carta de VAN
-        </p>
-      </div>
-
-      <div className="relative">
+    <div className="w-full max-w-2xl mx-auto px-2">
+      <h2 className="text-lg font-semibold mb-1">
+        1. Selecionar um Banco (Instituição Bancária)
+      </h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Selecione um banco para criar uma nova carta de VAN
+      </p>
+      <div className="mb-8 relative">
         <Combobox
           value={banks.find((bank) => bank.code === selectedBank) || null}
           onChange={(bank) => bank && onSelect(bank.code)}
         >
           <div className="relative">
-            <Combobox.Input
-              className="input-field"
+            <ComboboxInput
+              className="w-full border border-[#8B3DFF] rounded-md py-2 pl-3 pr-10 text-gray-900 bg-white focus:ring-2 focus:ring-[#8B3DFF] focus:border-[#8B3DFF] focus:outline-none transition placeholder:text-[#8B3DFF]"
               onChange={(event) => setQuery(event.target.value)}
               displayValue={(bank: Bank) =>
-                bank ? `${bank.code} - ${bank.name}` : ''
+                bank ? `${bank.code} - ${bank.name}` : ""
               }
-              placeholder="Digite o código ou nome do banco"
+              placeholder="Selecione um banco"
             />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon
-                className="h-5 w-5 text-gray-400"
+                className="h-5 w-5"
                 aria-hidden="true"
               />
-            </Combobox.Button>
+            </ComboboxButton>
           </div>
-
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <ComboboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-opacity-60 focus:outline-none sm:text-sm">
             {loading ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                 Carregando...
@@ -116,11 +92,13 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
               </div>
             ) : (
               filteredBanks.map((bank) => (
-                <Combobox.Option
+                <ComboboxOption
                   key={bank.code}
                   className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-primary-600 text-white' : 'text-gray-900'
+                    `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                      active
+                        ? "bg-[#8B3DFF] text-white"
+                        : "text-[#8B3DFF] hover:bg-[#f3eaff]"
                     }`
                   }
                   value={bank}
@@ -129,7 +107,7 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                     <>
                       <span
                         className={`block truncate ${
-                          selected ? 'font-medium' : 'font-normal'
+                          selected ? "font-semibold" : "font-normal"
                         }`}
                       >
                         {bank.code} - {bank.name}
@@ -137,7 +115,7 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                       {selected ? (
                         <span
                           className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                            active ? 'text-white' : 'text-primary-600'
+                            active ? "text-white" : "text-[#8B3DFF]"
                           }`}
                         >
                           <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -145,23 +123,31 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                       ) : null}
                     </>
                   )}
-                </Combobox.Option>
+                </ComboboxOption>
               ))
             )}
-          </Combobox.Options>
+          </ComboboxOptions>
         </Combobox>
       </div>
-
-      <div className="flex justify-end">
-        <button
+      <div className="flex justify-between">
+        <Button
           type="button"
-          className="btn-primary"
+          className="border border-[#8D44AD] text-white rounded-full px-6 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50"
+          onClick={onBack}
+          variant="secondary"
+        >
+          Voltar
+        </Button>
+        <Button
+          type="button"
+          className="bg-[#8D44AD] text-white rounded-full px-6 py-2 font-semibold shadow hover:bg-[#8D44AD] transition disabled:opacity-50"
           onClick={onNext}
           disabled={!selectedBank}
+          variant="primary"
         >
           Próximo
-        </button>
+        </Button>
       </div>
     </div>
   );
-}; 
+};
