@@ -1,11 +1,12 @@
 import React from 'react';
 
-type ButtonProps = {
+export interface ButtonProps {
   label: string;
   className?: string;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-};
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+}
 
 export function Button({ label, className = '', type = "button", ...rest }: ButtonProps) {
   return (

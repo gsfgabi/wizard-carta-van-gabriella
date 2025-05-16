@@ -11,7 +11,8 @@ type InputProps = {
 };
 
 export function Input({ label, type = "text", placeholder, className = '', ...rest }: InputProps) {
-  const responsiveClass = 'w-full sm:w-auto';
+  // Responsivo: ocupa toda a largura em telas pequenas, auto em md+
+  const responsiveClass = 'w-full md:w-auto';
 
   return (
     <div className="form-control mb-4">

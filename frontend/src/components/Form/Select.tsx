@@ -14,10 +14,10 @@ interface SelectProps {
 }
 
 const Select: React.FC<SelectProps> = ({ label, options, value, onChange, error }) => (
-  <div className="mb-4">
+  <div className="mb-4 w-full">
     <label className="block text-sm font-medium mb-1">{label}</label>
     <select
-      className={`input-field ${error ? 'border-red-500' : ''}`}
+      className={`input-field w-full md:w-auto ${error ? 'border-red-500' : ''}`}
       value={value}
       onChange={e => onChange(e.target.value)}
     >
