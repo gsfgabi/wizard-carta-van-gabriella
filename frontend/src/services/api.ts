@@ -1,13 +1,27 @@
+/// <reference types="vite/client" />
 import axios from 'axios';
 import type { Bank, FormData as FormDataType, Product, ZendeskTicket } from '../types';
 
+const BANKS_API_URL = import.meta.env.VITE_BANKS_API;
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+  baseURL: '/api'
 });
 
 export const getBanks = async (): Promise<Bank[]> => {
-  const response = await api.get('/banks');
-  return response.data;
+  try {
+    const response = await api.get('/banks'); // Usando a instância configurada com baseURL
+    console.log('Resposta da API:', response.data); // Para debug
+    const banks = response.data.map((b: any) => ({
+      code: b.code,
+      name: b.name
+    }));
+    banks.sort((a, b) => a.code.localeCompare(b.code));
+    return banks;
+  } catch (error) {
+    console.error('Erro ao buscar bancos:', error);
+    throw error;
+  }
 };
 
 export const generatePDF = async (

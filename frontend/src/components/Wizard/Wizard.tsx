@@ -18,7 +18,7 @@ export const steps = [
 
 export const Wizard: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<WizardStep>("bank");
-  const [selectedBank, setSelectedBank] = useState<number | null>(null);
+  const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({});
   const [showIntro, setShowIntro] = useState(true);

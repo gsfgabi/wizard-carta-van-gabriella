@@ -28,47 +28,26 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium text-gray-900">
-          Selecione os Produtos
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Escolha os produtos que deseja incluir na Carta de VAN
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="w-full max-w-5xl mx-auto px-2">
+      <h2 className="text-2xl font-bold mb-2 text-black text-left">
+        2. Selecione os Produtos
+      </h2>
+      <p className="text-base text-black mb-6 text-left">
+        Escolha os produtos que deseja incluir na Carta de VAN
+      </p>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-12">
         {AVAILABLE_PRODUCTS.map((product) => (
           <div
             key={product.id}
-            className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${
-              selectedProducts.includes(product.id)
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 bg-white'
-            }`}
+            className={`relative flex cursor-pointer rounded-lg border-2 p-6 shadow-md transition focus:outline-none items-center min-h-[72px] text-lg font-medium
+              ${selectedProducts.includes(product.id)
+                ? 'border-[#8D44AD] bg-[#f3eaff] text-[#8D44AD]'
+                : 'border-[#E0E0E0] bg-white text-black hover:border-[#8D44AD]'}
+            `}
             onClick={() => handleProductToggle(product.id)}
           >
-            <div className="flex flex-1">
-              <div className="flex flex-col">
-                <span
-                  className={`block text-sm font-medium ${
-                    selectedProducts.includes(product.id)
-                      ? 'text-primary-900'
-                      : 'text-gray-900'
-                  }`}
-                >
-                  {product.name}
-                </span>
-              </div>
-            </div>
-            <div
-              className={`ml-3 flex h-5 items-center ${
-                selectedProducts.includes(product.id)
-                  ? 'text-primary-600'
-                  : 'text-gray-300'
-              }`}
-            >
+            <span className="flex-1 text-left">{product.name}</span>
+            <span className={`ml-4 flex items-center justify-center w-7 h-7 rounded-full border-2 ${selectedProducts.includes(product.id) ? 'border-[#8D44AD] bg-[#8D44AD] text-white' : 'border-[#E0E0E0] bg-white text-[#E0E0E0]'}`}>
               <svg
                 className="h-5 w-5"
                 viewBox="0 0 20 20"
@@ -81,22 +60,21 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-            </div>
+            </span>
           </div>
         ))}
       </div>
-
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center mt-8">
         <button
           type="button"
-          className="btn-secondary"
+          className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
           onClick={onBack}
         >
           Voltar
         </button>
         <button
           type="button"
-          className="btn-primary"
+          className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
           onClick={onNext}
           disabled={selectedProducts.length === 0}
         >

@@ -1,11 +1,6 @@
 export interface Bank {
-  code: number;
+  code: string;
   name: string;
-  vanPattern: string;
-  cnab240: boolean;
-  cnab400: boolean;
-  cnab444: boolean;
-  products: string;
 }
 
 export interface FormData {

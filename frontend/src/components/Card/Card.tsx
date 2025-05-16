@@ -5,13 +5,11 @@ const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ chi
     className={`
       bg-white rounded-lg shadow-lg
       py-4 px-2
-      sm:py-6 sm:px-6
-      md:py-8 md:px-10
+      xs:px-3 xs:py-5
+      sm:py-6 sm:px-4
+      md:py-8 md:px-8
       w-full
-      max-w-full
-      sm:max-w-2xl
-      md:max-w-3xl
-      lg:max-w-5xl
+      max-w-xs xs:max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-5xl
       mx-auto
       relative
       ${className}
