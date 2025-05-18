@@ -9,34 +9,35 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model authorization_letters {
-  id                             BigInt                           @id @unique @default(autoincrement())
-  cnpj                           String                           @db.VarChar
-  corporate_name                 String                           @db.VarChar
-  responsible_person_name        String                           @db.VarChar
-  responsible_person_title       String                           @db.VarChar
-  responsible_person_cellphone   String                           @db.VarChar
-  responsible_person_email       String                           @db.VarChar
-  manager_name                   String                           @db.VarChar
-  manager_cellphone              String                           @db.VarChar
-  manager_email                  String                           @db.VarChar
-  branch_number                  String                           @db.VarChar
-  branch_dv                      String                           @db.VarChar
-  account_number                 String                           @db.VarChar
-  account_dv                     String                           @db.VarChar
-  agreement_number               String                           @db.VarChar
-  id_banks                       Int                              @db.SmallInt
-  id_cnabs                       Int                              @db.SmallInt
-  created_at                     DateTime                         @db.Timestamptz(6)
-  banks                          banks                            @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  cnabs                          cnabs                            @relation(fields: [id_cnabs], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  authorization_letters_products authorization_letters_products[]
+  id                              Int                               @id @unique @default(autoincrement()) @db.SmallInt
+  cnpj                            String                            @db.VarChar
+  corporate_name                  String                            @db.VarChar
+  responsible_person_name         String                            @db.VarChar
+  responsible_person_title        String                            @db.VarChar
+  responsible_person_cellphone    String                            @db.VarChar
+  responsible_person_email        String                            @db.VarChar
+  manager_name                    String                            @db.VarChar
+  manager_cellphone               String                            @db.VarChar
+  manager_email                   String                            @db.VarChar
+  branch_number                   String                            @db.VarChar
+  branch_dv                       String                            @db.VarChar
+  account_number                  String                            @db.VarChar
+  account_dv                      String                            @db.VarChar
+  agreement_number                String                            @db.VarChar
+  id_banks                        Int                               @db.SmallInt
+  id_cnabs                        Int                               @db.SmallInt
+  created_at                      DateTime                          @db.Timestamptz(6)
+  banks                           banks                             @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cnabs                           cnabs                             @relation(fields: [id_cnabs], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  authorization_letters_products  authorization_letters_products[]
+  authorization_letters_type_vans authorization_letters_type_vans[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model authorization_letters_products {
-  id                       BigInt                @id @unique @default(autoincrement())
-  id_products              BigInt
-  id_authorization_letters BigInt
+  id                       Int                   @id @unique @default(autoincrement()) @db.SmallInt
+  id_products              Int                   @db.SmallInt
+  id_authorization_letters Int                   @db.SmallInt
   authorization_letters    authorization_letters @relation(fields: [id_authorization_letters], references: [id], onDelete: NoAction, onUpdate: NoAction)
   products                 products              @relation(fields: [id_products], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -49,21 +50,22 @@ model banks {
   authorization_letters authorization_letters[]
   banks_cnabs           banks_cnabs[]
   banks_products        banks_products[]
+  banks_type_vans       banks_type_vans[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model banks_cnabs {
-  id       BigInt @id @default(autoincrement())
-  id_banks Int    @db.SmallInt
-  id_cnabs Int    @db.SmallInt
-  banks    banks  @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  cnabs    cnabs  @relation(fields: [id_cnabs], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id       Int   @id @default(autoincrement()) @db.SmallInt
+  id_banks Int   @db.SmallInt
+  id_cnabs Int   @db.SmallInt
+  banks    banks @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cnabs    cnabs @relation(fields: [id_cnabs], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model banks_products {
-  id          BigInt   @id @unique @default(autoincrement())
-  id_products BigInt
+  id          Int      @id @unique @default(autoincrement()) @db.SmallInt
+  id_products Int      @db.SmallInt
   id_banks    Int      @db.SmallInt
   banks       banks    @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
   products    products @relation(fields: [id_products], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -79,8 +81,36 @@ model cnabs {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model products {
-  id                             BigInt                           @id @unique @default(autoincrement())
+  id                             Int                              @id @unique @default(autoincrement()) @db.SmallInt
   name                           String                           @db.VarChar
+  description                    String?                          @db.VarChar
+  icon                           String?                          @db.VarChar
   authorization_letters_products authorization_letters_products[]
   banks_products                 banks_products[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model authorization_letters_type_vans {
+  id                       Int                   @id @default(autoincrement()) @db.SmallInt
+  id_authorization_letters Int                   @db.SmallInt
+  id_type_vans             Int                   @db.SmallInt
+  authorization_letters    authorization_letters @relation(fields: [id_authorization_letters], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  type_vans                type_vans             @relation(fields: [id_type_vans], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model banks_type_vans {
+  id           Int       @id @default(autoincrement()) @db.SmallInt
+  id_banks     Int       @db.SmallInt
+  id_type_vans Int       @db.SmallInt
+  banks        banks     @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  type_vans    type_vans @relation(fields: [id_type_vans], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model type_vans {
+  id                              Int                               @id @unique @default(autoincrement()) @db.SmallInt
+  type                            String                            @db.VarChar
+  authorization_letters_type_vans authorization_letters_type_vans[]
+  banks_type_vans                 banks_type_vans[]
 }

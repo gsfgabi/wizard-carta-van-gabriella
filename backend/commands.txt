@@ -1,4 +1,6 @@
 npm install @nestjs/swagger swagger-ui-express
+npx prisma db pull
+npx prisma generate
 
 ---------  DOCKER ----------------
 * Primera vez baixando o código rode o comando;
