@@ -27,9 +27,9 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-primary flex flex-col">
+    <div className="min-h-screen bg-primary flex flex-col pt-12">
       <Header onLogout={handleLogout} onLogoClick={() => setShowIntro(true)} />
-      <main className="flex-1 flex items-center justify-center">
+      <main className="flex-1 flex flex-col">
         {showIntro ? (
           <WizardIntro onStart={() => setShowIntro(false)} />
         ) : (

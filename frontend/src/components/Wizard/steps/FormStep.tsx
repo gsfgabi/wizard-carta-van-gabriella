@@ -1,7 +1,9 @@
 import React from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import InputMask from 'react-input-mask';
+import { IMaskInput } from 'react-imask';
+import InputField from '../../Form/InputField';
+import { Button } from '../../Form/Button';
 
 interface FormData {
   cnpj: string;
@@ -19,6 +21,7 @@ interface FormData {
   nomeGerente: string;
   telefoneGerente: string;
   emailGerente: string;
+  banco?: string;
 }
 
 interface FormStepProps {
@@ -26,6 +29,7 @@ interface FormStepProps {
   onUpdate: (data: FormData) => void;
   onNext: () => void;
   onBack: () => void;
+  bancos?: { value: string; label: string }[];
 }
 
 const validationSchema = Yup.object().shape({
@@ -54,12 +58,13 @@ const validationSchema = Yup.object().shape({
   emailGerente: Yup.string()
     .email('E-mail inválido')
     .required('E-mail do Gerente é obrigatório'),
+  banco: Yup.string().required('Banco é obrigatório'),
 });
 
 const CNAB_OPTIONS = [
-  { value: 'cnab240', label: 'CNAB 240' },
-  { value: 'cnab400', label: 'CNAB 400' },
-  { value: 'cnab444', label: 'CNAB 444' },
+  { value: 'cnab240', label: '240' },
+  { value: 'cnab400', label: '400' },
+  { value: 'cnab444', label: '444' },
 ];
 
 export const FormStep: React.FC<FormStepProps> = ({
@@ -67,6 +72,7 @@ export const FormStep: React.FC<FormStepProps> = ({
   onUpdate,
   onNext,
   onBack,
+  bancos = [],
 }) => {
   const initialValues: FormData = {
     cnpj: formData.cnpj || '',
@@ -84,18 +90,19 @@ export const FormStep: React.FC<FormStepProps> = ({
     nomeGerente: formData.nomeGerente || '',
     telefoneGerente: formData.telefoneGerente || '',
     emailGerente: formData.emailGerente || '',
+    banco: formData.banco || '',
   };
 
+  const bancoSelecionado = bancos.find(b => b.value === initialValues.banco);
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium text-gray-900">
-          Preencha os Dados da Carta
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Preencha todos os campos necessários para gerar a Carta de VAN
-        </p>
-      </div>
+    <>
+      <h2 className="text-2xl font-semibold text-black mb-1">
+        3. Preencher dados da empresa e conta
+      </h2>
+      <p className="text-base text-gray-700 mb-6">
+        A seguir precisamos coletar alguns dados que utilizaremos para elaborar a carta de VAN para o banco desejado.
+      </p>
 
       <Formik
         initialValues={initialValues}
@@ -105,321 +112,244 @@ export const FormStep: React.FC<FormStepProps> = ({
           onNext();
         }}
       >
-        {({ errors, touched }) => (
-          <Form className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="cnpj"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  CNPJ
-                </label>
-                <Field
-                  as={InputMask}
-                  mask="99.999.999/9999-99"
-                  name="cnpj"
-                  className={`input-field ${
-                    errors.cnpj && touched.cnpj ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.cnpj && touched.cnpj && (
-                  <div className="error-message">{errors.cnpj}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="razaoSocial"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Razão Social
-                </label>
-                <Field
-                  name="razaoSocial"
-                  className={`input-field ${
-                    errors.razaoSocial && touched.razaoSocial
-                      ? 'border-red-500'
-                      : ''
-                  }`}
-                />
-                {errors.razaoSocial && touched.razaoSocial && (
-                  <div className="error-message">{errors.razaoSocial}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="nomeResponsavel"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Nome do Responsável
-                </label>
-                <Field
-                  name="nomeResponsavel"
-                  className={`input-field ${
-                    errors.nomeResponsavel && touched.nomeResponsavel
-                      ? 'border-red-500'
-                      : ''
-                  }`}
-                />
-                {errors.nomeResponsavel && touched.nomeResponsavel && (
-                  <div className="error-message">{errors.nomeResponsavel}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="cargoResponsavel"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Cargo do Responsável
-                </label>
-                <Field
-                  name="cargoResponsavel"
-                  className={`input-field ${
-                    errors.cargoResponsavel && touched.cargoResponsavel
-                      ? 'border-red-500'
-                      : ''
-                  }`}
-                />
-                {errors.cargoResponsavel && touched.cargoResponsavel && (
-                  <div className="error-message">{errors.cargoResponsavel}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="telefone"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Telefone
-                </label>
-                <Field
-                  as={InputMask}
-                  mask="(99) 99999-9999"
-                  name="telefone"
-                  className={`input-field ${
-                    errors.telefone && touched.telefone ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.telefone && touched.telefone && (
-                  <div className="error-message">{errors.telefone}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  E-mail
-                </label>
-                <Field
-                  name="email"
-                  type="email"
-                  className={`input-field ${
-                    errors.email && touched.email ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.email && touched.email && (
-                  <div className="error-message">{errors.email}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="agencia"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Agência
-                </label>
-                <Field
-                  name="agencia"
-                  className={`input-field ${
-                    errors.agencia && touched.agencia ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.agencia && touched.agencia && (
-                  <div className="error-message">{errors.agencia}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="agenciaDV"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  DV da Agência (opcional)
-                </label>
-                <Field
-                  name="agenciaDV"
-                  className="input-field"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="conta"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Conta
-                </label>
-                <Field
-                  name="conta"
-                  className={`input-field ${
-                    errors.conta && touched.conta ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.conta && touched.conta && (
-                  <div className="error-message">{errors.conta}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contaDV"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  DV da Conta
-                </label>
-                <Field
-                  name="contaDV"
-                  className={`input-field ${
-                    errors.contaDV && touched.contaDV ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.contaDV && touched.contaDV && (
-                  <div className="error-message">{errors.contaDV}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="convenio"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Convênio
-                </label>
-                <Field
-                  name="convenio"
-                  className={`input-field ${
-                    errors.convenio && touched.convenio ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.convenio && touched.convenio && (
-                  <div className="error-message">{errors.convenio}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="cnab"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  CNAB
-                </label>
-                <Field
-                  as="select"
-                  name="cnab"
-                  className={`input-field ${
-                    errors.cnab && touched.cnab ? 'border-red-500' : ''
-                  }`}
-                >
-                  <option value="">Selecione o CNAB</option>
-                  {CNAB_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+        {({ errors, touched, setFieldValue, values }) => (
+          <Form>
+            {/* EMPRESA */}
+            <div className="mb-6">
+              <h3 className="font-semibold text-black mb-2">Empresa</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field name="razaoSocial">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Razão Social"
+                      placeholder="Inserir razão social da empresa"
+                      error={touched.razaoSocial && errors.razaoSocial ? errors.razaoSocial : ''}
+                      {...field}
+                    />
+                  )}
                 </Field>
-                {errors.cnab && touched.cnab && (
-                  <div className="error-message">{errors.cnab}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="nomeGerente"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Nome do Gerente
-                </label>
-                <Field
-                  name="nomeGerente"
-                  className={`input-field ${
-                    errors.nomeGerente && touched.nomeGerente
-                      ? 'border-red-500'
-                      : ''
-                  }`}
-                />
-                {errors.nomeGerente && touched.nomeGerente && (
-                  <div className="error-message">{errors.nomeGerente}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="telefoneGerente"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Telefone do Gerente
-                </label>
-                <Field
-                  as={InputMask}
-                  mask="(99) 99999-9999"
-                  name="telefoneGerente"
-                  className={`input-field ${
-                    errors.telefoneGerente && touched.telefoneGerente
-                      ? 'border-red-500'
-                      : ''
-                  }`}
-                />
-                {errors.telefoneGerente && touched.telefoneGerente && (
-                  <div className="error-message">{errors.telefoneGerente}</div>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="emailGerente"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  E-mail do Gerente
-                </label>
-                <Field
-                  name="emailGerente"
-                  type="email"
-                  className={`input-field ${
-                    errors.emailGerente && touched.emailGerente
-                      ? 'border-red-500'
-                      : ''
-                  }`}
-                />
-                {errors.emailGerente && touched.emailGerente && (
-                  <div className="error-message">{errors.emailGerente}</div>
-                )}
+                <Field name="cnpj">
+                  {({ field }: any) => (
+                    <InputField
+                      label="CNPJ"
+                      placeholder="Inserir número do CNPJ"
+                      error={touched.cnpj && errors.cnpj ? errors.cnpj : ''}
+                      as={IMaskInput}
+                      mask="00.000.000/0000-00"
+                      unmask={false}
+                      {...field}
+                      onAccept={(value: any) => setFieldValue('cnpj', value)}
+                    />
+                  )}
+                </Field>
               </div>
             </div>
 
-            <div className="flex justify-between">
-              <button
+            {/* RESPONSÁVEL */}
+            <div className="mb-6">
+              <h3 className="font-semibold text-black mb-2">Responsável pela Empresa</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field name="cargoResponsavel">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Cargo"
+                      placeholder="Inserir cargo do responsável da empresa"
+                      error={touched.cargoResponsavel && errors.cargoResponsavel ? errors.cargoResponsavel : ''}
+                      {...field}
+                    />
+                  )}
+                </Field>
+                <Field name="nomeResponsavel">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Nome"
+                      placeholder="Inserir nome do responsável pela empresa"
+                      error={touched.nomeResponsavel && errors.nomeResponsavel ? errors.nomeResponsavel : ''}
+                      {...field}
+                    />
+                  )}
+                </Field>
+                <Field name="email">
+                  {({ field }: any) => (
+                    <InputField
+                      label="E-mail"
+                      placeholder="Inserir email do responsável pela empresa"
+                      type="email"
+                      error={touched.email && errors.email ? errors.email : ''}
+                      {...field}
+                    />
+                  )}
+                </Field>
+                <Field name="telefone">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Telefone"
+                      placeholder="Inserir telefone do responsável pela empresa"
+                      error={touched.telefone && errors.telefone ? errors.telefone : ''}
+                      as={IMaskInput}
+                      mask="(00) 00000-0000"
+                      unmask={false}
+                      {...field}
+                      onAccept={(value: any) => setFieldValue('telefone', value)}
+                    />
+                  )}
+                </Field>
+              </div>
+            </div>
+
+            {/* CONTA */}
+            <div className="mb-6">
+              <h3 className="font-semibold text-black mb-2">Conta</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="col-span-1 flex flex-col">
+                  <label className="block text-sm font-medium mb-1 text-black">Banco</label>
+                  <input
+                    type="text"
+                    value={bancoSelecionado?.label || ''}
+                    readOnly
+                    className="rounded-md border border-gray-300 bg-gray-100 px-3 py-2 w-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="col-span-1">
+                  <Field name="conta">
+                    {({ field }: any) => (
+                      <InputField
+                        label="Conta"
+                        placeholder="Inserir o número da conta"
+                        error={touched.conta && errors.conta ? errors.conta : ''}
+                        {...field}
+                      />
+                    )}
+                  </Field>
+                </div>
+                <div className="col-span-1 flex gap-2">
+                  <Field name="agencia">
+                    {({ field }: any) => (
+                      <InputField
+                        label="Agência"
+                        placeholder="Inserir o número da agência"
+                        error={touched.agencia && errors.agencia ? errors.agencia : ''}
+                        {...field}
+                        className="w-full"
+                      />
+                    )}
+                  </Field>
+                  <Field name="agenciaDV">
+                    {({ field }: any) => (
+                      <InputField
+                        label="DV"
+                        placeholder="DV"
+                        {...field}
+                        className="w-16"
+                      />
+                    )}
+                  </Field>
+                </div>
+                <div className="col-span-1 flex gap-2">
+                  <Field name="contaDV">
+                    {({ field }: any) => (
+                      <InputField
+                        label="DV"
+                        placeholder="DV"
+                        error={touched.contaDV && errors.contaDV ? errors.contaDV : ''}
+                        {...field}
+                        className="w-16"
+                      />
+                    )}
+                  </Field>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <Field name="convenio">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Convênio"
+                      placeholder="Inserir o número do convênio"
+                      error={touched.convenio && errors.convenio ? errors.convenio : ''}
+                      {...field}
+                    />
+                  )}
+                </Field>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black">CNAB</label>
+                  <div className="flex gap-8 mt-2">
+                    {CNAB_OPTIONS.map(option => (
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                        <Field
+                          type="radio"
+                          name="cnab"
+                          value={option.value}
+                          className="accent-purple-500"
+                        />
+                        <span className="text-base">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {touched.cnab && errors.cnab && (
+                    <span className="text-red-500 text-xs">{errors.cnab}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* GERENTE CONTA */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-black mb-2">Gerente Conta</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Field name="nomeGerente">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Nome"
+                      placeholder="Inserir nome do gerente da conta bancária"
+                      error={touched.nomeGerente && errors.nomeGerente ? errors.nomeGerente : ''}
+                      {...field}
+                    />
+                  )}
+                </Field>
+                <Field name="emailGerente">
+                  {({ field }: any) => (
+                    <InputField
+                      label="E-mail"
+                      placeholder="Inserir email do gerente da conta bancária"
+                      type="email"
+                      error={touched.emailGerente && errors.emailGerente ? errors.emailGerente : ''}
+                      {...field}
+                    />
+                  )}
+                </Field>
+                <Field name="telefoneGerente">
+                  {({ field }: any) => (
+                    <InputField
+                      label="Telefone"
+                      placeholder="Inserir telefone do gerente da conta bancária"
+                      error={touched.telefoneGerente && errors.telefoneGerente ? errors.telefoneGerente : ''}
+                      as={IMaskInput}
+                      mask="(00) 00000-0000"
+                      unmask={false}
+                      {...field}
+                      onAccept={(value: any) => setFieldValue('telefoneGerente', value)}
+                    />
+                  )}
+                </Field>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-8">
+              <Button
+                label="Voltar"
                 type="button"
-                className="btn-secondary"
+                className="border-2 border-primary text-primary bg-white rounded-full px-8 py-2 font-medium hover:bg-gray-100"
                 onClick={onBack}
-              >
-                Voltar
-              </button>
-              <button
+              />
+              <Button
+                label="Revisar"
                 type="submit"
-                className="btn-primary"
-              >
-                Próximo
-              </button>
+                className="bg-primary text-white rounded-full px-8 py-2 font-medium hover:bg-primary-dark"
+              />
             </div>
           </Form>
         )}
       </Formik>
-    </div>
+    </>
   );
-}; 
+};

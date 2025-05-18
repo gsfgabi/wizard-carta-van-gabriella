@@ -1,4 +1,7 @@
 import React from 'react';
+import { FaMoneyCheckAlt, FaFileAlt, FaExchangeAlt, FaBarcode } from 'react-icons/fa';
+import Card from '../../Card/Card';
+import { Button } from '../../Form/Button';
 
 interface ProductSelectionProps {
   selectedProducts: string[];
@@ -8,10 +11,30 @@ interface ProductSelectionProps {
 }
 
 const AVAILABLE_PRODUCTS = [
-  { id: 'boletos', name: 'Boletos' },
-  { id: 'pagamentos', name: 'Pagamentos' },
-  { id: 'extrato', name: 'Extrato' },
-  { id: 'dda', name: 'DDA' },
+  {
+    id: 'pagamentos',
+    name: 'Pagamentos',
+    description: 'Trafegar arquivos de remessa e retorno de pagamentos',
+    icon: <FaMoneyCheckAlt size={38} />,
+  },
+  {
+    id: 'extrato',
+    name: 'Extrato',
+    description: 'Trafegar arquivos de extratos',
+    icon: <FaFileAlt size={38} />,
+  },
+  {
+    id: 'dda',
+    name: 'DDA',
+    description: 'Trafegar arquivos de varredura de débitos',
+    icon: <FaExchangeAlt size={38} />,
+  },
+  {
+    id: 'boletos',
+    name: 'Boletos',
+    description: 'Trafegar arquivos de remessa e retorno de boletos',
+    icon: <FaBarcode size={38} />,
+  },
 ];
 
 export const ProductSelection: React.FC<ProductSelectionProps> = ({
@@ -28,81 +51,72 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium text-gray-900">
-          Selecione os Produtos
+    <Card className="shadow-none p-0">
+      <div className="w-full h-full px-0 py-0">
+        <h2 className="text-2xl font-semibold mb-2 text-black text-left">
+          2. Selecionar um ou mais produtos
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Escolha os produtos que deseja incluir na Carta de VAN
+        <p className="text-base text-black mb-8 text-left">
+          Selecione quais produtos deseja utilizar a transferência de arquivos por VAN
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {AVAILABLE_PRODUCTS.map((product) => (
-          <div
-            key={product.id}
-            className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${
-              selectedProducts.includes(product.id)
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 bg-white'
-            }`}
-            onClick={() => handleProductToggle(product.id)}
-          >
-            <div className="flex flex-1">
-              <div className="flex flex-col">
-                <span
-                  className={`block text-sm font-medium ${
-                    selectedProducts.includes(product.id)
-                      ? 'text-primary-900'
-                      : 'text-gray-900'
-                  }`}
-                >
-                  {product.name}
-                </span>
-              </div>
-            </div>
-            <div
-              className={`ml-3 flex h-5 items-center ${
-                selectedProducts.includes(product.id)
-                  ? 'text-primary-600'
-                  : 'text-gray-300'
-              }`}
-            >
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
+        <div
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-4
+            gap-6
+            mb-12
+          "
+        >
+          {AVAILABLE_PRODUCTS.map((product) => {
+            const selected = selectedProducts.includes(product.id);
+            return (
+              <button
+                key={product.id}
+                type="button"
+                className={`
+                  flex flex-col items-center justify-center rounded-xl border-2 px-4 py-10 transition min-h-[160px] h-full
+                  ${selected
+                    ? 'border-[#8D44AD] bg-[#8D44AD] text-white'
+                    : 'border-[#8D44AD] bg-white text-[#8D44AD] hover:bg-[#f3eaff]'}
+                  focus:outline-none
+                `}
+                style={{ boxShadow: 'none' }}
+                onClick={() => handleProductToggle(product.id)}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-          </div>
-        ))}
+                <span className="mb-3">
+                  {React.cloneElement(product.icon, {
+                    color: selected ? 'white' : '#8D44AD',
+                  })}
+                </span>
+                <span className="text-2xl font-bold mb-2">{product.name}</span>
+                <span
+                  className="text-base font-normal text-black/80 md:text-white/80 text-center"
+                  style={{ color: selected ? 'white' : '#222' }}
+                >
+                  {product.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
+          <Button
+            label="Voltar"
+            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+            onClick={onBack}
+            type="button"
+          />
+          <Button
+            label="Próximo"
+            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
+            onClick={onNext}
+            type="button"
+            disabled={selectedProducts.length === 0}
+          />
+        </div>
       </div>
-
-      <div className="flex justify-between">
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={onBack}
-        >
-          Voltar
-        </button>
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={onNext}
-          disabled={selectedProducts.length === 0}
-        >
-          Próximo
-        </button>
-      </div>
-    </div>
+    </Card>
   );
-}; 
+};

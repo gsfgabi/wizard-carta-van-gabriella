@@ -6,17 +6,18 @@ import {
   ComboboxOptions,
   ComboboxOption,
 } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { CheckIcon, ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import Button from "../../Button/Button"; // ajuste o caminho se necessário
+import { getBanks } from '../../../services/api';
 
 interface Bank {
-  code: number;
+  code: string;
   name: string;
 }
 
 interface BankSelectionProps {
-  onSelect: (bankCode: number) => void;
-  selectedBank: number | null;
+  onSelect: (bankCode: string | null) => void;
+  selectedBank: string | null;
   onNext: () => void;
   onBack: () => void;
 }
@@ -30,17 +31,13 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
   const [banks, setBanks] = useState<Bank[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
-      setBanks([
-        { code: 33, name: "Banco Santander" },
-        { code: 1, name: "Banco do Brasil" },
-        { code: 341, name: "Itaú" },
-        { code: 104, name: "Caixa Econômica" },
-      ]);
-      setLoading(false);
-    }, 500);
+    setLoading(true);
+    getBanks()
+      .then((data) => setBanks(data))
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredBanks =
@@ -53,97 +50,106 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
         );
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-2">
-      <h2 className="text-lg font-semibold mb-1">
+    <div className="w-full max-w-5xl mx-auto px-2">
+      <h2 className="text-2xl font-bold mb-2 text-black text-left">
         1. Selecionar um Banco (Instituição Bancária)
       </h2>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-base text-black mb-6 text-left">
         Selecione um banco para criar uma nova carta de VAN
       </p>
-      <div className="mb-8 relative">
+      <div className="mb-12 relative">
         <Combobox
           value={banks.find((bank) => bank.code === selectedBank) || null}
-          onChange={(bank) => bank && onSelect(bank.code)}
+          onChange={(bank) => {
+            if (bank && bank.code === selectedBank) {
+              onSelect(null);
+            } else if (bank) {
+              onSelect(bank.code);
+            }
+          }}
         >
-          <div className="relative">
-            <ComboboxInput
-              className="w-full border border-[#8B3DFF] rounded-md py-2 pl-3 pr-10 text-gray-900 bg-white focus:ring-2 focus:ring-[#8B3DFF] focus:border-[#8B3DFF] focus:outline-none transition placeholder:text-[#8B3DFF]"
-              onChange={(event) => setQuery(event.target.value)}
-              displayValue={(bank: Bank) =>
-                bank ? `${bank.code} - ${bank.name}` : ""
-              }
-              placeholder="Selecione um banco"
-            />
-            <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronUpDownIcon
-                className="h-5 w-5"
-                aria-hidden="true"
-              />
-            </ComboboxButton>
-          </div>
-          <ComboboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-opacity-60 focus:outline-none sm:text-sm">
-            {loading ? (
-              <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                Carregando...
-              </div>
-            ) : filteredBanks.length === 0 ? (
-              <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                Banco não localizado
-              </div>
-            ) : (
-              filteredBanks.map((bank) => (
-                <ComboboxOption
-                  key={bank.code}
-                  className={({ active }) =>
-                    `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
-                      active
-                        ? "bg-[#8B3DFF] text-white"
-                        : "text-[#8B3DFF] hover:bg-[#f3eaff]"
-                    }`
+          {({ open: comboboxOpen }) => {
+            if (open !== comboboxOpen) setTimeout(() => setOpen(comboboxOpen), 0);
+            return (
+              <div className="relative">
+                <ComboboxInput
+                  className="w-full border border-[#E0E0E0] rounded-lg py-2 px-3 xs:py-3 xs:px-4 sm:py-4 sm:px-5 pr-12 text-gray-900 bg-white focus:ring-2 focus:ring-[#D1B3E0] focus:border-[#D1B3E0] focus:outline-none transition placeholder:text-gray-400 shadow-md text-base"
+                  onChange={(event) => setQuery(event.target.value)}
+                  displayValue={(bank: Bank) =>
+                    bank ? `${bank.code} - ${bank.name}` : ""
                   }
-                  value={bank}
-                >
-                  {({ selected, active }) => (
-                    <>
-                      <span
-                        className={`block truncate ${
-                          selected ? "font-semibold" : "font-normal"
-                        }`}
-                      >
-                        {bank.code} - {bank.name}
-                      </span>
-                      {selected ? (
-                        <span
-                          className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                            active ? "text-white" : "text-[#8B3DFF]"
-                          }`}
-                        >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
+                  placeholder="Selecione um banco"
+                />
+                <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2 xs:pr-4 bg-transparent focus:outline-none border-none shadow-none">
+                  {open ? (
+                    <ChevronUpIcon className="h-5 w-5 xs:h-6 xs:w-6 text-gray-400" aria-hidden="true" />
+                  ) : (
+                    <ChevronDownIcon className="h-5 w-5 xs:h-6 xs:w-6 text-gray-400" aria-hidden="true" />
                   )}
-                </ComboboxOption>
-              ))
-            )}
-          </ComboboxOptions>
+                </ComboboxButton>
+                <ComboboxOptions className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg border border-[#D1B3E0] focus:outline-none sm:text-sm">
+                  {loading ? (
+                    <div key="loading" className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                      Carregando...
+                    </div>
+                  ) : filteredBanks.length === 0 ? (
+                    <div key="no-results" className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                      Banco não localizado
+                    </div>
+                  ) : (
+                    filteredBanks.map((bank) => (
+                      <ComboboxOption
+                        key={bank.code}
+                        className={({ active, selected }) =>
+                          `relative cursor-pointer select-none py-4 pl-12 pr-4 text-lg border-b border-[#ECECEC] last:border-b-0
+                            ${active ? "bg-[#E0D7F3] text-[#8B3DFF] font-semibold" : selected ? "bg-[#f3eaff] text-[#8B3DFF] font-semibold" : "text-gray-900 hover:bg-[#f3eaff]"}
+                            transition-colors duration-150`
+                        }
+                        value={bank}
+                      >
+                        {({ selected, active }) => (
+                          <React.Fragment key={`${bank.code}-content`}>
+                            <span
+                              className={`block truncate ${
+                                selected ? "font-semibold" : "font-normal"
+                              }`}
+                            >
+                              {bank.code} - {bank.name}
+                            </span>
+                            {selected ? (
+                              <span
+                                key={`${bank.code}-check`}
+                                className={`absolute inset-y-0 left-0 flex items-center pl-4 ${
+                                  active ? "text-white" : "text-[#8B3DFF]"
+                                }`}
+                              >
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </React.Fragment>
+                        )}
+                      </ComboboxOption>
+                    ))
+                  )}
+                </ComboboxOptions>
+              </div>
+            );
+          }}
         </Combobox>
       </div>
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-2 sm:gap-4">
         <Button
           type="button"
-          className="border border-[#8D44AD] text-white rounded-full px-6 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50"
+          className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none w-full sm:w-auto"
           onClick={onBack}
-          variant="secondary"
         >
           Voltar
         </Button>
         <Button
           type="button"
-          className="bg-[#8D44AD] text-white rounded-full px-6 py-2 font-semibold shadow hover:bg-[#8D44AD] transition disabled:opacity-50"
+          className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50 w-full sm:w-auto"
           onClick={onNext}
           disabled={!selectedBank}
-          variant="primary"
         >
           Próximo
         </Button>

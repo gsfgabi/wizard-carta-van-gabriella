@@ -1,19 +1,18 @@
 import React from 'react';
 
-type ButtonProps = {
+export interface ButtonProps {
   label: string;
   className?: string;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-};
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+}
 
 export function Button({ label, className = '', type = "button", ...rest }: ButtonProps) {
-  const responsiveClass = 'w-full sm:w-auto';
-
   return (
     <button
       type={type}
-      className={`btn btn-primary ${responsiveClass} ${className}`}
+      className={`btn btn-primary ${className}`}
       {...rest}
     >
       {label}
