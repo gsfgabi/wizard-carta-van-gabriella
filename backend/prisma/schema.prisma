@@ -30,7 +30,7 @@ model authorization_letters {
   banks                           banks                             @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cnabs                           cnabs                             @relation(fields: [id_cnabs], references: [id], onDelete: NoAction, onUpdate: NoAction)
   authorization_letters_products  authorization_letters_products[]
-  authorization_letters_type_vans authorization_letters_type_vans[]
+  authorization_letters_van_types authorization_letters_van_types[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -50,7 +50,7 @@ model banks {
   authorization_letters authorization_letters[]
   banks_cnabs           banks_cnabs[]
   banks_products        banks_products[]
-  banks_type_vans       banks_type_vans[]
+  banks_van_types       banks_van_types[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -90,27 +90,27 @@ model products {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model authorization_letters_type_vans {
-  id                       Int                   @id @default(autoincrement()) @db.SmallInt
+model authorization_letters_van_types {
+  id                       Int                   @id(map: "authorization_letters_type_vans_pkey") @default(autoincrement()) @db.SmallInt
   id_authorization_letters Int                   @db.SmallInt
-  id_type_vans             Int                   @db.SmallInt
-  authorization_letters    authorization_letters @relation(fields: [id_authorization_letters], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  type_vans                type_vans             @relation(fields: [id_type_vans], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id_van_types             Int                   @db.SmallInt
+  authorization_letters    authorization_letters @relation(fields: [id_authorization_letters], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "authorization_letters_type_vans_id_authorization_letters_fkey")
+  van_types                van_types             @relation(fields: [id_van_types], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "authorization_letters_type_vans_id_van_types_fkey")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model banks_type_vans {
-  id           Int       @id @default(autoincrement()) @db.SmallInt
+model banks_van_types {
+  id           Int       @id(map: "banks_type_vans_pkey") @default(autoincrement()) @db.SmallInt
   id_banks     Int       @db.SmallInt
-  id_type_vans Int       @db.SmallInt
-  banks        banks     @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  type_vans    type_vans @relation(fields: [id_type_vans], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id_van_types Int       @db.SmallInt
+  banks        banks     @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "banks_type_vans_id_banks_fkey")
+  van_types    van_types @relation(fields: [id_van_types], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model type_vans {
-  id                              Int                               @id @unique @default(autoincrement()) @db.SmallInt
+model van_types {
+  id                              Int                               @id(map: "type_vans_pkey") @unique(map: "type_vans_id_key") @default(autoincrement()) @db.SmallInt
   type                            String                            @db.VarChar
-  authorization_letters_type_vans authorization_letters_type_vans[]
-  banks_type_vans                 banks_type_vans[]
+  authorization_letters_van_types authorization_letters_van_types[]
+  banks_van_types                 banks_van_types[]
 }

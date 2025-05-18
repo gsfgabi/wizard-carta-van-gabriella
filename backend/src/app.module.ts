@@ -9,9 +9,10 @@ import { PdfsModule } from './pdfs/pdfs.module';
 import { ZendeskModule } from './zendesk/zendesk.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { VanTypesModule } from './van-types/van-types.module';
 
 @Module({
-  imports: [BanksModule, ProductsModule, CnabsModule, FormsModule, PdfsModule, ZendeskModule, PrismaModule],
+  imports: [BanksModule, ProductsModule, CnabsModule, FormsModule, PdfsModule, ZendeskModule, PrismaModule, VanTypesModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

@@ -10,6 +10,7 @@ export class ProductsController {
 
   @Get(':id')
   @ApiOkResponse({ type: [ProductsDto] })
+
   findAllByBankId(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findAllByBankId(id);
   }
