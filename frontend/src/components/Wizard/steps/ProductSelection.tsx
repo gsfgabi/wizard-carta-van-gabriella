@@ -2,6 +2,7 @@ import React from 'react';
 import { FaMoneyCheckAlt, FaFileAlt, FaExchangeAlt, FaBarcode } from 'react-icons/fa';
 import Card from '../../Card/Card';
 import { Button } from '../../Form/Button';
+import { PreviewStep1 } from '../../Stepper/PreviewStep1.tsx';
 
 interface ProductSelectionProps {
   selectedProducts: string[];
@@ -51,6 +52,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
   };
 
   return (
+    
     <Card className="shadow-none p-0">
       <div className="w-full h-full px-0 py-0">
         <h2 className="text-2xl font-semibold mb-2 text-black text-left">

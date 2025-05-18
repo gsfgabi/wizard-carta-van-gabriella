@@ -13,7 +13,9 @@ export const steps = [
   "Banco",
   "Produto",
   "Dados da empresa e conta",
-  "Validação",
+  "Carta Finnet",
+  "Carta Nexxera",
+  "Encerramento",
 ];
 
 export const Wizard: React.FC = () => {

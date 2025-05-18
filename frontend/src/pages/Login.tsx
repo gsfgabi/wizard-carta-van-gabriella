@@ -42,7 +42,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setTimeout(() => {
       setLoading(false);
       // Simulação de resposta da API
-      if (cnpj === '12.345.678/0001-99' && token === 'plugbank123') {
+      if (cnpj === '1' && token === '111111') {
         onLoginSuccess();
       } else {
         setError('CNPJ ou Token inválido.');
