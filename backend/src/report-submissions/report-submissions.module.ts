@@ -13,4 +13,4 @@ import { ZapierModule } from 'src/zapier/zapier.module';
     GeneratePdfsService,
   ],
 })
-export class NewFeatureModule {}
+export class ReportSubmissionsModule {}
