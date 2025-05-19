@@ -16,13 +16,13 @@ export class EmailService {
 
   async sendReportEmail(to: string, subject: string, text: string, attachment: Buffer) {
     const mailOptions = {
-      from: `"Relatórios" <${process.env.EMAIL_USER}>`,
+      from: `"Plugboleto" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text,
       attachments: [
         {
-          filename: 'relatorios.zip',
+          filename: 'cartas_de_van.zip',
           content: attachment,
         },
       ],

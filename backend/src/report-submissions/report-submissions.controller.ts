@@ -5,24 +5,24 @@ import { EmailService } from 'src/email/email.service';
 import { GeneratePdfsDto } from 'src/generate-pdf/dto/generate-pdfs';
 
 @Controller('report-submissions')
-export class GeneratePdfsController {
+export class ReportSubmissionsController {
   constructor(
-    private readonly reportService: ReportSubmissionsService,
+    private readonly reportSubmissionsService: ReportSubmissionsService,
     private readonly emailService: EmailService,
   ) {}
 
   @Post()
   async generateReportsAndSendEmail(
-    @Body() generateReportDto: GeneratePdfsDto,
+    @Body() generatePdfsDto: GeneratePdfsDto,
     @Res() res: Response,
   ) {
     try {
-      const zipBuffer = await this.reportService.generateReportsWithMoreLogic(generateReportDto);
+      const zipBuffer = await this.reportSubmissionsService.generateReportsWithMoreLogic(generatePdfsDto);
 
       await this.emailService.sendReportEmail(
-        'kethellinpereira2018@outlook.com', // para quem enviar - mudar ao testar
-        'Relatórios Gerados',
-        'Segue em anexo os relatórios gerados.',
+        'kethellinpereira2018@outlook.com', // para quem enviar - mudar para email gerente/responsável
+        'Carta de Van Bancária - Arquivo',
+        'Segue em anexo os pdfs gerados para a carta de van bancária.',
         zipBuffer,
       );
 
