@@ -2,16 +2,69 @@
 import axios from 'axios';
 import type { Bank, FormData as FormDataType, Product, ZendeskTicket } from '../types';
 
-const BANKS_API_URL = import.meta.env.VITE_BANKS_API;
+const API_BASE_URL = import.meta.env.DEV 
+  ? '/api' 
+  : 'https://wizard-carta-van-teste.onrender.com';
+
+console.log('API_BASE_URL:', API_BASE_URL); // Debug log
 
 const api = axios.create({
-  baseURL: '/api'
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  timeout: 10000
 });
 
-export const getBanks = async (): Promise<Bank[]> => {
+// Interceptor para logging
+api.interceptors.request.use(
+  (config) => {
+    console.log('Request:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`
+    });
+    return config;
+  },
+  (error) => {
+    console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => {
+    console.log('Response:', {
+      status: response.status,
+      url: response.config.url,
+      baseURL: response.config.baseURL,
+      fullURL: `${response.config.baseURL}${response.config.url}`
+    });
+    return response;
+  },
+  (error) => {
+    console.error('Response Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      fullURL: error.config ? `${error.config.baseURL}${error.config.url}` : 'unknown',
+      message: error.message
+    });
+    return Promise.reject(error);
+  }
+);
+
+export interface BankData {
+  code: string;
+  name: string;
+}
+
+export const getBanks = async (): Promise<BankData[]> => {
   try {
-    const response = await api.get('/banks'); // Usando a instância configurada com baseURL
-    console.log('Resposta da API:', response.data); // Para debug
+    const response = await api.get('/banks');
+    console.log('Resposta da API:', response.data);
     const banks = response.data.map((b: any) => ({
       code: b.code,
       name: b.name
