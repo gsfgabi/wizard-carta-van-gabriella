@@ -200,17 +200,23 @@ export const FormStep: React.FC<FormStepProps> = ({
             {/* CONTA */}
             <div className="mb-6">
               <h3 className="font-semibold text-black mb-2">Conta</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="col-span-1 flex flex-col">
+
+              {/* Linha com Banco, Conta+DV e Agência+DV */}
+              <div className="w-full flex justify-center gap-4">
+                
+                {/* Banco */}
+                <div className="flex flex-col">
                   <label className="block text-sm font-medium mb-1 text-black">Banco</label>
                   <input
                     type="text"
                     value={bancoSelecionado?.label || ''}
                     readOnly
-                    className="rounded-md border border-gray-300 bg-gray-100 px-3 py-2 w-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="min-w-[300px] max-w-[500px] rounded-md border border-gray-300 bg-gray-100 px-3 py-2 w-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
-                <div className="col-span-1">
+
+                {/* Conta + DV */}
+                <div className="flex gap-2">
                   <Field name="conta">
                     {({ field }: any) => (
                       <InputField
@@ -218,11 +224,30 @@ export const FormStep: React.FC<FormStepProps> = ({
                         placeholder="Inserir o número da conta"
                         error={touched.conta && errors.conta ? errors.conta : ''}
                         {...field}
+                        maxLength={6}
+                        type="text"
+                        className="w-full"
+                      />
+                    )}
+                  </Field>
+                  <Field name="contaDV">
+                    {({ field }: any) => (
+                      <InputField
+                        label="DV"
+                        placeholder="DV"
+                        error={touched.contaDV && errors.contaDV ? errors.contaDV : ''}
+                        {...field}
+                        maxLength={2}
+                        type="text"
+                        className="min-w-[10px] max-w-[80px]"
+                        
                       />
                     )}
                   </Field>
                 </div>
-                <div className="col-span-1 flex gap-2">
+
+                {/* Agência + DV */}
+                <div className="flex gap-2">
                   <Field name="agencia">
                     {({ field }: any) => (
                       <InputField
@@ -230,6 +255,8 @@ export const FormStep: React.FC<FormStepProps> = ({
                         placeholder="Inserir o número da agência"
                         error={touched.agencia && errors.agencia ? errors.agencia : ''}
                         {...field}
+                        maxLength={4}
+                        type="text"
                         className="w-full"
                       />
                     )}
@@ -240,25 +267,16 @@ export const FormStep: React.FC<FormStepProps> = ({
                         label="DV"
                         placeholder="DV"
                         {...field}
-                        className="w-16"
-                      />
-                    )}
-                  </Field>
-                </div>
-                <div className="col-span-1 flex gap-2">
-                  <Field name="contaDV">
-                    {({ field }: any) => (
-                      <InputField
-                        label="DV"
-                        placeholder="DV"
-                        error={touched.contaDV && errors.contaDV ? errors.contaDV : ''}
-                        {...field}
-                        className="w-16"
+                        maxLength={2}
+                        type="text"
+                        className="w-16 min-w-[10px] max-w-[80px]"
+                      
                       />
                     )}
                   </Field>
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Field name="convenio">
                   {({ field }: any) => (
@@ -272,7 +290,7 @@ export const FormStep: React.FC<FormStepProps> = ({
                 </Field>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black">CNAB</label>
-                  <div className="flex gap-8 mt-2">
+                  <div className="flex flex-wrap gap-12 sm:gap-4 md:gap-8 mt-4">
                     {CNAB_OPTIONS.map(option => (
                       <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                         <Field

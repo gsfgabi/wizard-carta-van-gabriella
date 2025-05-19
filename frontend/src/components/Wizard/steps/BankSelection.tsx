@@ -10,11 +10,13 @@ import { CheckIcon, ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from "@h
 import Button from "../../Button/Button"; // ajuste o caminho se necessário
 import { getBanks } from '../../../services/api';
 
+// Define Bank
 interface Bank {
   code: string;
   name: string;
 }
 
+// Estados da caixa de seleção
 interface BankSelectionProps {
   onSelect: (bankCode: string | null) => void;
   selectedBank: string | null;
@@ -22,6 +24,7 @@ interface BankSelectionProps {
   onBack: () => void;
 }
 
+// Componente de seleção de bancos. Inicialmente fechada e carregando. 
 export const BankSelection: React.FC<BankSelectionProps> = ({
   onSelect,
   selectedBank,
@@ -33,6 +36,8 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
+
+  // Preenche a lista de bancos após carregá-las
   useEffect(() => {
     setLoading(true);
     getBanks()
@@ -40,6 +45,7 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
       .finally(() => setLoading(false));
   }, []);
 
+  // Função de filtrar bancos por texto
   const filteredBanks =
     query === ""
       ? banks
@@ -49,6 +55,15 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
             .includes(query.toLowerCase())
         );
 
+      // Salvar banco selecionado (executar ao avançar etapa)
+    function SaveSelectedBank() {
+      const finalBankSelected = banks.find(bank => bank.code === selectedBank);
+      localStorage.setItem('selectedBank', JSON.stringify(finalBankSelected));
+      console.log("Banco armazenado:", finalBankSelected);
+    }
+
+
+  // Corpo da página
   return (
     <div className="w-full max-w-5xl mx-auto px-2">
       <h2 className="text-2xl font-bold mb-2 text-black text-left">
@@ -148,7 +163,11 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
         <Button
           type="button"
           className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50 w-full sm:w-auto"
-          onClick={onNext}
+          // Ao clicar "Próximo", chama a função SaveSelectedBank e onNext
+          onClick={() => {
+            SaveSelectedBank();
+            onNext();
+          }}
           disabled={!selectedBank}
         >
           Próximo
