@@ -18,12 +18,15 @@ export const steps = [
   "Encerramento",
 ];
 
-export const Wizard: React.FC = () => {
+interface WizardProps {
+  onBackToIntro: () => void;
+}
+
+export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [currentStep, setCurrentStep] = useState<WizardStep>("bank");
-  const [selectedBank, setSelectedBank] = useState<string | null>(null);
+  const [selectedBank, setSelectedBank] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({});
-  const [showIntro, setShowIntro] = useState(true);
 
   const handleNext = () => {
     switch (currentStep) {
@@ -44,7 +47,7 @@ export const Wizard: React.FC = () => {
   const handleBack = () => {
     switch (currentStep) {
       case "bank":
-        setShowIntro(true);
+        onBackToIntro();
         break;
       case "products":
         setCurrentStep("bank");
@@ -78,6 +81,7 @@ export const Wizard: React.FC = () => {
             onSelect={setSelectedProducts}
             onNext={handleNext}
             onBack={handleBack}
+            selectedBank={selectedBank}
           />
         );
       case "form":
@@ -87,6 +91,7 @@ export const Wizard: React.FC = () => {
             onUpdate={setFormData}
             onNext={handleNext}
             onBack={handleBack}
+            selectedBank={selectedBank}
           />
         );
       case "validation":
@@ -101,14 +106,7 @@ export const Wizard: React.FC = () => {
     }
   };
 
-  return showIntro ? (
-    <WizardIntro
-      onStart={() => {
-        setShowIntro(false);
-        setCurrentStep("bank");
-      }}
-    />
-  ) : (
+  return (
     <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2">
       <Stepper
         currentStep={

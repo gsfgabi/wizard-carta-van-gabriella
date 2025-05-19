@@ -18,6 +18,10 @@ function App() {
     setShowIntro(true);
   };
 
+  const handleBackToIntro = () => {
+    setShowIntro(true);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-primary flex flex-col">
@@ -33,7 +37,7 @@ function App() {
         {showIntro ? (
           <WizardIntro onStart={() => setShowIntro(false)} />
         ) : (
-          <Wizard />
+          <Wizard onBackToIntro={handleBackToIntro} />
         )}
       </main>
     </div>

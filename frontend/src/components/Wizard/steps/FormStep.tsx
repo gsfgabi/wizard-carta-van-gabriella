@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { IMaskInput } from 'react-imask';
 import InputField from '../../Form/InputField';
-import { Button } from '../../Form/Button';
+import Button from '../../Button/Button';
+import { getCNABs, type CNABData } from '../../../services/api';
 
 interface FormData {
   cnpj: string;
@@ -29,7 +30,7 @@ interface FormStepProps {
   onUpdate: (data: FormData) => void;
   onNext: () => void;
   onBack: () => void;
-  bancos?: { value: string; label: string }[];
+  selectedBank: number | null;
 }
 
 const validationSchema = Yup.object().shape({
@@ -61,19 +62,45 @@ const validationSchema = Yup.object().shape({
   banco: Yup.string().required('Banco é obrigatório'),
 });
 
-const CNAB_OPTIONS = [
-  { value: 'cnab240', label: '240' },
-  { value: 'cnab400', label: '400' },
-  { value: 'cnab444', label: '444' },
-];
-
 export const FormStep: React.FC<FormStepProps> = ({
   formData,
   onUpdate,
   onNext,
   onBack,
-  bancos = [],
+  selectedBank,
 }) => {
+  const [cnabs, setCNABs] = useState<CNABData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedBankData, setSelectedBankData] = useState<{ code: string; name: string } | null>(null);
+
+  useEffect(() => {
+    // Recuperar dados do banco do localStorage
+    const storedBank = localStorage.getItem('selectedBank');
+    if (storedBank) {
+      const bankData = JSON.parse(storedBank);
+      setSelectedBankData(bankData);
+    }
+
+    // Carregar CNABs disponíveis
+    if (selectedBank) {
+      setLoading(true);
+      setError(null);
+      getCNABs(selectedBank.toString())
+        .then((data) => {
+          setCNABs(data);
+          setError(null);
+        })
+        .catch((error) => {
+          console.error('Erro ao carregar CNABs:', error);
+          setError('Erro ao carregar os CNABs. Por favor, tente novamente.');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [selectedBank]);
+
   const initialValues: FormData = {
     cnpj: formData.cnpj || '',
     razaoSocial: formData.razaoSocial || '',
@@ -90,10 +117,8 @@ export const FormStep: React.FC<FormStepProps> = ({
     nomeGerente: formData.nomeGerente || '',
     telefoneGerente: formData.telefoneGerente || '',
     emailGerente: formData.emailGerente || '',
-    banco: formData.banco || '',
+    banco: selectedBankData ? `${selectedBankData.code} - ${selectedBankData.name}` : '',
   };
-
-  const bancoSelecionado = bancos.find(b => b.value === initialValues.banco);
 
   return (
     <>
@@ -209,14 +234,14 @@ export const FormStep: React.FC<FormStepProps> = ({
                   <label className="block text-sm font-medium mb-1 text-black">Banco</label>
                   <input
                     type="text"
-                    value={bancoSelecionado?.label || ''}
+                    value={selectedBankData ? `${selectedBankData.code} - ${selectedBankData.name}` : ''}
                     readOnly
                     className="min-w-[300px] max-w-[500px] rounded-md border border-gray-300 bg-gray-100 px-3 py-2 w-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 {/* Conta + DV */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-grow">
                   <Field name="conta">
                     {({ field }: any) => (
                       <InputField
@@ -226,7 +251,7 @@ export const FormStep: React.FC<FormStepProps> = ({
                         {...field}
                         maxLength={6}
                         type="text"
-                        className="w-full"
+                        className="flex-grow"
                       />
                     )}
                   </Field>
@@ -239,15 +264,14 @@ export const FormStep: React.FC<FormStepProps> = ({
                         {...field}
                         maxLength={2}
                         type="text"
-                        className="min-w-[10px] max-w-[80px]"
-                        
+                        className="w-16"
                       />
                     )}
                   </Field>
                 </div>
 
                 {/* Agência + DV */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-grow">
                   <Field name="agencia">
                     {({ field }: any) => (
                       <InputField
@@ -257,7 +281,7 @@ export const FormStep: React.FC<FormStepProps> = ({
                         {...field}
                         maxLength={4}
                         type="text"
-                        className="w-full"
+                        className="flex-grow"
                       />
                     )}
                   </Field>
@@ -269,8 +293,7 @@ export const FormStep: React.FC<FormStepProps> = ({
                         {...field}
                         maxLength={2}
                         type="text"
-                        className="w-16 min-w-[10px] max-w-[80px]"
-                      
+                        className="w-16"
                       />
                     )}
                   </Field>
@@ -290,21 +313,37 @@ export const FormStep: React.FC<FormStepProps> = ({
                 </Field>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black">CNAB</label>
-                  <div className="flex flex-wrap gap-12 sm:gap-4 md:gap-8 mt-4">
-                    {CNAB_OPTIONS.map(option => (
-                      <label key={option.value} className="flex items-center gap-2 cursor-pointer">
-                        <Field
-                          type="radio"
-                          name="cnab"
-                          value={option.value}
-                          className="accent-purple-500"
-                        />
-                        <span className="text-base">{option.label}</span>
-                      </label>
-                    ))}
+                  <div className="flex flex-wrap gap-4 mt-2">
+                    {loading ? (
+                      <p className="text-gray-600">Carregando CNABs...</p>
+                    ) : error ? (
+                      <p className="text-red-600">{error}</p>
+                    ) : cnabs.length === 0 ? (
+                      <p className="text-gray-600">Nenhum CNAB disponível para este banco.</p>
+                    ) : (
+                      cnabs.map(cnab => (
+                        <label 
+                          key={cnab.id} 
+                          className={
+                            `flex items-center gap-2 p-3 rounded-lg ${(values.cnab === cnab.name) ? 'bg-[#f3eaff]' : 'bg-white hover:bg-[#f3eaff]'} ${!cnab.available ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} transition-colors duration-200`
+                          }
+                        >
+                          <Field
+                            type="radio"
+                            name="cnab"
+                            value={cnab.name}
+                            className="accent-[#8D44AD]"
+                            disabled={!cnab.available}
+                          />
+                          <span className={`text-base ${!cnab.available ? 'text-gray-400' : 'text-gray-700'}`}>
+                            {cnab.name}
+                          </span>
+                        </label>
+                      ))
+                    )}
                   </div>
                   {touched.cnab && errors.cnab && (
-                    <span className="text-red-500 text-xs">{errors.cnab}</span>
+                    <span className="text-red-500 text-xs mt-1">{errors.cnab}</span>
                   )}
                 </div>
               </div>
@@ -354,16 +393,18 @@ export const FormStep: React.FC<FormStepProps> = ({
 
             <div className="flex justify-between items-center mt-8">
               <Button
-                label="Voltar"
                 type="button"
-                className="border-2 border-primary text-primary bg-white rounded-full px-8 py-2 font-medium hover:bg-gray-100"
+                className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
                 onClick={onBack}
-              />
+              >
+                Voltar
+              </Button>
               <Button
-                label="Revisar"
                 type="submit"
-                className="bg-primary text-white rounded-full px-8 py-2 font-medium hover:bg-primary-dark"
-              />
+                className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
+              >
+                Revisar
+              </Button>
             </div>
           </Form>
         )}
