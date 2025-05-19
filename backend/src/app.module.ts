@@ -12,13 +12,14 @@ import { GeneratePdfsModule } from './generate-pdf/generate-pdfs.module';
 import { NewFeatureModule } from './report-submissions/report-submissions.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
+import { ZapierModule } from './zapier/zapier.module';
 
 @Module({
   imports: 
   [ConfigModule.forRoot({
     isGlobal: true,
   }),
-  BanksModule, ProductsModule, CnabsModule, FormsModule, PrismaModule, VanTypesModule, GeneratePdfsModule, NewFeatureModule, EmailModule],
+  BanksModule, ProductsModule, CnabsModule, FormsModule, PrismaModule, VanTypesModule, GeneratePdfsModule, NewFeatureModule, EmailModule, ZapierModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
