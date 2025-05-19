@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { FaMoneyCheckAlt, FaFileAlt, FaExchangeAlt, FaBarcode } from 'react-icons/fa';
 import type { IconType } from 'react-icons';
 import Card from '../../Card/Card';
@@ -20,13 +20,13 @@ const PRODUCT_ICONS: Record<string, IconType> = {
   'Boletos': FaBarcode,
 };
 
-export const ProductSelection: React.FC<ProductSelectionProps> = ({
+export const ProductSelection = memo(({
   selectedProducts,
   onSelect,
   onNext,
   onBack,
   selectedBank,
-}) => {
+}: ProductSelectionProps) => {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,4 +163,4 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
       </div>
     </Card>
   );
-};
+});

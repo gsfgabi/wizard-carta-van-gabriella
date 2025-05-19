@@ -3,18 +3,19 @@ import { BankSelection } from "./steps/BankSelection";
 import { ProductSelection } from "./steps/ProductSelection";
 import { FormStep } from "./steps/FormStep";
 import { ValidationStep } from "./steps/ValidationStep";
+import { VanTypeSelection } from "./steps/VanTypeSelection";
 import Card from "../Card/Card";
-import WizardIntro from "../../pages/WizardIntro";
+// import WizardIntro from "../../pages/WizardIntro";
 import Stepper from "../Stepper/StepperSteps";
 
-export type WizardStep = "bank" | "products" | "form" | "validation";
+export type WizardStep = "bank" | "products" | "form" | "van-type" | "validation";
 
 export const steps = [
   "Banco",
   "Produto",
   "Dados da empresa e conta",
-  "Carta Finnet",
-  "Carta Nexxera",
+  "Tipo de VAN",
+  "Revisão",
   "Encerramento",
 ];
 
@@ -26,6 +27,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [currentStep, setCurrentStep] = useState<WizardStep>("bank");
   const [selectedBank, setSelectedBank] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedVanTypes, setSelectedVanTypes] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({});
 
   const handleNext = () => {
@@ -37,6 +39,9 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
         setCurrentStep("form");
         break;
       case "form":
+        setCurrentStep("van-type");
+        break;
+      case "van-type":
         setCurrentStep("validation");
         break;
       default:
@@ -55,8 +60,11 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       case "form":
         setCurrentStep("products");
         break;
-      case "validation":
+      case "van-type":
         setCurrentStep("form");
+        break;
+      case "validation":
+        setCurrentStep("van-type");
         break;
       default:
         break;
@@ -94,11 +102,23 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             selectedBank={selectedBank}
           />
         );
+      case "van-type":
+        return (
+          <VanTypeSelection
+            selectedBank={selectedBank}
+            selectedVanTypes={selectedVanTypes}
+            onSelect={setSelectedVanTypes}
+            onNext={handleNext}
+            onBack={handleBack}
+          />
+        );
       case "validation":
         return (
           <ValidationStep
             selectedProducts={selectedProducts}
+            selectedVanTypes={selectedVanTypes}
             onBack={handleBack}
+            selectedBank={selectedBank}
           />
         );
       default:
@@ -110,7 +130,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2">
       <Stepper
         currentStep={
-          ["bank", "products", "form", "validation"].indexOf(currentStep)
+          ["bank", "products", "form", "van-type", "validation"].indexOf(currentStep)
         }
         steps={steps}
       />

@@ -1,23 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import Card from '../../Card/Card';
+import React, { useEffect, useState, memo } from 'react';
 import Button from '../../Button/Button';
 import { getVanTypes, type VanTypeData } from '../../../services/api';
 
 interface VanTypeSelectionProps {
-  selectedVanType: string | null;
-  onSelect: (vanType: string | null) => void;
+  selectedBank: number | null;
   onNext: () => void;
   onBack: () => void;
-  selectedBank: number | null;
+  onSelect: (vanTypes: string[]) => void;
+  selectedVanTypes: string[];
 }
 
-export const VanTypeSelection: React.FC<VanTypeSelectionProps> = ({
-  selectedVanType,
-  onSelect,
+export const VanTypeSelection = memo(({
+  selectedBank,
   onNext,
   onBack,
-  selectedBank,
-}) => {
+  onSelect,
+  selectedVanTypes,
+}: VanTypeSelectionProps) => {
   const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +28,10 @@ export const VanTypeSelection: React.FC<VanTypeSelectionProps> = ({
       getVanTypes(selectedBank.toString())
         .then((data) => {
           setVanTypes(data);
+          // Se houver apenas uma VAN disponível, seleciona automaticamente
+          if (data.length === 1 && data[0].available) {
+            onSelect([data[0].id.toString()]);
+          }
           setError(null);
         })
         .catch((error) => {
@@ -39,7 +42,14 @@ export const VanTypeSelection: React.FC<VanTypeSelectionProps> = ({
           setLoading(false);
         });
     }
-  }, [selectedBank]);
+  }, [selectedBank, onSelect]);
+
+  const handleVanTypeToggle = (vanTypeId: string) => {
+    const newSelection = selectedVanTypes.includes(vanTypeId)
+      ? selectedVanTypes.filter((id) => id !== vanTypeId)
+      : [...selectedVanTypes, vanTypeId];
+    onSelect(newSelection);
+  };
 
   if (loading) {
     return (
@@ -77,65 +87,65 @@ export const VanTypeSelection: React.FC<VanTypeSelectionProps> = ({
     );
   }
 
-  return (
-    <Card className="shadow-none p-0">
-      <div className="w-full h-full px-0 py-0">
-        <h2 className="text-2xl font-semibold mb-2 text-black text-left">
-          4. Selecionar tipo de VAN
-        </h2>
-        <p className="text-base text-black mb-8 text-left">
-          Selecione qual tipo de VAN deseja utilizar para a transferência de arquivos
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {vanTypes.map((vanType) => {
-            const selected = selectedVanType === vanType.id.toString();
-            const isDisabled = !vanType.name;
-            
-            return (
-              <button
-                key={vanType.id}
-                type="button"
-                disabled={isDisabled}
-                className={`
-                  flex flex-col items-center justify-center rounded-xl border-2 px-4 py-10 transition min-h-[160px] h-full
-                  ${selected
-                    ? 'border-[#8D44AD] bg-[#8D44AD] text-white'
-                    : isDisabled
-                    ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'border-[#8D44AD] bg-white text-[#8D44AD] hover:bg-[#f3eaff]'}
-                  focus:outline-none
-                `}
-                style={{ boxShadow: 'none' }}
-                onClick={() => !isDisabled && onSelect(vanType.id.toString())}
-              >
-                <span className="text-2xl font-bold mb-2">{vanType.name}</span>
-                {isDisabled && (
-                  <span className="text-sm text-gray-500 mt-2">
-                    Indisponível
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
-          <Button
-            type="button"
-            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
-            onClick={onBack}
-          >
-            Voltar
-          </Button>
-          <Button
-            type="button"
-            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
-            onClick={onNext}
-            disabled={!selectedVanType}
-          >
-            Próximo
-          </Button>
-        </div>
+  if (vanTypes.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="text-gray-600">Nenhum tipo de VAN disponível para este banco.</p>
       </div>
-    </Card>
+    );
+  }
+
+  return (
+    <>
+      <h2 className="text-2xl font-semibold text-black mb-1">
+        4. Selecionar tipo de VAN
+      </h2>
+      <p className="text-base text-gray-700 mb-6">
+        Selecione qual(is) tipo(s) de VAN você deseja gerar a carta.
+      </p>
+
+      <div className="space-y-4 mb-8">
+        {vanTypes.map((vanType) => (
+          <label
+            key={vanType.id}
+            className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-colors duration-200 ${
+              selectedVanTypes.includes(vanType.id.toString())
+                ? 'border-[#8D44AD] bg-[#f3eaff]'
+                : 'border-gray-200 hover:border-[#8D44AD] hover:bg-[#f3eaff]'
+            } ${!vanType.available ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <input
+              type="checkbox"
+              checked={selectedVanTypes.includes(vanType.id.toString())}
+              onChange={() => handleVanTypeToggle(vanType.id.toString())}
+              disabled={!vanType.available}
+              className="w-5 h-5 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+            />
+            <span className="ml-3 text-lg font-medium text-gray-900">
+              {vanType.type}
+            </span>
+          </label>
+        ))}
+      </div>
+
+      <div className="flex justify-between items-center mt-8">
+        <Button
+          type="button"
+          className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+          onClick={onBack}
+        >
+          Voltar
+        </Button>
+        <Button
+          type="button"
+          className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
+          onClick={onNext}
+          disabled={selectedVanTypes.length === 0 || vanTypes.length === 0}
+          title={vanTypes.length === 0 ? "Nenhum tipo de VAN disponível para este banco." : selectedVanTypes.length === 0 ? "Selecione pelo menos um tipo de VAN para continuar." : ""}
+        >
+          Próximo
+        </Button>
+      </div>
+    </>
   );
-}; 
+}); 
