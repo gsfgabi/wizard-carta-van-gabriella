@@ -3,10 +3,10 @@ import axios from 'axios';
 import type { Bank, FormData as FormDataType, Product, ZendeskTicket } from '../types';
 
 const API_BASE_URL = import.meta.env.DEV 
-  ? '/api' 
+  ? 'http://localhost:3000/api' 
   : 'https://wizard-carta-van-teste.onrender.com';
 
-console.log('API_BASE_URL:', API_BASE_URL); // Debug log
+console.log('API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,8 +14,22 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 10000
+  timeout: 15000 // Reduzindo para 15 segundos
 });
+
+// Função para retry
+const retryRequest = async (fn: () => Promise<any>, retries = 3, delay = 1000) => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    if (retries === 0) throw error;
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return retryRequest(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+};
 
 // Interceptor para logging
 api.interceptors.request.use(
@@ -45,6 +59,15 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (error.code === 'ECONNABORTED') {
+      console.error('Timeout na requisição:', {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        fullURL: error.config ? `${error.config.baseURL}${error.config.url}` : 'unknown'
+      });
+      return Promise.reject(new Error('A requisição demorou muito tempo para responder. Por favor, tente novamente.'));
+    }
+
     console.error('Response Error:', {
       status: error.response?.status,
       url: error.config?.url,
@@ -57,22 +80,87 @@ api.interceptors.response.use(
 );
 
 export interface BankData {
+  id: number;
   code: string;
   name: string;
 }
 
+export interface ProductData {
+  id: number;
+  name: string;
+  available: boolean;
+}
+
+export interface CNABData {
+  id: number;
+  code: string;
+  name: string;
+  available: boolean;
+}
+
+export interface VanTypeData {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export const getBanks = async (): Promise<BankData[]> => {
   try {
-    const response = await api.get('/banks');
-    console.log('Resposta da API:', response.data);
-    const banks = response.data.map((b: any) => ({
-      code: b.code,
-      name: b.name
-    }));
-    banks.sort((a, b) => a.code.localeCompare(b.code));
-    return banks;
+    return await retryRequest(async () => {
+      const response = await api.get('/banks');
+      console.log('Resposta da API:', response.data);
+      const banks = response.data.map((b: any) => ({
+        id: b.id,
+        code: b.code,
+        name: b.name
+      }));
+      banks.sort((a, b) => a.code.localeCompare(b.code));
+      return banks;
+    });
   } catch (error) {
     console.error('Erro ao buscar bancos:', error);
+    throw error;
+  }
+};
+
+export const getProducts = async (bankId: string): Promise<ProductData[]> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.get(`/products/${bankId}`);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao buscar produtos:', error);
+    throw error;
+  }
+};
+
+export const getCNABs = async (bankId: string): Promise<CNABData[]> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.get(`/cnabs/${bankId}`);
+      console.log('Resposta da API CNABs:', response.data);
+      return response.data.map((cnab: any) => ({
+        id: cnab.id,
+        code: cnab.name,
+        name: cnab.name,
+        available: cnab.available
+      }));
+    });
+  } catch (error) {
+    console.error('Erro ao buscar CNABs:', error);
+    throw error;
+  }
+};
+
+export const getVanTypes = async (bankId: string): Promise<VanTypeData[]> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.get(`/van-types/${bankId}`);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao buscar tipos de VAN:', error);
     throw error;
   }
 };

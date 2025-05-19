@@ -1,33 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { FaMoneyCheckAlt, FaFileAlt, FaExchangeAlt, FaBarcode } from 'react-icons/fa';
-import type { IconType } from 'react-icons';
 import Card from '../../Card/Card';
 import Button from '../../Button/Button';
-import { getProducts, type ProductData } from '../../../services/api';
+import { getVanTypes, type VanTypeData } from '../../../services/api';
 
-interface ProductSelectionProps {
-  selectedProducts: string[];
-  onSelect: (products: string[]) => void;
+interface VanTypeSelectionProps {
+  selectedVanType: string | null;
+  onSelect: (vanType: string | null) => void;
   onNext: () => void;
   onBack: () => void;
   selectedBank: number | null;
 }
 
-const PRODUCT_ICONS: Record<string, IconType> = {
-  'Pagamentos': FaMoneyCheckAlt,
-  'Extrato': FaFileAlt,
-  'DDA': FaExchangeAlt,
-  'Boletos': FaBarcode,
-};
-
-export const ProductSelection: React.FC<ProductSelectionProps> = ({
-  selectedProducts,
+export const VanTypeSelection: React.FC<VanTypeSelectionProps> = ({
+  selectedVanType,
   onSelect,
   onNext,
   onBack,
   selectedBank,
 }) => {
-  const [products, setProducts] = useState<ProductData[]>([]);
+  const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,14 +26,14 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
     if (selectedBank) {
       setLoading(true);
       setError(null);
-      getProducts(selectedBank.toString())
+      getVanTypes(selectedBank.toString())
         .then((data) => {
-          setProducts(data);
+          setVanTypes(data);
           setError(null);
         })
         .catch((error) => {
-          console.error('Erro ao carregar produtos:', error);
-          setError('Erro ao carregar os produtos. Por favor, tente novamente.');
+          console.error('Erro ao carregar tipos de VAN:', error);
+          setError('Erro ao carregar os tipos de VAN. Por favor, tente novamente.');
         })
         .finally(() => {
           setLoading(false);
@@ -50,17 +41,10 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
     }
   }, [selectedBank]);
 
-  const handleProductToggle = (productId: number) => {
-    const newSelection = selectedProducts.includes(productId.toString())
-      ? selectedProducts.filter((id) => id !== productId.toString())
-      : [...selectedProducts, productId.toString()];
-    onSelect(newSelection);
-  };
-
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <p className="text-gray-600">Carregando produtos...</p>
+        <p className="text-gray-600">Carregando tipos de VAN...</p>
       </div>
     );
   }
@@ -73,13 +57,13 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
           onClick={() => {
             setLoading(true);
             setError(null);
-            getProducts(selectedBank!.toString())
+            getVanTypes(selectedBank!.toString())
               .then((data) => {
-                setProducts(data);
+                setVanTypes(data);
                 setError(null);
               })
               .catch((error) => {
-                setError('Erro ao carregar os produtos. Por favor, tente novamente.');
+                setError('Erro ao carregar os tipos de VAN. Por favor, tente novamente.');
               })
               .finally(() => {
                 setLoading(false);
@@ -97,20 +81,19 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
     <Card className="shadow-none p-0">
       <div className="w-full h-full px-0 py-0">
         <h2 className="text-2xl font-semibold mb-2 text-black text-left">
-          2. Selecionar um ou mais produtos
+          4. Selecionar tipo de VAN
         </h2>
         <p className="text-base text-black mb-8 text-left">
-          Selecione quais produtos deseja utilizar a transferência de arquivos por VAN
+          Selecione qual tipo de VAN deseja utilizar para a transferência de arquivos
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {products.map((product) => {
-            const selected = selectedProducts.includes(product.id.toString());
-            const isDisabled = !product.available;
-            const Icon = PRODUCT_ICONS[product.name];
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {vanTypes.map((vanType) => {
+            const selected = selectedVanType === vanType.id.toString();
+            const isDisabled = !vanType.name;
             
             return (
               <button
-                key={product.id}
+                key={vanType.id}
                 type="button"
                 disabled={isDisabled}
                 className={`
@@ -123,17 +106,9 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
                   focus:outline-none
                 `}
                 style={{ boxShadow: 'none' }}
-                onClick={() => !isDisabled && handleProductToggle(product.id)}
+                onClick={() => !isDisabled && onSelect(vanType.id.toString())}
               >
-                <span className="mb-3">
-                  {Icon && (
-                    <Icon
-                      size={38}
-                      color={selected ? 'white' : isDisabled ? '#9CA3AF' : '#8D44AD'}
-                    />
-                  )}
-                </span>
-                <span className="text-2xl font-bold mb-2">{product.name}</span>
+                <span className="text-2xl font-bold mb-2">{vanType.name}</span>
                 {isDisabled && (
                   <span className="text-sm text-gray-500 mt-2">
                     Indisponível
@@ -155,7 +130,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
             type="button"
             className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
             onClick={onNext}
-            disabled={selectedProducts.length === 0}
+            disabled={!selectedVanType}
           >
             Próximo
           </Button>
@@ -163,4 +138,4 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
       </div>
     </Card>
   );
-};
+}; 
