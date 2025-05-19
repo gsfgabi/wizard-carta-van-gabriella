@@ -8,7 +8,13 @@ interface StepperProps {
 const Stepper: React.FC<StepperProps> = ({ currentStep, steps }) => (
   <nav className="w-full flex justify-center items-center py-4 sm:py-6 bg-transparent overflow-x-auto">
     <div className="relative w-full max-w-full sm:max-w-3xl md:max-w-5xl mx-auto flex flex-col items-center">
-      <div className="absolute top-5 left-0 right-0 h-0.5 bg-[#8D44AD] z-0 rounded-full" />
+      <div 
+        className="absolute top-5 h-0.5 bg-[#8D44AD] z-0 rounded-full"
+        style={{
+          left: '64px',    // Ajuste da linha (esquerda)
+          right: '64px',    // Ajuste da linha (direita)
+        }}
+      />
       <ol className="relative flex w-full justify-between z-10 gap-2 sm:gap-0">
         {steps.map((step, idx) => (
           <li
