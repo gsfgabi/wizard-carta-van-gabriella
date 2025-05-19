@@ -4,7 +4,7 @@ import { GeneratePdfsDto } from 'src/generate-pdf/dto/generate-pdfs';
 
 @Injectable()
 export class ReportSubmissionsService {
-  constructor(private readonly reportGeneratorService: GeneratePdfsService) {}
+  constructor(private readonly GeneratePdfsService: GeneratePdfsService) {}
 
   /**
    * Novo método que chama a geração de relatórios, mas pode adicionar mais lógica
@@ -15,7 +15,7 @@ export class ReportSubmissionsService {
   async generateReportsWithMoreLogic(generateReportDto: GeneratePdfsDto): Promise<Buffer> {
     console.log('Realizando outras tarefas antes de gerar o PDF.');
 
-    const zipBuffer = await this.reportGeneratorService.generateReportsZip(generateReportDto);
+    const zipBuffer = await this.GeneratePdfsService.generateReportsZip(generateReportDto);
 
     console.log('Relatórios gerados com sucesso, agora adicionando mais lógica...');
     

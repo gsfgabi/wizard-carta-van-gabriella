@@ -8,63 +8,54 @@ import { Buffer } from 'buffer';
 @Injectable()
 export class GeneratePdfsService {
   /**
-   * @param generateReportDto Dados para gerar os relatórios
+   * Gera um ZIP com PDFs para cada combinação de produto e VAN
+   * @param generatePdfsDto Dados para gerar os relatórios
    * @returns Buffer do arquivo ZIP
    */
 
-  async generateReportsZip(generateReportDto: GeneratePdfsDto): Promise<Buffer> {
-    const { title, generatedAt, products, reportTypes } = generateReportDto;
-    const pdfBuffers: Buffer[] = [];
-    const pdfDetails: Array<any> = [];
+  async generateReportsZip(generatePdfsDto: GeneratePdfsDto): Promise<Buffer> {
+    const { id_products, id_van_types } = generatePdfsDto;
 
-    for (const product of products) {
-      for (const reportType of reportTypes) {
+    if (!id_products?.length || !id_van_types?.length) {
+      throw new Error('É necessário informar ao menos um produto e um tipo de VAN.');
+    }
+
+    const zip = new JSZip();
+
+    for (const product of id_products) {
+      for (const vanType of id_van_types) {
         const reportData: GeneratePdfsDto = {
-          title,
-          generatedAt,
-          products: [product],
-          reportTypes: [reportType],
+          ...generatePdfsDto,
+          id_products: [product],
+          id_van_types: [vanType],
         };
 
-        const pdfBuffer = await this.generatePdf(reportData, reportType);
-        pdfBuffers.push(pdfBuffer);
+        const pdfBuffer = await this.generatePdf(reportData, vanType.id);
 
-        pdfDetails.push({
-          productId: product.id,
-          productName: product.name,
-          reportType,
-          pdfUrl: `relatorio_${product.id}_${reportType}.pdf`,
-        });
+        const fileName = `relatorio_produto_${product.id}_van_${vanType.id}.pdf`;
+
+        zip.file(fileName, pdfBuffer);
       }
     }
 
-    if (pdfBuffers.length > 0) {
-      const zip = new JSZip();
-
-      pdfBuffers.forEach((pdfBuffer, index) => {
-        zip.file(pdfDetails[index].pdfUrl, pdfBuffer);
-      });
-
-      return await zip.generateAsync({ type: 'nodebuffer' });
-    }
-
-    throw new Error('Nenhum relatório gerado.');
+    return await zip.generateAsync({ type: 'nodebuffer' });
   }
 
   /**
-   * Gera um único PDF baseado nos dados fornecidos e no tipo de relatório
-   * @param generateReportDto Dados para gerar o relatório
-   * @param reportType Tipo de relatório (type1, type2, etc.)
+   * Gera um PDF com base no tipo de VAN
+   * @param generatePdfsDto Dados para gerar o relatório
+   * @param vanTypeId ID do tipo de VAN: 1 para 'nexxera', 2 para 'finnet', etc.
    * @returns Buffer do PDF gerado
    */
-
-  private async generatePdf(generateReportDto: GeneratePdfsDto, reportType: string): Promise<Buffer> {
-    if (reportType === 'type1') {
-      return await generatePdfBufferNexxera(generateReportDto);
-    } else if (reportType === 'type2') {
-      return await generatePdfBufferFinnet(generateReportDto);
-    } else {
-      throw new Error(`Tipo de relatório desconhecido: ${reportType}`);
+  
+  private async generatePdf(generatePdfsDto: GeneratePdfsDto, vanTypeId: number): Promise<Buffer> {
+    switch (vanTypeId) {
+      case 1: 
+        return await generatePdfBufferNexxera(generatePdfsDto);
+      case 2: 
+        return await generatePdfBufferFinnet(generatePdfsDto);
+      default:
+        throw new Error(`Tipo de VAN desconhecido: ${vanTypeId}`);
     }
   }
 }
