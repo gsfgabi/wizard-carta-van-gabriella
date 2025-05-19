@@ -87,11 +87,48 @@ export const VanTypeSelection = memo(({
     );
   }
 
-  if (vanTypes.length === 0) {
+  // Verifica se todos os tipos de VAN estão indisponíveis
+  const allVanTypesUnavailable = vanTypes.length > 0 && vanTypes.every(vanType => !vanType.available);
+
+  if (allVanTypesUnavailable) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-gray-600">Nenhum tipo de VAN disponível para este banco.</p>
-      </div>
+      <>
+        <h2 className="text-2xl font-semibold text-black mb-1">
+          4. Selecionar tipo de VAN
+        </h2>
+        <p className="text-base text-gray-700 mb-6">
+          Selecione qual(is) tipo(s) de VAN você deseja gerar a carta.
+        </p>
+
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+          <div className="text-center">
+            <p className="text-red-600 text-lg font-medium mb-2">
+              Não há tipos de VAN disponíveis para o banco selecionado
+            </p>
+            <p className="text-gray-600">
+              Por favor, selecione outro banco ou entre em contato com o suporte.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center mt-8">
+          <Button
+            type="button"
+            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+            onClick={onBack}
+          >
+            Voltar
+          </Button>
+          <Button
+            type="button"
+            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
+            onClick={onNext}
+            disabled={true}
+          >
+            Próximo
+          </Button>
+        </div>
+      </>
     );
   }
 
@@ -124,6 +161,11 @@ export const VanTypeSelection = memo(({
             <span className="ml-3 text-lg font-medium text-gray-900">
               {vanType.type}
             </span>
+            {!vanType.available && (
+              <span className="ml-2 text-sm text-red-600">
+                (Indisponível)
+              </span>
+            )}
           </label>
         ))}
       </div>
