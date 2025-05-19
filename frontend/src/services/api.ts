@@ -99,9 +99,9 @@ export interface CNABData {
 }
 
 export interface VanTypeData {
-  id: string;
-  name: string;
-  description: string;
+  id: number;
+  type: string;
+  available: boolean;
 }
 
 export const getBanks = async (): Promise<BankData[]> => {

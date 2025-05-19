@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
   Combobox,
   ComboboxInput,
@@ -26,12 +26,12 @@ interface BankSelectionProps {
 }
 
 // Componente de seleção de bancos. Inicialmente fechada e carregando. 
-export const BankSelection: React.FC<BankSelectionProps> = ({
+export const BankSelection = memo(({
   onSelect,
   selectedBank,
   onNext,
   onBack,
-}) => {
+}: BankSelectionProps) => {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -239,4 +239,4 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
       </div>
     </div>
   );
-};
+});
