@@ -5,14 +5,20 @@ import { BanksModule } from './banks/banks.module';
 import { ProductsModule } from './products/products.module';
 import { CnabsModule } from './cnabs/cnabs.module';
 import { FormsModule } from './forms/forms.module';
-import { PdfsModule } from './pdfs/pdfs.module';
-import { ZendeskModule } from './zendesk/zendesk.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { VanTypesModule } from './van-types/van-types.module';
+import { GeneratePdfsModule } from './generate-pdf/generate-pdfs.module';
+import { NewFeatureModule } from './report-submissions/report-submissions.module';
+import { EmailModule } from './email/email.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [BanksModule, ProductsModule, CnabsModule, FormsModule, PdfsModule, ZendeskModule, PrismaModule, VanTypesModule],
+  imports: 
+  [ConfigModule.forRoot({
+    isGlobal: true,
+  }),
+  BanksModule, ProductsModule, CnabsModule, FormsModule, PrismaModule, VanTypesModule, GeneratePdfsModule, NewFeatureModule, EmailModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

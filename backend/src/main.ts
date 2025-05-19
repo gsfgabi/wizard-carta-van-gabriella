@@ -6,8 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('API Banks')
-    .setDescription('Documentação da API de bancos')
+    .setTitle('API de Carta de Van Bancária')
+    .setDescription('Documentação da API de carta de van bancária')
     .setVersion('1.0')
     .build();
 

@@ -16,25 +16,24 @@ const AVAILABLE_PRODUCTS = [
     id: 'pagamentos',
     name: 'Pagamentos',
     description: 'Trafegar arquivos de remessa e retorno de pagamentos',
-    icon: <FaMoneyCheckAlt size={38} />,
+    icon: <FaMoneyCheckAlt/>,
   },
   {
     id: 'extrato',
     name: 'Extrato',
     description: 'Trafegar arquivos de extratos',
-    icon: <FaFileAlt size={38} />,
+    icon: <FaFileAlt/>,
   },
-  {
-    id: 'dda',
+  {    id: 'dda',
     name: 'DDA',
     description: 'Trafegar arquivos de varredura de débitos',
-    icon: <FaExchangeAlt size={38} />,
+    icon: <FaExchangeAlt/>,
   },
   {
     id: 'boletos',
     name: 'Boletos',
     description: 'Trafegar arquivos de remessa e retorno de boletos',
-    icon: <FaBarcode size={38} />,
+    icon: <FaBarcode/>,
   },
 ];
 
@@ -90,6 +89,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
                 <span className="mb-3">
                   {React.cloneElement(product.icon, {
                     color: selected ? 'white' : '#8D44AD',
+                    size: 38,
                   })}
                 </span>
                 <span className="text-2xl font-bold mb-2">{product.name}</span>
