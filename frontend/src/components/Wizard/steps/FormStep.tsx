@@ -171,9 +171,9 @@ export const FormStep: React.FC<FormStepProps> = ({
                         error={touched.cnpj && errors.cnpj ? errors.cnpj : ''}
                         as={IMaskInput}
                         mask="00.000.000/0000-00"
-                        unmask={false}
                         {...field}
-                        onAccept={(value: any) => setFieldValue('cnpj', value)}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
                       />
                     )}
                   </Field>
@@ -223,9 +223,9 @@ export const FormStep: React.FC<FormStepProps> = ({
                         error={touched.telefone && errors.telefone ? errors.telefone : ''}
                         as={IMaskInput}
                         mask="(00) 00000-0000"
-                        unmask={false}
                         {...field}
-                        onAccept={(value: any) => setFieldValue('telefone', value)}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
                       />
                     )}
                   </Field>
@@ -392,9 +392,9 @@ export const FormStep: React.FC<FormStepProps> = ({
                         error={touched.telefoneGerente && errors.telefoneGerente ? errors.telefoneGerente : ''}
                         as={IMaskInput}
                         mask="(00) 00000-0000"
-                        unmask={false}
                         {...field}
-                        onAccept={(value: any) => setFieldValue('telefoneGerente', value)}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
                       />
                     )}
                   </Field>
