@@ -104,6 +104,33 @@ export interface VanTypeData {
   available: boolean;
 }
 
+export interface AuthorizationLetterData {
+  company: {
+    corporate_name: string;
+    cnpj: string;
+  };
+  bank: {
+    id: number;
+    bank_name: string;
+    branch_number: string;
+    account_number: string;
+    agreement_number: string;
+  };
+  responsible_person: {
+    responsible_person_name: string;
+    responsible_person_email: string;
+    responsible_person_cellphone: string;
+  };
+  manager: {
+    manager_name: string;
+    manager_email: string;
+    manager_cellphone: string;
+  };
+  id_products: { id: number }[];
+  id_van_types: { id: number }[];
+  id_cnabs: { id: number }[];
+}
+
 export const getBanks = async (): Promise<BankData[]> => {
   try {
     return await retryRequest(async () => {
@@ -212,4 +239,16 @@ export const sendEmail = async (
       'Content-Type': 'multipart/form-data',
     },
   });
+};
+
+export const createAuthorizationLetter = async (data: AuthorizationLetterData): Promise<any> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.post('/auth/authorization-letters', data);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao criar carta de autorização:', error);
+    throw error;
+  }
 }; 

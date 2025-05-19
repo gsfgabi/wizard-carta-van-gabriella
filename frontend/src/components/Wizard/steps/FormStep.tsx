@@ -8,21 +8,21 @@ import { getCNABs, type CNABData } from '../../../services/api';
 
 interface FormData {
   cnpj: string;
-  razaoSocial: string;
-  nomeResponsavel: string;
-  cargoResponsavel: string;
-  telefone: string;
-  email: string;
-  agencia: string;
-  agenciaDV: string;
-  conta: string;
-  contaDV: string;
-  convenio: string;
+  corporate_name: string;
+  responsible_person_name: string;
+  responsible_person_position: string;
+  responsible_person_cellphone: string;
+  responsible_person_email: string;
+  branch_number: string;
+  branch_dv: string;
+  account_number: string;
+  account_dv: string;
+  agreement_number: string;
   cnab: string;
-  nomeGerente: string;
-  telefoneGerente: string;
-  emailGerente: string;
-  banco?: string;
+  manager_name: string;
+  manager_cellphone: string;
+  manager_email: string;
+  bank?: string;
 }
 
 interface FormStepProps {
@@ -37,29 +37,29 @@ const validationSchema = Yup.object().shape({
   cnpj: Yup.string()
     .required('CNPJ é obrigatório')
     .matches(/^[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}-[0-9]{2}$/, 'CNPJ inválido'),
-  razaoSocial: Yup.string().required('Razão Social é obrigatória'),
-  nomeResponsavel: Yup.string().required('Nome do Responsável é obrigatório'),
-  cargoResponsavel: Yup.string().required('Cargo do Responsável é obrigatório'),
-  telefone: Yup.string()
+  corporate_name: Yup.string().required('Razão Social é obrigatória'),
+  responsible_person_name: Yup.string().required('Nome do Responsável é obrigatório'),
+  responsible_person_position: Yup.string().required('Cargo do Responsável é obrigatório'),
+  responsible_person_cellphone: Yup.string()
     .required('Telefone é obrigatório')
-    .matches(/^\(\d{2}\) \d{5}-\d{4}$/, 'Telefone inválido'),
-  email: Yup.string()
+    .matches(/^\d{10,11}$/, 'Telefone inválido - Digite apenas números'),
+  responsible_person_email: Yup.string()
     .email('E-mail inválido')
     .required('E-mail é obrigatório'),
-  agencia: Yup.string().required('Agência é obrigatória'),
-  agenciaDV: Yup.string(),
-  conta: Yup.string().required('Conta é obrigatória'),
-  contaDV: Yup.string().required('DV da Conta é obrigatório'),
-  convenio: Yup.string().required('Convênio é obrigatório'),
+  branch_number: Yup.string().required('Agência é obrigatória'),
+  branch_dv: Yup.string(),
+  account_number: Yup.string().required('Conta é obrigatória'),
+  account_dv: Yup.string().required('DV da Conta é obrigatório'),
+  agreement_number: Yup.string().required('Convênio é obrigatório'),
   cnab: Yup.string().required('CNAB é obrigatório'),
-  nomeGerente: Yup.string().required('Nome do Gerente é obrigatório'),
-  telefoneGerente: Yup.string()
+  manager_name: Yup.string().required('Nome do Gerente é obrigatório'),
+  manager_cellphone: Yup.string()
     .required('Telefone do Gerente é obrigatório')
-    .matches(/^\(\d{2}\) \d{5}-\d{4}$/, 'Telefone inválido'),
-  emailGerente: Yup.string()
+    .matches(/^\d{10,11}$/, 'Telefone inválido - Digite apenas números'),
+  manager_email: Yup.string()
     .email('E-mail inválido')
     .required('E-mail do Gerente é obrigatório'),
-  banco: Yup.string().required('Banco é obrigatório'),
+  bank: Yup.string().required('Banco é obrigatório'),
 });
 
 export const FormStep: React.FC<FormStepProps> = ({
@@ -76,21 +76,21 @@ export const FormStep: React.FC<FormStepProps> = ({
 
   const initialValues: FormData = {
     cnpj: formData.cnpj || '',
-    razaoSocial: formData.razaoSocial || '',
-    nomeResponsavel: formData.nomeResponsavel || '',
-    cargoResponsavel: formData.cargoResponsavel || '',
-    telefone: formData.telefone || '',
-    email: formData.email || '',
-    agencia: formData.agencia || '',
-    agenciaDV: formData.agenciaDV || '',
-    conta: formData.conta || '',
-    contaDV: formData.contaDV || '',
-    convenio: formData.convenio || '',
+    corporate_name: formData.corporate_name || '',
+    responsible_person_name: formData.responsible_person_name || '',
+    responsible_person_position: formData.responsible_person_position || '',
+    responsible_person_cellphone: formData.responsible_person_cellphone || '',
+    responsible_person_email: formData.responsible_person_email || '',
+    branch_number: formData.branch_number || '',
+    branch_dv: formData.branch_dv || '',
+    account_number: formData.account_number || '',
+    account_dv: formData.account_dv || '',
+    agreement_number: formData.agreement_number || '',
     cnab: formData.cnab || '',
-    nomeGerente: formData.nomeGerente || '',
-    telefoneGerente: formData.telefoneGerente || '',
-    emailGerente: formData.emailGerente || '',
-    banco: selectedBankData ? `${selectedBankData.code} - ${selectedBankData.name}` : '',
+    manager_name: formData.manager_name || '',
+    manager_cellphone: formData.manager_cellphone || '',
+    manager_email: formData.manager_email || '',
+    bank: selectedBankData ? `${selectedBankData.code} - ${selectedBankData.name}` : '',
   };
 
   return (
@@ -106,6 +106,7 @@ export const FormStep: React.FC<FormStepProps> = ({
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values) => {
+          console.log('Formulário submetido com sucesso:', values);
           onUpdate(values);
           onNext();
         }}
@@ -113,18 +114,19 @@ export const FormStep: React.FC<FormStepProps> = ({
         validateOnChange={true}
         validateOnBlur={true}
       >
-        {({ errors, touched, setFieldValue, values, isValid }) => {
+        {({ errors, touched, setFieldValue, values, isValid, handleSubmit }) => {
           useEffect(() => {
+            console.log('Estado atual do formulário:', { isValid, errors, touched, values });
+
             // Recuperar dados do banco do localStorage
             const storedBank = localStorage.getItem('selectedBank');
             if (storedBank) {
               const bankData = JSON.parse(storedBank);
               setSelectedBankData(bankData);
-              // Atualiza o campo banco no Formik quando os dados do banco são carregados
-              setFieldValue('banco', `${bankData.code} - ${bankData.name}`);
+              setFieldValue('bank', `${bankData.code} - ${bankData.name}`);
             } else {
               setSelectedBankData(null);
-              setFieldValue('banco', ''); // Limpa o campo se não houver banco no localStorage
+              setFieldValue('bank', ''); 
             }
 
             // Carregar CNABs disponíveis
@@ -146,19 +148,18 @@ export const FormStep: React.FC<FormStepProps> = ({
             }
           }, [selectedBank, setFieldValue]);
 
-          console.log('Formik state:', { isValid, errors, touched, values });
           return (
-            <Form>
+            <Form onSubmit={handleSubmit}>
               {/* EMPRESA */}
               <div className="mb-6">
                 <h3 className="font-semibold text-black mb-2">Empresa</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field name="razaoSocial">
+                  <Field name="corporate_name">
                     {({ field }: any) => (
                       <InputField
                         label="Razão Social"
                         placeholder="Inserir razão social da empresa"
-                        error={touched.razaoSocial && errors.razaoSocial ? errors.razaoSocial : ''}
+                        error={touched.corporate_name && errors.corporate_name ? errors.corporate_name : ''}
                         {...field}
                       />
                     )}
@@ -184,48 +185,46 @@ export const FormStep: React.FC<FormStepProps> = ({
               <div className="mb-6">
                 <h3 className="font-semibold text-black mb-2">Responsável pela Empresa</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field name="cargoResponsavel">
+                  <Field name="responsible_person_position">
                     {({ field }: any) => (
                       <InputField
                         label="Cargo"
                         placeholder="Inserir cargo do responsável da empresa"
-                        error={touched.cargoResponsavel && errors.cargoResponsavel ? errors.cargoResponsavel : ''}
+                        error={touched.responsible_person_position && errors.responsible_person_position ? errors.responsible_person_position : ''}
                         {...field}
                       />
                     )}
                   </Field>
-                  <Field name="nomeResponsavel">
+                  <Field name="responsible_person_name">
                     {({ field }: any) => (
                       <InputField
                         label="Nome"
                         placeholder="Inserir nome do responsável pela empresa"
-                        error={touched.nomeResponsavel && errors.nomeResponsavel ? errors.nomeResponsavel : ''}
+                        error={touched.responsible_person_name && errors.responsible_person_name ? errors.responsible_person_name : ''}
                         {...field}
                       />
                     )}
                   </Field>
-                  <Field name="email">
+                  <Field name="responsible_person_email">
                     {({ field }: any) => (
                       <InputField
                         label="E-mail"
                         placeholder="Inserir email do responsável pela empresa"
                         type="email"
-                        error={touched.email && errors.email ? errors.email : ''}
+                        error={touched.responsible_person_email && errors.responsible_person_email ? errors.responsible_person_email : ''}
                         {...field}
                       />
                     )}
                   </Field>
-                  <Field name="telefone">
+                  <Field name="responsible_person_cellphone">
                     {({ field }: any) => (
                       <InputField
                         label="Telefone"
                         placeholder="Inserir telefone do responsável pela empresa"
-                        error={touched.telefone && errors.telefone ? errors.telefone : ''}
-                        as={IMaskInput}
-                        mask="(00) 00000-0000"
+                        error={touched.responsible_person_cellphone && errors.responsible_person_cellphone ? errors.responsible_person_cellphone : ''}
                         {...field}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
+                        type="tel"
+                        maxLength={11}
                       />
                     )}
                   </Field>
@@ -252,12 +251,12 @@ export const FormStep: React.FC<FormStepProps> = ({
 
                   {/* Conta + DV */}
                   <div className="flex gap-2 flex-grow">
-                    <Field name="conta">
+                    <Field name="account_number">
                       {({ field }: any) => (
                         <InputField
                           label="Conta"
                           placeholder="Inserir o número da conta"
-                          error={touched.conta && errors.conta ? errors.conta : ''}
+                          error={touched.account_number && errors.account_number ? errors.account_number : ''}
                           {...field}
                           maxLength={6}
                           type="text"
@@ -265,12 +264,12 @@ export const FormStep: React.FC<FormStepProps> = ({
                         />
                       )}
                     </Field>
-                    <Field name="contaDV">
+                    <Field name="account_dv">
                       {({ field }: any) => (
                         <InputField
                           label="DV"
                           placeholder="DV"
-                          error={touched.contaDV && errors.contaDV ? errors.contaDV : ''}
+                          error={touched.account_dv && errors.account_dv ? errors.account_dv : ''}
                           {...field}
                           maxLength={2}
                           type="text"
@@ -282,12 +281,12 @@ export const FormStep: React.FC<FormStepProps> = ({
 
                   {/* Agência + DV */}
                   <div className="flex gap-2 flex-grow">
-                    <Field name="agencia">
+                    <Field name="branch_number">
                       {({ field }: any) => (
                         <InputField
                           label="Agência"
                           placeholder="Inserir o número da agência"
-                          error={touched.agencia && errors.agencia ? errors.agencia : ''}
+                          error={touched.branch_number && errors.branch_number ? errors.branch_number : ''}
                           {...field}
                           maxLength={4}
                           type="text"
@@ -295,7 +294,7 @@ export const FormStep: React.FC<FormStepProps> = ({
                         />
                       )}
                     </Field>
-                    <Field name="agenciaDV">
+                    <Field name="branch_dv">
                       {({ field }: any) => (
                         <InputField
                           label="DV"
@@ -311,12 +310,12 @@ export const FormStep: React.FC<FormStepProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <Field name="convenio">
+                  <Field name="agreement_number">
                     {({ field }: any) => (
                       <InputField
                         label="Convênio"
                         placeholder="Inserir o número do convênio"
-                        error={touched.convenio && errors.convenio ? errors.convenio : ''}
+                        error={touched.agreement_number && errors.agreement_number ? errors.agreement_number : ''}
                         {...field}
                       />
                     )}
@@ -363,38 +362,36 @@ export const FormStep: React.FC<FormStepProps> = ({
               <div className="mb-8">
                 <h3 className="font-semibold text-black mb-2">Gerente Conta</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Field name="nomeGerente">
+                  <Field name="manager_name">
                     {({ field }: any) => (
                       <InputField
                         label="Nome"
                         placeholder="Inserir nome do gerente da conta bancária"
-                        error={touched.nomeGerente && errors.nomeGerente ? errors.nomeGerente : ''}
+                        error={touched.manager_name && errors.manager_name ? errors.manager_name : ''}
                         {...field}
                       />
                     )}
                   </Field>
-                  <Field name="emailGerente">
+                  <Field name="manager_email">
                     {({ field }: any) => (
                       <InputField
                         label="E-mail"
                         placeholder="Inserir email do gerente da conta bancária"
                         type="email"
-                        error={touched.emailGerente && errors.emailGerente ? errors.emailGerente : ''}
+                        error={touched.manager_email && errors.manager_email ? errors.manager_email : ''}
                         {...field}
                       />
                     )}
                   </Field>
-                  <Field name="telefoneGerente">
+                  <Field name="manager_cellphone">
                     {({ field }: any) => (
                       <InputField
                         label="Telefone"
                         placeholder="Inserir telefone do gerente da conta bancária"
-                        error={touched.telefoneGerente && errors.telefoneGerente ? errors.telefoneGerente : ''}
-                        as={IMaskInput}
-                        mask="(00) 00000-0000"
+                        error={touched.manager_cellphone && errors.manager_cellphone ? errors.manager_cellphone : ''}
                         {...field}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
+                        type="tel"
+                        maxLength={11}
                       />
                     )}
                   </Field>
@@ -412,11 +409,12 @@ export const FormStep: React.FC<FormStepProps> = ({
                 <Button
                   type="submit"
                   className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
-                  onClick={() => {
-                    onUpdate(values);
-                    onNext();
-                  }}
                   disabled={!isValid}
+                  onClick={() => {
+                    console.log('Botão Revisar clicado');
+                    console.log('Formulário é válido:', isValid);
+                    console.log('Erros atuais:', errors);
+                  }}
                 >
                   Revisar
                 </Button>
