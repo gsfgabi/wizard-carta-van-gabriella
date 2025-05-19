@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { BanksModule } from './banks/banks.module';
 import { ProductsModule } from './products/products.module';
 import { CnabsModule } from './cnabs/cnabs.module';
-import { FormsModule } from './forms/forms.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { VanTypesModule } from './van-types/van-types.module';
@@ -13,18 +12,17 @@ import { ReportSubmissionsModule } from './report-submissions/report-submissions
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { ZapierModule } from './zapier/zapier.module';
-import { AuthModule } from './auth/auth.module';
+import { authorizationLettersModule } from './authorization-letters/authorization-letters.module';
 
 @Module({
   imports: 
   [ConfigModule.forRoot({
     isGlobal: true,
   }),
-  AuthModule,
+  authorizationLettersModule,
   BanksModule, 
   ProductsModule, 
   CnabsModule, 
-  FormsModule, 
   PrismaModule, 
   VanTypesModule, 
   GeneratePdfsModule, 

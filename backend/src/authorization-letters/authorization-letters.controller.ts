@@ -1,13 +1,13 @@
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthorizationLettersService } from './authorization-letters.service';
 import { CreateAuthorizationLettersDto } from './dto/create-authorization-letters.dto';
 import { CreateAuthorizationLettersProductsDto } from './dto/create-authorization-letters-products.dto';
 import { CreateAuthorizationLettersVanTypesDto } from './dto/create-authorization-letters-van-types.dto';
 import { convertBigIntToString } from 'src/utils/bigint.helper';
 
 @Controller('auth')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+export class AuthorizationLettersController {
+  constructor(private readonly authService: AuthorizationLettersService) {}
 
   @Post('authorization-letters')
   async saveAuthorizationLetters(

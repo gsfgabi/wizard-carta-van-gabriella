@@ -21,27 +21,38 @@ export class ReportSubmissionsController {
   ) {
     try {
       const zipBuffer = await this.reportSubmissionsService.generateReportsWithMoreLogic(generatePdfsDto);
-      
+  
+      // Envia e-mail com ZIP
       await this.emailService.sendReportEmail(
         'kethellinpereira2018@outlook.com',
         'Carta de Van Bancária - Arquivo',
         'Segue em anexo os pdfs gerados para a carta de van bancária.',
         zipBuffer,
       );
-
+  
       const zip = await JSZip.loadAsync(zipBuffer);
-      for (const fileName of Object.keys(zip.files)) {
-        const file = zip.files[fileName];
-        const pdfBuffer = await file.async('nodebuffer');
-        const base64PDF = pdfBuffer.toString('base64');
-
-        const cnpjSH = '11111111111111';
-        const email = 'guilherme.ganassin@tecnospeed.com.br';
-        const CNPJ_cliente = generatePdfsDto.cnpj;
-
-        for (const product of generatePdfsDto.id_products) {
+      const fileNames = Object.keys(zip.files).filter(name => name.endsWith('.pdf'));
+  
+      if (fileNames.length !== generatePdfsDto.id_products.length * generatePdfsDto.id_van_types.length) {
+        return res.status(400).json({
+          message: 'Número de arquivos PDF gerados não corresponde ao número de produtos.',
+        });
+      }
+  
+      const cnpjSH = '11111111111111';
+      const email = 'guilherme.ganassin@tecnospeed.com.br';
+      const CNPJ_cliente = generatePdfsDto.cnpj;
+  
+      for (let v = 0; v < generatePdfsDto.id_van_types.length; v++) {
+        for (let i = 0; i < generatePdfsDto.id_products.length; i++) {
+          const product = generatePdfsDto.id_products[i];
           const produto = product.name;
-
+    
+          const fileName = fileNames[i];
+          const file = zip.files[fileName];
+          const pdfBuffer = await file.async('nodebuffer');
+          const base64PDF = pdfBuffer.toString('base64');
+    
           console.log('Enviando dados para o Zapier...', {
             cnpjSH,
             email,
@@ -49,14 +60,19 @@ export class ReportSubmissionsController {
             CNPJ_cliente,
             produto,
           });
-
+    
           await this.zapierService.sendDataToZapier(cnpjSH, email, base64PDF, CNPJ_cliente, produto);
         }
       }
-
-      return res.status(200).json({ message: 'E-mail enviado e dados enviados para o Zapier com sucesso!' });
+  
+      return res.status(200).json({
+        message: 'E-mail enviado e dados enviados para o Zapier com sucesso!',
+      });
     } catch (error) {
-      return res.status(500).json({ message: 'Erro ao gerar ou enviar o ZIP', error: error.message });
+      return res.status(500).json({
+        message: 'Erro ao gerar ou enviar o ZIP',
+        error: error.message,
+      });
     }
   }
-}
+}  
