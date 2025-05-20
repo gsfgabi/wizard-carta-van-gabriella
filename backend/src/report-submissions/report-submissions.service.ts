@@ -6,12 +6,6 @@ import { GeneratePdfsDto } from 'src/generate-pdf/dto/generate-pdfs';
 export class ReportSubmissionsService {
   constructor(private readonly GeneratePdfsService: GeneratePdfsService) {}
 
-  /**
-   * Novo método que chama a geração de relatórios, mas pode adicionar mais lógica
-   * @param generateReportDto Dados para gerar os relatórios
-   * @returns Buffer do arquivo ZIP gerado
-   */
-
   async generateReportsWithMoreLogic(generateReportDto: GeneratePdfsDto): Promise<Buffer> {
     console.log('Realizando outras tarefas antes de gerar o PDF.');
 

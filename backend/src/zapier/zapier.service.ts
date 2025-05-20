@@ -15,7 +15,7 @@ export class ZapierService {
     CNPJ_cliente: string,
     Produto: string,
   ): Promise<AxiosResponse> {
-    const zapierUrl = 'https://hooks.zapier.com/hooks/catch/21923307/2gwb3a6/';
+    const zapierUrl = process.env.URL_ZAPIER!;
 
     const formData = new FormData();
     

@@ -7,11 +7,6 @@ import { Buffer } from 'buffer';
 
 @Injectable()
 export class GeneratePdfsService {
-  /**
-   * Gera um ZIP com PDFs para cada combinação de produto e VAN
-   * @param generatePdfsDto Dados para gerar os relatórios
-   * @returns Buffer do arquivo ZIP
-   */
 
   async generateReportsZip(generatePdfsDto: GeneratePdfsDto): Promise<Buffer> {
     const { id_products, id_van_types } = generatePdfsDto;
@@ -40,13 +35,6 @@ export class GeneratePdfsService {
 
     return await zip.generateAsync({ type: 'nodebuffer' });
   }
-
-  /**
-   * Gera um PDF com base no tipo de VAN
-   * @param generatePdfsDto Dados para gerar o relatório
-   * @param vanTypeId ID do tipo de VAN: 1 para 'nexxera', 2 para 'finnet', etc.
-   * @returns Buffer do PDF gerado
-   */
   
   private async generatePdf(generatePdfsDto: GeneratePdfsDto, vanTypeId: number): Promise<Buffer> {
     switch (vanTypeId) {
