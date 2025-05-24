@@ -3,6 +3,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import toast from 'react-hot-toast';
 import Button from '../../Button/Button';
 import { getVanTypes, type VanTypeData, getProducts, type ProductData } from '../../../services/api';
+import Modal from '../../Modal/Modal';
+import Confirmation from '../../Modal/Confirmation';
 
 // Configuração do worker do PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -53,6 +55,16 @@ export const ValidationStep = memo(({
         setLoadingData(false);
     }
   }, [selectedBank]);
+
+  //Controle do modal de confirmação
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleConfirm = () => {
+        setIsModalOpen(false);
+        handleGeneratePDF();
+  };
+  const handleCancel = () => {
+        setIsModalOpen(false);
+  };
 
   const handleGeneratePDF = async () => {
     setLoadingPdf(true);
@@ -196,11 +208,18 @@ export const ValidationStep = memo(({
         <Button
           type="button"
           className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
-          onClick={handleGeneratePDF}
+          onClick={() => setIsModalOpen(true)}
           disabled={loadingData || loadingPdf || selectedProducts.length === 0 || selectedVanTypes.length === 0}
         >
           {loadingPdf ? 'Gerando...' : 'Gerar Cartas'}
         </Button>
+
+        <Modal isOpen={isModalOpen} onClose={handleCancel}>
+                <Confirmation
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            </Modal>
       </div>
     </>
   );
