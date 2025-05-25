@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
 import { IMaskInput } from 'react-imask';
 import InputField from '../../Form/InputField';
 import Button from '../../Button/Button';
-import { getCNABs, type CNABData } from '../../../services/api';
+import type { CNABData, BankData, ProductData } from '../../../services/api';
+import { formValidationSchema, isValidCNPJ, validatePhone } from '../../../utils/validation';
+import { maskCNPJ, maskPhone, maskAccount, maskAccountDV, maskBranch, maskBranchDV, maskAgreement } from '../../../utils/mask';
+import * as Yup from 'yup';
 
 interface FormData {
   cnpj: string;
@@ -22,7 +24,6 @@ interface FormData {
   manager_name: string;
   manager_cellphone: string;
   manager_email: string;
-  bank?: string;
 }
 
 interface FormStepProps {
@@ -31,49 +32,23 @@ interface FormStepProps {
   onNext: () => void;
   onBack: () => void;
   selectedBank: number | null;
+  cnabs: CNABData[];
+  banks: BankData[];
+  products: ProductData[];
+  selectedProducts: string[];
 }
 
-const validationSchema = Yup.object().shape({
-  cnpj: Yup.string()
-    .required('CNPJ é obrigatório')
-    .matches(/^[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}-[0-9]{2}$/, 'CNPJ inválido'),
-  corporate_name: Yup.string().required('Razão Social é obrigatória'),
-  responsible_person_name: Yup.string().required('Nome do Responsável é obrigatório'),
-  responsible_person_position: Yup.string().required('Cargo do Responsável é obrigatório'),
-  responsible_person_cellphone: Yup.string()
-    .required('Telefone é obrigatório')
-    .matches(/^\d{10,11}$/, 'Telefone inválido - Digite apenas números'),
-  responsible_person_email: Yup.string()
-    .email('E-mail inválido')
-    .required('E-mail é obrigatório'),
-  branch_number: Yup.string().required('Agência é obrigatória'),
-  branch_dv: Yup.string(),
-  account_number: Yup.string().required('Conta é obrigatória'),
-  account_dv: Yup.string().required('DV da Conta é obrigatório'),
-  agreement_number: Yup.string().required('Convênio é obrigatório'),
-  cnab: Yup.string().required('CNAB é obrigatório'),
-  manager_name: Yup.string().required('Nome do Gerente é obrigatório'),
-  manager_cellphone: Yup.string()
-    .required('Telefone do Gerente é obrigatório')
-    .matches(/^\d{10,11}$/, 'Telefone inválido - Digite apenas números'),
-  manager_email: Yup.string()
-    .email('E-mail inválido')
-    .required('E-mail do Gerente é obrigatório'),
-  bank: Yup.string().required('Banco é obrigatório'),
-});
-
-export const FormStep: React.FC<FormStepProps> = ({
+export const FormStep = memo(({
   formData,
   onUpdate,
   onNext,
   onBack,
   selectedBank,
-}) => {
-  const [cnabs, setCNABs] = useState<CNABData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedBankData, setSelectedBankData] = useState<{ code: string; name: string } | null>(null);
-
+  cnabs,
+  banks,
+  products,
+  selectedProducts,
+}: FormStepProps) => {
   const initialValues: FormData = {
     cnpj: formData.cnpj || '',
     corporate_name: formData.corporate_name || '',
@@ -90,7 +65,6 @@ export const FormStep: React.FC<FormStepProps> = ({
     manager_name: formData.manager_name || '',
     manager_cellphone: formData.manager_cellphone || '',
     manager_email: formData.manager_email || '',
-    bank: selectedBankData ? `${selectedBankData.code} - ${selectedBankData.name}` : '',
   };
 
   return (
@@ -102,9 +76,36 @@ export const FormStep: React.FC<FormStepProps> = ({
         A seguir precisamos coletar alguns dados que utilizaremos para elaborar a carta de VAN para o banco desejado.
       </p>
 
+      {/* Exibir Banco Selecionado */}
+      {
+        selectedBank !== null && (
+          <div className="mb-4 p-4 bg-gray-100 rounded-lg">
+            <h4 className="font-semibold text-black mb-2">Banco Selecionado:</h4>
+            <p className="text-base text-gray-700">
+              {banks.find(bank => bank.id === selectedBank)?.code} - {banks.find(bank => bank.id === selectedBank)?.name}
+            </p>
+          </div>
+        )
+      }
+
+      {/* Exibir Produtos Selecionados */}
+      {
+        selectedProducts.length > 0 && (
+          <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+            <h4 className="font-semibold text-black mb-2">Produtos Selecionados:</h4>
+            <ul className="list-disc list-inside text-base text-gray-700">
+              {selectedProducts.map(productId => {
+                const product = products.find(p => p.id.toString() === productId);
+                return product ? <li key={productId}>{product.name}</li> : null;
+              })}
+            </ul>
+          </div>
+        )
+      }
+
       <Formik
         initialValues={initialValues}
-        validationSchema={validationSchema}
+        validationSchema={formValidationSchema}
         onSubmit={(values) => {
           console.log('Formulário submetido com sucesso:', values);
           onUpdate(values);
@@ -115,39 +116,7 @@ export const FormStep: React.FC<FormStepProps> = ({
         validateOnBlur={true}
       >
         {({ errors, touched, setFieldValue, values, isValid, handleSubmit }) => {
-          useEffect(() => {
-            console.log('Estado atual do formulário:', { isValid, errors, touched, values });
-
-            // Recuperar dados do banco do localStorage
-            const storedBank = localStorage.getItem('selectedBank');
-            if (storedBank) {
-              const bankData = JSON.parse(storedBank);
-              setSelectedBankData(bankData);
-              setFieldValue('bank', `${bankData.code} - ${bankData.name}`);
-            } else {
-              setSelectedBankData(null);
-              setFieldValue('bank', ''); 
-            }
-
-            // Carregar CNABs disponíveis
-            if (selectedBank) {
-              setLoading(true);
-              setError(null);
-              getCNABs(selectedBank.toString())
-                .then((data) => {
-                  setCNABs(data);
-                  setError(null);
-                })
-                .catch((error) => {
-                  console.error('Erro ao carregar CNABs:', error);
-                  setError('Erro ao carregar os CNABs. Por favor, tente novamente.');
-                })
-                .finally(() => {
-                  setLoading(false);
-                });
-            }
-          }, [selectedBank, setFieldValue]);
-
+          console.log('Formik State:', { errors, touched, isValid, values });
           return (
             <Form onSubmit={handleSubmit}>
               {/* EMPRESA */}
@@ -170,11 +139,19 @@ export const FormStep: React.FC<FormStepProps> = ({
                         label="CNPJ"
                         placeholder="Inserir número do CNPJ"
                         error={touched.cnpj && errors.cnpj ? errors.cnpj : ''}
-                        as={IMaskInput}
-                        mask="00.000.000/0000-00"
                         {...field}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const maskedValue = maskCNPJ(e.target.value);
+                          field.onChange({
+                            target: {
+                              name: field.name,
+                              value: maskedValue
+                            }
+                          });
+                        }}
+                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                          field.onBlur(e);
+                        }}
                       />
                     )}
                   </Field>
@@ -223,8 +200,18 @@ export const FormStep: React.FC<FormStepProps> = ({
                         placeholder="Inserir telefone do responsável pela empresa"
                         error={touched.responsible_person_cellphone && errors.responsible_person_cellphone ? errors.responsible_person_cellphone : ''}
                         {...field}
-                        type="tel"
-                        maxLength={11}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const maskedValue = maskPhone(e.target.value);
+                          field.onChange({
+                            target: {
+                              name: field.name,
+                              value: maskedValue
+                            }
+                          });
+                        }}
+                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                          field.onBlur(e);
+                        }}
                       />
                     )}
                   </Field>
@@ -237,18 +224,6 @@ export const FormStep: React.FC<FormStepProps> = ({
 
                 {/* Linha com Banco, Conta+DV e Agência+DV */}
                 <div className="w-full flex justify-center gap-4">
-                  
-                  {/* Banco */}
-                  <div className="flex flex-col">
-                    <label className="block text-sm font-medium mb-1 text-black">Banco</label>
-                    <input
-                      type="text"
-                      value={selectedBankData ? `${selectedBankData.code} - ${selectedBankData.name}` : ''}
-                      readOnly
-                      className="min-w-[300px] max-w-[500px] rounded-md border border-gray-300 bg-gray-100 px-3 py-2 w-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
                   {/* Conta + DV */}
                   <div className="flex gap-2 flex-grow">
                     <Field name="account_number">
@@ -258,9 +233,15 @@ export const FormStep: React.FC<FormStepProps> = ({
                           placeholder="Inserir o número da conta"
                           error={touched.account_number && errors.account_number ? errors.account_number : ''}
                           {...field}
-                          maxLength={6}
-                          type="text"
-                          className="flex-grow"
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const maskedValue = maskAccount(e.target.value);
+                            field.onChange({
+                              target: {
+                                name: field.name,
+                                value: maskedValue
+                              }
+                            });
+                          }}
                         />
                       )}
                     </Field>
@@ -271,9 +252,15 @@ export const FormStep: React.FC<FormStepProps> = ({
                           placeholder="DV"
                           error={touched.account_dv && errors.account_dv ? errors.account_dv : ''}
                           {...field}
-                          maxLength={2}
-                          type="text"
-                          className="w-16"
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const maskedValue = maskAccountDV(e.target.value);
+                            field.onChange({
+                              target: {
+                                name: field.name,
+                                value: maskedValue
+                              }
+                            });
+                          }}
                         />
                       )}
                     </Field>
@@ -288,9 +275,15 @@ export const FormStep: React.FC<FormStepProps> = ({
                           placeholder="Inserir o número da agência"
                           error={touched.branch_number && errors.branch_number ? errors.branch_number : ''}
                           {...field}
-                          maxLength={4}
-                          type="text"
-                          className="flex-grow"
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const maskedValue = maskBranch(e.target.value);
+                            field.onChange({
+                              target: {
+                                name: field.name,
+                                value: maskedValue
+                              }
+                            });
+                          }}
                         />
                       )}
                     </Field>
@@ -299,10 +292,17 @@ export const FormStep: React.FC<FormStepProps> = ({
                         <InputField
                           label="DV"
                           placeholder="DV"
+                          error={touched.branch_dv && errors.branch_dv ? errors.branch_dv : ''}
                           {...field}
-                          maxLength={2}
-                          type="text"
-                          className="w-16"
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const maskedValue = maskBranchDV(e.target.value);
+                            field.onChange({
+                              target: {
+                                name: field.name,
+                                value: maskedValue
+                              }
+                            });
+                          }}
                         />
                       )}
                     </Field>
@@ -314,20 +314,25 @@ export const FormStep: React.FC<FormStepProps> = ({
                     {({ field }: any) => (
                       <InputField
                         label="Convênio"
-                        placeholder="Inserir o número do convênio"
+                        placeholder="Inserir número do convênio"
                         error={touched.agreement_number && errors.agreement_number ? errors.agreement_number : ''}
                         {...field}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const maskedValue = maskAgreement(e.target.value);
+                          field.onChange({
+                            target: {
+                              name: field.name,
+                              value: maskedValue
+                            }
+                          });
+                        }}
                       />
                     )}
                   </Field>
                   <div>
                     <label className="font-semibold text-black mb-2">CNAB</label>
                     <div className="flex flex-wrap gap-4 mt-2">
-                      {loading ? (
-                        <p className="text-gray-600">Carregando CNABs...</p>
-                      ) : error ? (
-                        <p className="text-red-600">{error}</p>
-                      ) : cnabs.length === 0 ? (
+                      {cnabs.length === 0 ? (
                         <p className="text-gray-600">Nenhum CNAB disponível para este banco.</p>
                       ) : (
                         cnabs.map(cnab => (
@@ -390,8 +395,18 @@ export const FormStep: React.FC<FormStepProps> = ({
                         placeholder="Inserir telefone do gerente da conta bancária"
                         error={touched.manager_cellphone && errors.manager_cellphone ? errors.manager_cellphone : ''}
                         {...field}
-                        type="tel"
-                        maxLength={11}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const maskedValue = maskPhone(e.target.value);
+                          field.onChange({
+                            target: {
+                              name: field.name,
+                              value: maskedValue
+                            }
+                          });
+                        }}
+                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                          field.onBlur(e);
+                        }}
                       />
                     )}
                   </Field>
@@ -425,4 +440,4 @@ export const FormStep: React.FC<FormStepProps> = ({
       </Formik>
     </>
   );
-};
+});

@@ -14,7 +14,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 15000 // Reduzindo para 15 segundos
+  timeout: 15000 
 });
 
 // Função para retry
