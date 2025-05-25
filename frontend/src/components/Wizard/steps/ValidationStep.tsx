@@ -6,6 +6,8 @@ import Button from '../../Button/Button';
 import Modal from '../../Modal/Modal';
 import Confirmation from '../../Modal/Confirmation';
 import { getVanTypes, type VanTypeData, getProducts, type ProductData } from '../../../services/api';
+import { FinnetLetterDisplay } from '../letters/FinnetLetterDisplay';
+import { NexxeraLetterDisplay } from '../letters/NexxeraLetterDisplay';
 
 // Configuração do worker do PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -13,12 +15,16 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 interface BankData {
   id: number;
   name: string;
+  code: string;
   // Add other bank properties as needed
 }
 
 interface CNABData {
   id: number;
-  // Add CNAB properties as needed
+  code: string;
+  name: string;
+  available: boolean;
+  // Add other CNAB properties as needed
 }
 
 interface ValidationStepProps {
@@ -43,22 +49,6 @@ interface LetterDisplayProps {
     productName: string;
   };
 }
-
-const FinnetLetterDisplay: React.FC<LetterDisplayProps> = ({ data }) => {
-  return (
-    <div className="whitespace-pre-wrap text-sm text-gray-800">
-      {data.content}
-    </div>
-  );
-};
-
-const NexxeraLetterDisplay: React.FC<LetterDisplayProps> = ({ data }) => {
-  return (
-    <div className="whitespace-pre-wrap text-sm text-gray-800">
-      {data.content}
-    </div>
-  );
-};
 
 export const ValidationStep = memo(({
   selectedProducts,
@@ -154,6 +144,8 @@ export const ValidationStep = memo(({
       // TODO: Implementar envio de e-mail
       await new Promise((resolve) => setTimeout(resolve, 2000));
       toast.success('Carta enviada com sucesso!');
+      // Aqui você deve implementar a lógica para passar para o CompletionStep
+      // com o número do ticket e link gerados
     } catch (error) {
       console.error('Erro ao enviar carta:', error);
       toast.error('Erro ao enviar a carta. Tente novamente.');
@@ -356,18 +348,18 @@ export const ValidationStep = memo(({
         <Button
           type="button"
           className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
-          onClick={handleGeneratePDF}
+          onClick={() => setIsModalOpen(true)}
           disabled={loadingData || loadingPdf || selectedProducts.length === 0 || selectedVanTypes.length === 0}
         >
           {loadingConfirmAndSend ? 'Enviando...' : 'Confirmar e Enviar Carta'}
         </Button>
 
         <Modal isOpen={isModalOpen} onClose={handleCancel}>
-                <Confirmation
-                    onConfirm={handleConfirm}
-                    onCancel={handleCancel}
-                />
-            </Modal>
+          <Confirmation
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+          />
+        </Modal>
       </div>
     </>
   );
