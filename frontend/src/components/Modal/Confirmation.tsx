@@ -1,7 +1,15 @@
 import React from 'react';
 import Button from "../Button/Button";
 
-function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?", message = "Esta ação é irreversível." }) {
+interface ConfirmationProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+  title?: string;
+  message?: string;
+  loading: boolean;
+}
+
+function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?", message = "Esta ação é irreversível.", loading }: ConfirmationProps) {
     return (
         <div className="flex flex-col items-center text-center">
             <h1 className="text-2xl font-bold mb-4">{title}</h1>
@@ -11,6 +19,7 @@ function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?"
                     type="button"
                     className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
                     onClick={onCancel}
+                    disabled={loading}
                 >
                     Cancelar
                 </Button>
@@ -18,8 +27,9 @@ function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?"
                     type="button"
                     className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
                     onClick={onConfirm}
+                    disabled={loading}
                 >
-                    Confirmar e Enviar Carta
+                    {loading ? 'Enviando...' : 'Confirmar e Enviar Carta'}
                 </Button>
             </div>
         </div>

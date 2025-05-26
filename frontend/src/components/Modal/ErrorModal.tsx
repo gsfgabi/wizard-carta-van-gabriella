@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from "../Button/Button";
 
 interface ErrorModalProps {
   isOpen: boolean;
@@ -13,24 +14,21 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center" style={{ zIndex: 51 }}>
-      <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
-        <div className="text-center">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Ocorreu um erro inesperado
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Pedimos desculpas pelo inconveniente. Estamos cientes do problema e nossa equipe técnica está trabalhando para solucioná-lo o mais rápido possível. Por favor, tente novamente mais tarde.
-          </p>
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleLoginRedirect}
-              className="w-full bg-[#8D44AD] text-white rounded-full px-6 py-2 font-semibold hover:bg-[#7d379c] transition"
-            >
-              Voltar para o Login
-            </button>
-          </div>
-        </div>
+    <div className="flex flex-col items-center text-center">
+      <h1 className="text-2xl font-bold mb-4 text-black">
+        Ocorreu um erro ao carregar os bancos
+      </h1>
+      <p className="text-gray-700 mb-6">
+        Não foi possível carregar as informações dos bancos após várias tentativas. Por favor, volte para a página de login.
+      </p>
+      <div className="w-full flex justify-center mt-6">
+        <Button
+            type="button"
+            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
+            onClick={handleLoginRedirect}
+        >
+            Voltar para o Login
+        </Button>
       </div>
     </div>
   );

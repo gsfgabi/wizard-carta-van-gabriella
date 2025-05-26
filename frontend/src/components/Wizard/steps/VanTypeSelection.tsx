@@ -1,6 +1,7 @@
 import React, { useEffect, useState, memo } from 'react';
 import Button from '../../Button/Button';
 import { getVanTypes, type VanTypeData } from '../../../services/api';
+import VanTypeSelectionSkeleton from '../../Skeleton/VanTypeSelectionSkeleton';
 
 interface VanTypeSelectionProps {
   selectedBank: number | null;
@@ -40,6 +41,10 @@ export const VanTypeSelection = memo(({
         .finally(() => {
           setLoading(false);
         });
+    } else {
+      setVanTypes([]);
+      setLoading(false);
+      setError(null);
     }
   }, [selectedBank, onSelect]);
 
@@ -51,11 +56,7 @@ export const VanTypeSelection = memo(({
   };
 
   if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-gray-600">Carregando tipos de VAN...</p>
-      </div>
-    );
+    return <VanTypeSelectionSkeleton />;
   }
 
   if (error) {
@@ -64,19 +65,24 @@ export const VanTypeSelection = memo(({
         <p className="text-red-600 mb-4">{error}</p>
         <button
           onClick={() => {
-            setLoading(true);
-            setError(null);
-            getVanTypes(selectedBank!.toString())
-              .then((data) => {
-                setVanTypes(data);
-                setError(null);
-              })
-              .catch((error) => {
-                setError('Erro ao carregar os tipos de VAN. Por favor, tente novamente.');
-              })
-              .finally(() => {
-                setLoading(false);
-              });
+            if (selectedBank) {
+              setLoading(true);
+              setError(null);
+              getVanTypes(selectedBank.toString())
+                .then((data) => {
+                  setVanTypes(data);
+                  if (data.length === 1 && data[0].available) {
+                    onSelect([data[0].id.toString()]);
+                  }
+                  setError(null);
+                })
+                .catch((error) => {
+                  setError('Erro ao carregar os tipos de VAN. Por favor, tente novamente.');
+                })
+                .finally(() => {
+                  setLoading(false);
+                });
+            }
           }}
           className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
         >

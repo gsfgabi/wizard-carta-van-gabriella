@@ -10,6 +10,9 @@ import Card from "../Card/Card";
 import Stepper from "../Stepper/StepperSteps";
 import { getBanks, getProducts, getCNABs, getVanTypes, type BankData, type ProductData, type CNABData, type VanTypeData } from "../../services/api";
 import toast from 'react-hot-toast';
+import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton";
+import { ErrorModal } from '../Modal/ErrorModal';
+import Modal from '../Modal/Modal';
 
 export type WizardStep = "bank" | "products" | "form" | "van-type" | "validation" | "completion";
 
@@ -38,6 +41,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [cnabs, setCNABs] = useState<CNABData[]>([]);
   const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [generatedLetterContents, setGeneratedLetterContents] = useState<{ 
     type: string, 
     content: string, 
@@ -50,6 +54,10 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   }[]>([]);
   const [ticketDetails, setTicketDetails] = useState<{ number: string; link: string } | null>(null);
   const [loadingConfirmAndSend, setLoadingConfirmAndSend] = useState(false);
+  
+  const [bankFetchAttempts, setBankFetchAttempts] = useState(0);
+  const [showBankErrorModal, setShowBankErrorModal] = useState(false);
+  const MAX_BANK_FETCH_ATTEMPTS = 3;
 
   useEffect(() => {
     const fetchBanks = async () => {
@@ -58,20 +66,30 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
         setErrorBanks(null);
         const data = await getBanks();
         setBanks(data);
+        setBankFetchAttempts(0);
       } catch (error) {
         console.error('Erro ao buscar bancos:', error);
-        setErrorBanks('Erro ao carregar a lista de bancos. Por favor, tente novamente.');
+        setBankFetchAttempts(prevAttempts => prevAttempts + 1);
+        if (bankFetchAttempts + 1 >= MAX_BANK_FETCH_ATTEMPTS) {
+          setErrorBanks('Não foi possível carregar a lista de bancos após várias tentativas.');
+          setShowBankErrorModal(true);
+        } else {
+          fetchBanks();
+        }
       } finally {
-        setLoadingBanks(false);
+        if (bankFetchAttempts >= MAX_BANK_FETCH_ATTEMPTS || errorBanks === null) {
+           setLoadingBanks(false);
+        }
       }
     };
 
     fetchBanks();
-  }, []);
+  }, [bankFetchAttempts, errorBanks]);
 
   useEffect(() => {
     if (selectedBank) {
       console.log('Iniciando busca de detalhes para o banco:', selectedBank);
+      setLoadingProducts(true);
       const startTime = Date.now();
       Promise.all([
         getProducts(selectedBank.toString()),
@@ -89,11 +107,15 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           const endTime = Date.now();
           console.log('Erro ao carregar detalhes do banco em', endTime - startTime, 'ms', error);
           console.error('Erro ao carregar detalhes do banco:', error);
+        })
+        .finally(() => {
+          setLoadingProducts(false);
         });
     } else {
       setProducts([]);
       setCNABs([]);
       setVanTypes([]);
+      setLoadingProducts(false);
     }
   }, [selectedBank]);
 
@@ -195,7 +217,6 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   };
 
   const handleStartOver = () => {
-    // Resetar estados 
     setCurrentStep("bank");
     setSelectedBank(null);
     setSelectedProducts([]);
@@ -203,6 +224,14 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     setFormData({});
     setGeneratedLetterContents([]);
     setTicketDetails(null);
+    setBankFetchAttempts(0);
+    setShowBankErrorModal(false);
+    setErrorBanks(null);
+  };
+
+  const handleCloseBankErrorModal = () => {
+    setShowBankErrorModal(false);
+    handleStartOver();
   };
 
   const renderStep = () => {
@@ -220,7 +249,9 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           />
         );
       case "products":
-        return (
+        return loadingProducts ? (
+          <ProductSelectionSkeleton />
+        ) : (
           <ProductSelection
             selectedProducts={selectedProducts}
             onSelect={setSelectedProducts}
@@ -290,6 +321,16 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       <Card className="w-full max-w-full sm:max-w-2xl md:max-w-3xl mt-4">
         <div className="px-2 sm:px-6 md:px-8 py-6 sm:py-8">{renderStep()}</div>
       </Card>
+
+      <Modal
+        isOpen={showBankErrorModal}
+        onClose={handleCloseBankErrorModal}
+      >
+        <ErrorModal
+          isOpen={showBankErrorModal}
+          onClose={handleCloseBankErrorModal}
+        />
+      </Modal>
     </div>
   );
 };
