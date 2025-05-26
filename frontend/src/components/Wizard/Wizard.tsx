@@ -56,35 +56,37 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [loadingConfirmAndSend, setLoadingConfirmAndSend] = useState(false);
   
   const [bankFetchAttempts, setBankFetchAttempts] = useState(0);
-  const [showBankErrorModal, setShowBankErrorModal] = useState(false);
+  const [showBankFinalErrorModal, setShowBankFinalErrorModal] = useState(false);
   const MAX_BANK_FETCH_ATTEMPTS = 3;
 
-  useEffect(() => {
-    const fetchBanks = async () => {
-      try {
-        setLoadingBanks(true);
-        setErrorBanks(null);
-        const data = await getBanks();
-        setBanks(data);
-        setBankFetchAttempts(0);
-      } catch (error) {
-        console.error('Erro ao buscar bancos:', error);
-        setBankFetchAttempts(prevAttempts => prevAttempts + 1);
-        if (bankFetchAttempts + 1 >= MAX_BANK_FETCH_ATTEMPTS) {
-          setErrorBanks('Não foi possível carregar a lista de bancos após várias tentativas.');
-          setShowBankErrorModal(true);
-        } else {
-          fetchBanks();
-        }
-      } finally {
-        if (bankFetchAttempts >= MAX_BANK_FETCH_ATTEMPTS || errorBanks === null) {
-           setLoadingBanks(false);
-        }
+  const fetchBanks = async () => {
+    try {
+      setLoadingBanks(true);
+      setErrorBanks(null);
+      const data = await getBanks();
+      setBanks(data);
+      setBankFetchAttempts(0);
+    } catch (error) {
+      console.error('Erro ao buscar bancos:', error);
+      setBankFetchAttempts(prevAttempts => prevAttempts + 1);
+      if (bankFetchAttempts + 1 >= MAX_BANK_FETCH_ATTEMPTS) {
+        setErrorBanks('Não foi possível carregar a lista de bancos após várias tentativas.');
+        setShowBankFinalErrorModal(true);
+      } else {
+        setErrorBanks('Erro ao carregar a lista de bancos. Tentativa ' + (bankFetchAttempts + 1) + ' de ' + MAX_BANK_FETCH_ATTEMPTS + '.');
       }
-    };
+    } finally {
+      if (bankFetchAttempts >= MAX_BANK_FETCH_ATTEMPTS || errorBanks === null) {
+         setLoadingBanks(false);
+      }
+    }
+  };
 
-    fetchBanks();
-  }, [bankFetchAttempts, errorBanks]);
+  useEffect(() => {
+    if(bankFetchAttempts === 0) {
+       fetchBanks();
+    }
+  }, [bankFetchAttempts]);
 
   useEffect(() => {
     if (selectedBank) {
@@ -225,12 +227,12 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     setGeneratedLetterContents([]);
     setTicketDetails(null);
     setBankFetchAttempts(0);
-    setShowBankErrorModal(false);
+    setShowBankFinalErrorModal(false);
     setErrorBanks(null);
   };
 
-  const handleCloseBankErrorModal = () => {
-    setShowBankErrorModal(false);
+  const handleCloseBankFinalErrorModal = () => {
+    setShowBankFinalErrorModal(false);
     handleStartOver();
   };
 
@@ -246,6 +248,8 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             banks={banks}
             loading={loadingBanks}
             error={errorBanks}
+            onRetryFetchBanks={fetchBanks}
+            bankFetchAttempts={bankFetchAttempts}
           />
         );
       case "products":
@@ -323,12 +327,12 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       </Card>
 
       <Modal
-        isOpen={showBankErrorModal}
-        onClose={handleCloseBankErrorModal}
+        isOpen={showBankFinalErrorModal}
+        onClose={handleCloseBankFinalErrorModal}
       >
         <ErrorModal
-          isOpen={showBankErrorModal}
-          onClose={handleCloseBankErrorModal}
+          isOpen={showBankFinalErrorModal}
+          onClose={handleCloseBankFinalErrorModal}
         />
       </Modal>
     </div>

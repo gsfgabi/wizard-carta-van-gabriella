@@ -10,6 +10,7 @@ import { CheckIcon, ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from "@h
 import Button from "../../Button/Button";
 import { getProducts, getCNABs, getVanTypes, type ProductData, type CNABData, type VanTypeData, type BankData } from '../../../services/api';
 import { ErrorModal } from '../../Modal/ErrorModal';
+import BankSelectionSkeleton from '../../Skeleton/BankSelectionSkeleton';
 
 interface BankSelectionProps {
   onSelect: (bankId: number | null) => void;
@@ -19,6 +20,8 @@ interface BankSelectionProps {
   banks: BankData[];
   loading: boolean;
   error: string | null;
+  onRetryFetchBanks: () => void;
+  bankFetchAttempts: number;
 }
 
 export const BankSelection = memo(({
@@ -29,6 +32,8 @@ export const BankSelection = memo(({
   banks,
   loading,
   error,
+  onRetryFetchBanks,
+  bankFetchAttempts,
 }: BankSelectionProps) => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -79,20 +84,35 @@ export const BankSelection = memo(({
     console.log("Banco armazenado:", finalBankSelected);
   }
 
-  return (
-    <div className="w-full max-w-5xl mx-auto px-2">
-      <h2 className="text-2xl font-bold mb-2 text-black text-left">
-        1. Selecionar um Banco (Instituição Bancária)
-      </h2>
-      <p className="text-base text-black mb-6 text-left">
-        Selecione um banco para criar uma nova carta de VAN
-      </p>
-      <div className="mb-12 relative">
-        {error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <p className="text-red-600">{error}</p>
-          </div>
-        ) : (
+  if (loading && !error) {
+    return <BankSelectionSkeleton />;
+  }
+
+  if (error && bankFetchAttempts < 3) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button
+          type="button"
+          className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
+          onClick={onRetryFetchBanks}
+        >
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  if (!loading && !error) {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-2">
+        <h2 className="text-2xl font-bold mb-2 text-black text-left">
+          1. Selecionar um Banco (Instituição Bancária)
+        </h2>
+        <p className="text-base text-black mb-6 text-left">
+          Selecione um banco para criar uma nova carta de VAN
+        </p>
+        <div className="mb-12 relative">
           <Combobox
             value={banks.find((bank) => bank.id === selectedBank) || null}
             onChange={(bank) => {
@@ -123,11 +143,7 @@ export const BankSelection = memo(({
                     )}
                   </ComboboxButton>
                   <ComboboxOptions className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg border border-[#D1B3E0] focus:outline-none sm:text-sm">
-                    {loading ? (
-                      <div key="loading" className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                        Carregando...
-                      </div>
-                    ) : filteredBanks.length === 0 ? (
+                    {filteredBanks.length === 0 ? (
                       <div key="no-results" className="relative cursor-default select-none py-2 px-4 text-gray-700">
                         Banco não localizado
                       </div>
@@ -135,14 +151,14 @@ export const BankSelection = memo(({
                       filteredBanks.map((bank) => (
                         <ComboboxOption
                           key={bank.id}
-                          className={({ active, selected }) =>
+                          className={({ selected }) =>
                             `relative cursor-pointer select-none py-4 pl-12 pr-4 text-lg border-b border-[#ECECEC] last:border-b-0
-                              ${active ? "bg-[#E0D7F3] text-[#8B3DFF] font-semibold" : selected ? "bg-[#f3eaff] text-[#8B3DFF] font-semibold" : "text-gray-900 hover:bg-[#f3eaff]"}
-                              transition-colors duration-150`
+                              ${selected ? "bg-[#f3eaff] text-[#8B3DFF] font-semibold" : "text-gray-900 hover:bg-[#f3eaff]"}
+                              transition-colors duration-150 focus:bg-[#E0D7F3] focus:text-[#8B3DFF] focus:font-semibold`
                           }
                           value={bank}
                         >
-                          {({ selected, active }) => (
+                          {({ selected }) => (
                             <React.Fragment>
                               <span
                                 className={`block truncate ${
@@ -153,9 +169,7 @@ export const BankSelection = memo(({
                               </span>
                               {selected && (
                                 <span
-                                  className={`absolute inset-y-0 left-0 flex items-center pl-4 ${
-                                    active ? "text-white" : "text-[#8B3DFF]"
-                                  }`}
+                                  className={`absolute inset-y-0 left-0 flex items-center pl-4 ${selected ? "text-[#8B3DFF]" : "text-gray-400"}`}
                                 >
                                   <CheckIcon className="h-5 w-5" aria-hidden="true" />
                                 </span>
@@ -170,36 +184,38 @@ export const BankSelection = memo(({
               );
             }}
           </Combobox>
-        )}
-      </div>
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-end">
-        <Button
-          type="button"
-          className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none w-full sm:w-auto"
-          onClick={onBack}
-        >
-          Voltar
-        </Button>
-        <Button
-          type="button"
-          className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50 w-full sm:w-auto"
-          onClick={() => {
-            if (selectedBank) {
-              SaveSelectedBank();
-              onNext();
-            }
-          }}
-          disabled={!selectedBank}
-        >
-          Próximo
-        </Button>
-      </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-end">
+          <Button
+            type="button"
+            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none w-full sm:w-auto"
+            onClick={onBack}
+          >
+            Voltar
+          </Button>
+          <Button
+            type="button"
+            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50 w-full sm:w-auto"
+            onClick={() => {
+              if (selectedBank) {
+                SaveSelectedBank();
+                onNext();
+              }
+            }}
+            disabled={!selectedBank}
+          >
+            Próximo
+          </Button>
+        </div>
 
-      <ErrorModal 
-        isOpen={showErrorModal} 
-        onClose={() => setShowErrorModal(false)} 
-      />
-    </div>
-  );
+        <ErrorModal 
+          isOpen={showErrorModal} 
+          onClose={() => setShowErrorModal(false)} 
+        />
+      </div>
+    );
+  }
+
+  return null;
 });

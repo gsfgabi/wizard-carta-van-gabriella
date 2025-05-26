@@ -4,11 +4,10 @@ const ProductSelectionSkeleton = () => {
   return (
     <div className="w-full h-full px-0 py-0">
       <div className="animate-pulse">
-        {/* Título e descrição */}
+
         <div className="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
         <div className="h-5 bg-gray-300 rounded w-1/2 mb-8"></div>
 
-        {/* Cards de produto (esqueleto) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {[...Array(4)].map((_, index) => (
             <div
