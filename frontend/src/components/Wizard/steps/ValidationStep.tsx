@@ -5,6 +5,19 @@ import toast from 'react-hot-toast';
 // Configuração do worker do PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
+interface BankData {
+  id: number;
+  name: string;
+  code: string;
+}
+
+interface CNABData {
+  id: number;
+  code: string;
+  name: string;
+  available: boolean;
+}
+
 interface ValidationStepProps {
   selectedProducts: string[];
   onBack: () => void;
@@ -41,6 +54,7 @@ export const ValidationStep: React.FC<ValidationStepProps> = ({
       // TODO: Implementar envio de e-mail
       await new Promise((resolve) => setTimeout(resolve, 2000));
       toast.success('Carta enviada com sucesso!');
+   
     } catch (error) {
       console.error('Erro ao enviar carta:', error);
       toast.error('Erro ao enviar a carta. Tente novamente.');
@@ -94,31 +108,74 @@ export const ValidationStep: React.FC<ValidationStepProps> = ({
                   <Page pageNumber={1} width={600} />
                 </Document>
               </div>
+            )}
+          </div>
+        )}
 
-              {selectedProducts.length > 1 && (
-                <div className="flex justify-between">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={handlePreviousProduct}
-                    disabled={currentProductIndex === 0}
-                  >
-                    Anterior
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={handleNextProduct}
-                    disabled={currentProductIndex === selectedProducts.length - 1}
-                  >
-                    Próximo
-                  </button>
-                </div>
+        {/* Botão de Navegação Próximo */}
+        {filteredLetters.length > 1 && (
+          <Button
+            type="button"
+            className="absolute right-0 z-10 p-2 bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] disabled:opacity-50 transition-colors duration-200 -translate-y-1/2 top-1/2"
+            onClick={handleNextLetter}
+            disabled={currentLetterIndex === filteredLetters.length - 1}
+            aria-label="Próxima carta"
+          >
+            <ChevronRightIcon className="h-6 w-6" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
+
+      {/* Se não estiver carregando e não houver erro, exibe as listas de produtos e VANs
+      {!loadingData && !dataError && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-black mb-2">Produtos Selecionados</h3>
+            <div className="space-y-2">
+              {selectedProducts.length === 0 ? (
+                <p className="text-gray-600">Nenhum produto selecionado.</p>
+              ) : (
+                products.length === 0 ? (
+                  <p className="text-gray-600">Carregando produtos selecionados...</p>
+                ) : (
+                  selectedProducts.map((productId) => {
+                    const product = products.find(p => p.id.toString() === productId);
+                    return product ? (
+                      <div key={productId} className="flex items-center">
+                        <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
+                        <span className="text-gray-700">{product.name}</span>
+                      </div>
+                    ) : null;
+                  })
+                )
               )}
             </div>
-          )}
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-black mb-2">Tipos de VAN Selecionados</h3>
+            <div className="space-y-2">
+              {selectedVanTypes.length === 0 ? (
+                <p className="text-gray-600">Nenhum tipo de VAN selecionado.</p>
+              ) : (
+                vanTypes.length === 0 ? (
+                   <p className="text-gray-600">Carregando tipos de VAN selecionados...</p>
+                ) : (
+                  selectedVanTypes.map((vanTypeId) => {
+                    const vanType = vanTypes.find(vt => vt.id.toString() === vanTypeId);
+                    return vanType ? (
+                      <div key={vanTypeId} className="flex items-center">
+                        <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
+                        <span className="text-gray-700">{vanType.type}</span>
+                      </div>
+                    ) : null;
+                  })
+                )
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )} */}
 
       <div className="flex justify-between">
         <button
