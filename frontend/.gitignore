@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 *storybook.log
+.vercel
+
+.env
+.env.local
+.env.*.local

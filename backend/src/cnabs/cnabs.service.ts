@@ -1,26 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCnabDto } from './dto/create-cnab.dto';
-import { UpdateCnabDto } from './dto/update-cnab.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CnabsService {
-  create(createCnabDto: CreateCnabDto) {
-    return 'This action adds a new cnab';
-  }
+  constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all cnabs`;
-  }
+  async findAllByBankId(bankId: number) {
+    const cnabs = await this.prisma.cnabs.findMany({
+      select: {
+        id: true,
+        name: true,
+        banks_cnabs: {
+          where: {
+            id_banks: bankId,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} cnab`;
-  }
-
-  update(id: number, updateCnabDto: UpdateCnabDto) {
-    return `This action updates a #${id} cnab`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} cnab`;
+    return cnabs.map((cnab) => ({
+      id: cnab.id,
+      name: cnab.name,
+      available: cnab.banks_cnabs.length > 0,
+    }));
   }
 }

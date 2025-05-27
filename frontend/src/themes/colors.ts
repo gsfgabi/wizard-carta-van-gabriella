@@ -12,4 +12,5 @@ const colors = {
   error: '#E63946',
 };
 
-export default colors; 
+export default colors;
+

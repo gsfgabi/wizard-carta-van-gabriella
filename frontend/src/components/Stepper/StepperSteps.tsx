@@ -1,4 +1,5 @@
 import React from "react";
+import { CheckIcon } from '@heroicons/react/24/outline';
 
 interface StepperProps {
   currentStep: number;
@@ -9,8 +10,8 @@ interface StepperProps {
 const Stepper: React.FC<StepperProps> = ({ currentStep, steps }) => (
   <nav className="w-full flex justify-center items-center py-4 sm:py-6 md:py-8 bg-transparent overflow-x-auto">
     <div className="relative w-full max-w-full sm:max-w-3xl md:max-w-5xl mx-auto flex flex-col items-center min-w-0">
-      <div className="absolute top-4 left-0 right-0 h-0.5 bg-white opacity-50 z-0 rounded-full" />
-      <ol className="relative flex w-full justify-between z-10 gap-2 sm:gap-0">
+
+      <ol className="relative flex w-full items-baseline z-10 min-w-[320px] xs:min-w-[400px] sm:min-w-0">
         {steps.map((step, idx) => (
           <React.Fragment key={step}>
             {idx !== 0 && (
