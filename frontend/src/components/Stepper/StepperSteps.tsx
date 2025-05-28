@@ -4,6 +4,7 @@ import { CheckIcon } from '@heroicons/react/24/outline';
 interface StepperProps {
   currentStep: number;
   steps: string[];
+  onStepClick: (stepIndex: number) => void;
 }
 
 const Stepper: React.FC<StepperProps> = ({ currentStep, steps }) => (

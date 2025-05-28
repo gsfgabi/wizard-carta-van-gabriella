@@ -110,16 +110,11 @@ export const NexxeraLetterDisplay = memo(({
            <p className="text-gray-700">Nenhum produto selecionado.</p>
         ) : (
            <table className="w-full text-left border-collapse border border-gray-400 print:border-gray-800">
-             <thead>
-               <tr className="bg-gray-100 print:bg-gray-300 print:text-gray-900">
+             <thead><tr className="bg-gray-100 print:bg-gray-300 print:text-gray-900">
                  <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th>
                  <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th> {/* Coluna duplicada conforme template */}
                  <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th> {/* Coluna duplicada conforme template */}
-               </tr>
-             </thead>
-             <tbody>
-               <tr>
-                 
+               </tr></thead><tbody><tr>
                  {productInfo.slice(0, 3).map((product, prodIndex) => (
                    <td key={prodIndex} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[{product.name.toUpperCase()}]</td>
                  ))}
@@ -172,36 +167,33 @@ export const NexxeraLetterDisplay = memo(({
         <p className="font-semibold mb-6 text-gray-900 print:mb-4">Atenciosamente,</p>
 
         <table className="border border-gray-400 print:border-gray-800 inline-block text-left text-gray-800 print:text-gray-900 text-sm leading-normal border-collapse w-full"> {/* Alterado w-auto para w-full */}
-          <tbody>
-            <tr>
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">RAZÃO SOCIAL:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{razaoSocialContratante}</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">CNPJ:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{cnpjContratante}</td> {/* Ajustado padding */}
-            </tr>
-            <tr>
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">NOME:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{nomeRespEmpresa}</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">CARGO:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{cargoRespEmpresa}</td> {/* Ajustado padding */}
-            </tr>
-            <tr>
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">TELEFONE:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{telefoneEmpresa}</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">E-MAIL:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{emailRespEmpresa}</td> {/* Ajustado padding */}
-            </tr>
-            <tr>
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">RESPONSÁVEL:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{respTecnospeedNome}</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">E-MAIL RESP TEC:</td> {/* Ajustado padding */}
-              <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{respTecnospeedEmail}</td> {/* Ajustado padding */}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-       
+          <tbody><tr>
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">RAZÃO SOCIAL:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{razaoSocialContratante}</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">CNPJ:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{cnpjContratante}</td> {/* Ajustado padding */}
+          </tr>
+          <tr>
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">NOME:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{nomeRespEmpresa}</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">CARGO:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{cargoRespEmpresa}</td> {/* Ajustado padding */}
+          </tr>
+          <tr>
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">TELEFONE:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{telefoneEmpresa}</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">E-MAIL:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{emailRespEmpresa}</td> {/* Ajustado padding */}
+          </tr>
+          <tr>
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">RESPONSÁVEL:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 pr-4">{respTecnospeedNome}</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2 font-bold">E-MAIL RESP TEC:</td> {/* Ajustado padding */}
+            <td className="border border-gray-400 print:border-gray-800 py-1 px-2">{respTecnospeedEmail}</td> {/* Ajustado padding */}
+          </tr>
+        </tbody>
+      </table>
+    </div>
     </div>
   );
 }); 
