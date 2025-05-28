@@ -25,7 +25,7 @@ import {
   ChevronUpIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
-import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton"; // Added from second file
+import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton"; 
 
 export type WizardStep =
   | "bank"
@@ -412,7 +412,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             onSelect={setSelectedBank}
             selectedBank={selectedBank}
             onNext={() => handleNext(stepName)}
-            onBack={() => handleBack()} // Changed to handleBack()
+            onBack={() => handleBack()} 
             banks={banks}
             loading={loadingBanks}
             error={errorBanks}
@@ -428,7 +428,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             selectedProducts={selectedProducts}
             onSelect={setSelectedProducts}
             onNext={() => handleNext(stepName)}
-            onBack={() => handleBack()} // Changed to handleBack()
+            onBack={() => handleBack()} 
             selectedBank={selectedBank}
             products={products}
           />
@@ -439,7 +439,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             formData={formData}
             onUpdate={setFormData}
             onNext={() => handleNext(stepName)}
-            onBack={() => handleBack()} // Changed to handleBack()
+            onBack={() => handleBack()} 
             selectedBank={selectedBank}
             cnabs={cnabs}
             banks={banks}
@@ -456,7 +456,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             onNext={(vanTypesSelected) =>
               handleGenerateLetterAndNext(vanTypesSelected, stepName)
             }
-            onBack={() => handleBack()} // Changed to handleBack()
+            onBack={() => handleBack()} 
           />
         );
       case "validation":
@@ -464,7 +464,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           <ValidationStep
             selectedProducts={selectedProducts}
             selectedVanTypes={selectedVanTypes}
-            onBack={() => handleBack()} // Changed to handleBack()
+            onBack={() => handleBack()} 
             selectedBank={selectedBank}
             generatedLetterContents={generatedLetterContents}
             onConfirmAndSend={handleConfirmAndSend}
@@ -510,7 +510,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           const isExpanded = expandedStep === stepName;
 
           if (!isCompleted && !isCurrent && currentStepIndex < index)
-            return null; // Only show steps that are current or completed, or next if current
+            return null; 
 
           return (
             <Card

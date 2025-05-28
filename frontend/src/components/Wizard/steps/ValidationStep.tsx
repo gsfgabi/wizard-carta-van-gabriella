@@ -116,7 +116,6 @@ export const ValidationStep = memo(
           .then(([vanTypesData, productsData]) => {
             setVanTypes(vanTypesData);
             setProducts(productsData);
-            // Seleciona o primeiro produto por padrão (agora considera selectedProducts)
             if (selectedProducts.length > 0 && productsData.length > 0) {
               const firstSelectedProduct = productsData.find(
                 (p) => p.id.toString() === selectedProducts[0]
@@ -124,11 +123,9 @@ export const ValidationStep = memo(
               if (firstSelectedProduct) {
                 setSelectedProduct(firstSelectedProduct.id.toString());
               } else if (productsData.length > 0) {
-                // Fallback: se o primeiro selectedProduct não for encontrado nos dados carregados, use o primeiro dos dados carregados
                 setSelectedProduct(productsData[0].id.toString());
               }
             } else if (productsData.length > 0) {
-              // Se não há produtos selecionados na etapa anterior, mas há produtos carregados, use o primeiro dos carregados
               setSelectedProduct(productsData[0].id.toString());
             }
           })
@@ -145,7 +142,7 @@ export const ValidationStep = memo(
         setVanTypes([]);
         setProducts([]);
         setLoadingData(false);
-        setDataError(null); // Clear error if no bank is selected
+        setDataError(null);
       }
     }, [selectedBank, selectedProducts]);
 
@@ -172,8 +169,6 @@ export const ValidationStep = memo(
         // TODO: Implementar envio de e-mail
         await new Promise((resolve) => setTimeout(resolve, 2000));
         toast.success("Carta enviada com sucesso!");
-        // Aqui você deve implementar a lógica para passar para o CompletionStep
-        // com o número do ticket e link gerados
       } catch (error) {
         console.error("Erro ao enviar carta:", error);
         toast.error("Erro ao enviar a carta. Tente novamente.");
@@ -196,12 +191,10 @@ export const ValidationStep = memo(
 
     const currentLetter = filteredLetters[currentLetterIndex];
 
-    // Renderiza o esqueleto se estiver carregando dados e não houver erro
     if (loadingData && !dataError) {
       return <ValidationStepSkeleton />;
     }
 
-    // Renderiza mensagem de erro se houver erro e não estiver carregando
     if (dataError && !loadingData) {
       return (
         <div className="w-full h-full flex flex-col items-center justify-center">
@@ -241,7 +234,6 @@ export const ValidationStep = memo(
       );
     }
 
-    // Renderiza o conteúdo normal se não estiver carregando e não houver erro
     return (
       <>
         <h2 className="text-2xl font-semibold text-black mb-1">
