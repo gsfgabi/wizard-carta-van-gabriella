@@ -30,7 +30,7 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, steps, onStepClick }) =>
               label={step}
               index={idx}
               currentStep={currentStep}
-              onClick={onStepClick}
+              onClick={onStepClick} /* Função desativada */
             />
           </React.Fragment>
         ))}

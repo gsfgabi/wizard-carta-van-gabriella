@@ -4,10 +4,11 @@ interface StepItemProps {
   label: string;
   index: number;
   currentStep: number;
-  onClick?: (index: number) => void; //Navegação por clique (podemos implementar ativação de modal)
+  onClick?: (index: number) => void; // Navegação por clique caso reverta para botões
 }
 
-const StepItem: React.FC<StepItemProps> = ({ label, index, currentStep, onClick }) => {
+//Partes que envolvem a função de clicar convertidas para comentários:
+const StepItem: React.FC<StepItemProps> = ({ label, index, currentStep /*, onClick*/ }) => {
   // Condições de estado das etapas
   const isCompleted = index < currentStep;
   const isActive = index === currentStep;
@@ -39,18 +40,20 @@ const StepItem: React.FC<StepItemProps> = ({ label, index, currentStep, onClick 
 
   return (
     <li className="min-w-[5rem] max-w-[8rem] w-full px-1 flex-shrink-0">
-      {/* Botão da etapa */}
-      <button
-        type="button"
-        onClick={() => isClickable && onClick?.(index)}
-        disabled={!isClickable}
+      {/* Para ativar o botão, transforme div para button e restaure os comentários */}
+      <div
+        /* type="button" */
+        /* onClick={() => isClickable && onClick?.(index)} */
+        /* disabled={!isClickable} */
         className={buttonClass}
         style={{ userSelect: "none" }}
       >
         {/* Círculo da etapa */}
         <div className={circleClass} style={{ lineHeight: 1 }}>
           {isCompleted ? (
-            <span className="text-[#8D44AD] text-base sm:text-lg relative top-[1px]">&#10003;</span>
+            <span className="text-[#8D44AD] text-base sm:text-lg relative top-[1px]">
+              &#10003;
+            </span>
           ) : (
             <span className="text-base sm:text-lg relative top-[1px]">{index + 1}</span>
           )}
@@ -69,7 +72,7 @@ const StepItem: React.FC<StepItemProps> = ({ label, index, currentStep, onClick 
         >
           {label}
         </span>
-      </button>
+      </div>
     </li>
   );
 };
