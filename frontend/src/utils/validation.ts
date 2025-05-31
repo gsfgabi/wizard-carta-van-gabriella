@@ -60,11 +60,21 @@ export const formValidationSchema = Yup.object().shape({
     .required('CNPJ é obrigatório')
     .matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, 'CNPJ inválido'),
   corporate_name: Yup.string().required('Razão Social é obrigatória'),
-  responsible_person_name: Yup.string().required('Nome do Responsável é obrigatório'),
-  responsible_person_position: Yup.string().required('Cargo do Responsável é obrigatório'),
+  responsible_person_name: Yup.string().required('Nome do responsável é obrigatório'),
+  responsible_person_position: Yup.string().required('Cargo do responsável é obrigatório'),
   responsible_person_cellphone: Yup.string()
     .required('Telefone é obrigatório')
-    .matches(/^\(\d{2}\) \d{5}-\d{4}$/, 'Telefone inválido - Use o formato (DDD) 9XXXX-XXXX'),
+    .max(15, 'Telefone deve ter no máximo 15 caracteres')
+    // Validação do telefone com teste personalizado
+    .test(
+      'valid-cellphone',
+      'Telefone inválido - Use um número celular com DDD, ex: (44) 9XXXX-XXXX',
+      (value) => {
+        if (!value) return false; // Se não houver valor, validação falha
+        const cleaned = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+        return validatePhone(cleaned); // Verifica se o telefone limpo é aceito por validatePhone
+      }
+    ),
   responsible_person_email: Yup.string()
     .email('E-mail inválido')
     .required('E-mail é obrigatório'),
@@ -72,12 +82,13 @@ export const formValidationSchema = Yup.object().shape({
     .required('Agência é obrigatória')
     .matches(/^\d{4}$/, 'Agência deve conter 4 dígitos'),
   branch_dv: Yup.string()
+    .required('DV da agência é obrigatório')
     .matches(/^\d{1,2}$/, 'DV da agência deve conter 1 ou 2 dígitos'),
   account_number: Yup.string()
     .required('Conta é obrigatória')
     .matches(/^\d{6}$/, 'Conta deve conter 6 dígitos'),
   account_dv: Yup.string()
-    .required('DV da Conta é obrigatório')
+    .required('DV da conta é obrigatório')
     .matches(/^\d{1,2}$/, 'DV da conta deve conter 1 ou 2 dígitos'),
   agreement_number: Yup.string()
     .required('Convênio é obrigatório')
@@ -85,8 +96,18 @@ export const formValidationSchema = Yup.object().shape({
   cnab: Yup.string().required('CNAB é obrigatório'),
   manager_name: Yup.string().required('Nome do Gerente é obrigatório'),
   manager_cellphone: Yup.string()
-    .required('Telefone do Gerente é obrigatório')
-    .matches(/^\(\d{2}\) \d{5}-\d{4}$/, 'Telefone inválido - Use o formato (DDD) 9XXXX-XXXX'),
+    .required('Telefone é obrigatório')
+    .max(15, 'Telefone deve ter no máximo 15 caracteres')
+    // Validação do telefone com teste personalizado
+    .test(
+      'valid-cellphone',
+      'Telefone inválido - Use um número celular com DDD, ex: (44) 9XXXX-XXXX',
+      (value) => {
+        if (!value) return false; // Se não houver valor, validação falha
+        const cleaned = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+        return validatePhone(cleaned); // Verifica se o telefone limpo é aceito por validatePhone
+      }
+    ),
   manager_email: Yup.string()
     .email('E-mail inválido')
     .required('E-mail do Gerente é obrigatório'),

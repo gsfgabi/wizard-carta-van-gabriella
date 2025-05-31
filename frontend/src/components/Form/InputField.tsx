@@ -30,7 +30,9 @@ const InputField: React.FC<InputFieldProps> = ({ label, error, className = '', .
       `}
       {...props}
     />
-    {error && <span className="text-red-500 text-xs">{error}</span>}
+    <span className={`block text-xs h-4 ${error ? 'text-red-500' : 'text-transparent'}`}>
+      {error || '   '} {/* caractere invisível para ocupar espaço reservado para erros mesmo que não haja um*/}
+    </span>
   </div>
 );
 
