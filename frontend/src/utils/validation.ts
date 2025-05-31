@@ -64,15 +64,30 @@ export const formValidationSchema = Yup.object().shape({
   responsible_person_position: Yup.string().required('Cargo do responsável é obrigatório'),
   responsible_person_cellphone: Yup.string()
     .required('Telefone é obrigatório')
+    .min(10, 'Telefone deve ter no mínimo 10 caracteres')
     .max(15, 'Telefone deve ter no máximo 15 caracteres')
-    // Validação do telefone com teste personalizado
     .test(
       'valid-cellphone',
-      'Telefone inválido - Use um número celular com DDD, ex: (44) 9XXXX-XXXX',
-      (value) => {
-        if (!value) return false; // Se não houver valor, validação falha
+      'Telefone inválido',
+      function (value) {
+        if (!value) return this.createError({ message: 'Telefone é obrigatório' });
+
         const cleaned = value.replace(/\D/g, ''); // Remove caracteres não numéricos
-        return validatePhone(cleaned); // Verifica se o telefone limpo é aceito por validatePhone
+
+        //Caso seja fixo
+        if (cleaned.length <= 10) {
+          return this.createError({ message: 'Telefone fixo inválido -  Número deve possuir DDD, seguido de início entre 2 e 5' });
+        }
+        //Caso seja móvel
+        if (cleaned.length >= 11) {
+          return this.createError({ message: 'Telefone móvel inválido - Número deve possuir DDD, seguido de início com número 9' });
+        }
+        // Verifica se o telefone limpo é aceito por validatePhone
+        if (!validatePhone(cleaned)) {
+          return this.createError({ message: 'Telefone inválido - Use um número com DDD, ex: (44) 9XXXX-XXXX' });
+        }
+
+        return true;
       }
     ),
   responsible_person_email: Yup.string()
@@ -97,20 +112,35 @@ export const formValidationSchema = Yup.object().shape({
   manager_name: Yup.string().required('Nome do Gerente é obrigatório'),
   manager_cellphone: Yup.string()
     .required('Telefone é obrigatório')
+    .min(10, 'Telefone deve ter no mínimo 10 caracteres')
     .max(15, 'Telefone deve ter no máximo 15 caracteres')
-    // Validação do telefone com teste personalizado
     .test(
       'valid-cellphone',
-      'Telefone inválido - Use um número celular com DDD, ex: (44) 9XXXX-XXXX',
-      (value) => {
-        if (!value) return false; // Se não houver valor, validação falha
+      'Telefone inválido',
+      function (value) {
+        if (!value) return this.createError({ message: 'Telefone é obrigatório' });
+
         const cleaned = value.replace(/\D/g, ''); // Remove caracteres não numéricos
-        return validatePhone(cleaned); // Verifica se o telefone limpo é aceito por validatePhone
+
+        //Caso seja fixo
+        if (cleaned.length <= 10) {
+          return this.createError({ message: 'Telefone fixo inválido -  Número deve possuir DDD, seguido de início entre 2 e 5' });
+        }
+        //Caso seja móvel
+        if (cleaned.length >= 11) {
+          return this.createError({ message: 'Telefone móvel inválido - Número deve possuir DDD, seguido de início com número 9' });
+        }
+        // Verifica se o telefone limpo é aceito por validatePhone
+        if (!validatePhone(cleaned)) {
+          return this.createError({ message: 'Telefone inválido - Use um número com DDD, ex: (44) 9XXXX-XXXX' });
+        }
+
+        return true;
       }
     ),
   manager_email: Yup.string()
     .email('E-mail inválido')
-    .required('E-mail do Gerente é obrigatório'),
+    .required('E-mail do gerente é obrigatório'),
   // bank: Yup.string().required('Banco é obrigatório'),
 });
 

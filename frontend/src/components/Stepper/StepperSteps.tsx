@@ -21,7 +21,7 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, steps, onStepClick }) =>
                 className={`self-center flex-1 h-0.5 transition-colors duration-300 ${
                   idx <= currentStep ? 'bg-white opacity-50' : 'bg-white opacity-25'
                 }`}
-                style={{ marginBottom: 60 }}
+                style={{ marginBottom: 50 }}
               />
             )}
 
