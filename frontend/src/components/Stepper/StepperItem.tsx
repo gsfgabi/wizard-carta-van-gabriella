@@ -18,7 +18,7 @@ const StepItem: React.FC<StepItemProps> = ({ label, index, currentStep /*, onCli
   const buttonClass = [
     "flex flex-col items-center gap-1 sm:gap-2 flex-shrink-0",
     "rounded-md transition-colors duration-200",
-    isClickable ? "cursor-pointer hover:bg-white/20" : "cursor-default",
+    // isClickable ? "cursor-pointer hover:bg-white/20" : "cursor-default",
     "w-full max-w-[95px] sm:max-w-[125px]", // largura fixa
   ].join(" ");
 
@@ -28,7 +28,7 @@ const StepItem: React.FC<StepItemProps> = ({ label, index, currentStep /*, onCli
     "transition-all duration-200",
     isCompleted || isActive ? "bg-white border-[#8D44AD]" : "bg-transparent border-white",
     isActive ? "text-[#8D44AD]" : "text-white",
-    isClickable ? "cursor-pointer" : "cursor-default",
+    // isClickable ? "cursor-pointer" : "cursor-default",
   ].join(" ");
 
   // Classe para labels
