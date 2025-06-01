@@ -41,15 +41,13 @@ export function isValidToken(token: string): boolean {
 export const validatePhone = (value: string) => {
   if (!value) return false;
   
-  const numbers = value.replace(/\D/g, '');
-  
   // Telefone fixo (8 dígitos) ou móvel (9 dígitos)
-  if (numbers.length === 10) {
+  if (value.length === 10) {
     // Telefone fixo
-    return /^\d{2}[2-5]\d{7}$/.test(numbers);
-  } else if (numbers.length === 11) {
+    return /^\d{2}[2-5]\d{7}$/.test(value);
+  } else if (value.length === 11) {
     // Telefone móvel
-    return /^\d{2}9\d{8}$/.test(numbers);
+    return /^\d{2}9\d{8}$/.test(value);
   }
   
   return false;
@@ -59,40 +57,50 @@ export const formValidationSchema = Yup.object().shape({
   cnpj: Yup.string()
     .required('CNPJ é obrigatório')
     .matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, 'CNPJ inválido'),
-  corporate_name: Yup.string().required('Razão Social é obrigatória'),
-  responsible_person_name: Yup.string().required('Nome do responsável é obrigatório'),
-  responsible_person_position: Yup.string().required('Cargo do responsável é obrigatório'),
+  corporate_name: Yup.string()
+    .required('Razão Social é obrigatória')
+    .min(10, 'Razão Social deve ter no mínimo 10 digitos'),
+  responsible_person_name: Yup.string()
+    .required('Nome do responsável é obrigatório')
+    .min(9, 'Nome deve ter no mínimo 8 dígitos')
+    .matches(/^\S+\s+\S+/, 'Informe pelo menos nome e sobrenome'),
+  responsible_person_position: Yup.string()
+    .required('Cargo do responsável é obrigatório')
+    .min(5, 'Cargo do responsável deve ter no mínimo 5 digitos'),
   responsible_person_cellphone: Yup.string()
     .required('Telefone é obrigatório')
-    .min(10, 'Telefone deve ter no mínimo 10 caracteres')
-    .max(15, 'Telefone deve ter no máximo 15 caracteres')
+    .min(10, 'Telefone deve conter pelo menos 10 digitos')
+    .max(15, 'Telefone deve conter até 15 digitos')
     .test(
       'valid-cellphone',
       'Telefone inválido',
       function (value) {
         if (!value) return this.createError({ message: 'Telefone é obrigatório' });
 
-        const cleaned = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+        const numbers = value.replace(/\D/g, ''); //Remove tudo que não é número
+        const isValid = validatePhone(numbers); //Valida com a função validatePhone para retornar verdadeiro ou falso
 
-        //Caso seja fixo
-        if (cleaned.length <= 10) {
-          return this.createError({ message: 'Telefone fixo inválido -  Número deve possuir DDD, seguido de início entre 2 e 5' });
-        }
-        //Caso seja móvel
-        if (cleaned.length >= 11) {
-          return this.createError({ message: 'Telefone móvel inválido - Número deve possuir DDD, seguido de início com número 9' });
-        }
-        // Verifica se o telefone limpo é aceito por validatePhone
-        if (!validatePhone(cleaned)) {
-          return this.createError({ message: 'Telefone inválido - Use um número com DDD, ex: (44) 9XXXX-XXXX' });
+        if (!isValid) {
+          if (numbers.length === 10) {
+            // Caso de erro para fixo
+            return this.createError({ message: 'Telefone fixo inválido - Número deve possuir DDD, seguido de início entre 2 e 5' });
+          } else if (numbers.length === 11) {
+            //Caso de erro para móvel
+            return this.createError({ message: 'Telefone móvel inválido - Número deve possuir DDD, seguido de início com número 9' });
+          } else {
+            //Demais casos de erro
+            return this.createError({ message: 'Telefone inválido - Use um número com DDD, ex: (44) 9XXXX-XXXX' });
+          }
         }
 
         return true;
       }
     ),
   responsible_person_email: Yup.string()
-    .email('E-mail inválido')
-    .required('E-mail é obrigatório'),
+    .email('E-mail inválido - Inclua endereço e domínio, ex: tecno@outlook.com')
+    .required('E-mail do gerente é obrigatório')
+    .min(5, 'E-mail deve conter pelo menos 5 digitos')
+    .matches(/@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/, 'E-mail inválido - Inclua endereço e domínio, ex: tecno@outlook.com'),  
   branch_number: Yup.string()
     .required('Agência é obrigatória')
     .matches(/^\d{4}$/, 'Agência deve conter 4 dígitos'),
@@ -108,39 +116,46 @@ export const formValidationSchema = Yup.object().shape({
   agreement_number: Yup.string()
     .required('Convênio é obrigatório')
     .matches(/^\d+$/, 'Convênio deve conter apenas números'),
-  cnab: Yup.string().required('CNAB é obrigatório'),
-  manager_name: Yup.string().required('Nome do Gerente é obrigatório'),
+  cnab: Yup.string()
+    .required('CNAB é obrigatório'),
+  manager_name: Yup.string()
+    .required('Nome do gerente é obrigatório')
+    .min(9, 'Nome deve conter pelo menos 8 dígitos')
+    .matches(/^\S+\s+\S+/, 'Informe pelo menos nome e sobrenome'),
   manager_cellphone: Yup.string()
     .required('Telefone é obrigatório')
-    .min(10, 'Telefone deve ter no mínimo 10 caracteres')
-    .max(15, 'Telefone deve ter no máximo 15 caracteres')
+    .min(10, 'Telefone deve conter pelo menos 10 digitos')
+    .max(15, 'Telefone deve conter até 15 digitos')
     .test(
       'valid-cellphone',
       'Telefone inválido',
       function (value) {
         if (!value) return this.createError({ message: 'Telefone é obrigatório' });
 
-        const cleaned = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+        const numbers = value.replace(/\D/g, ''); //Remove tudo que não é número
+        const isValid = validatePhone(numbers); //Valida com a função validatePhone para retornar verdadeiro ou falso
 
-        //Caso seja fixo
-        if (cleaned.length <= 10) {
-          return this.createError({ message: 'Telefone fixo inválido -  Número deve possuir DDD, seguido de início entre 2 e 5' });
-        }
-        //Caso seja móvel
-        if (cleaned.length >= 11) {
-          return this.createError({ message: 'Telefone móvel inválido - Número deve possuir DDD, seguido de início com número 9' });
-        }
-        // Verifica se o telefone limpo é aceito por validatePhone
-        if (!validatePhone(cleaned)) {
-          return this.createError({ message: 'Telefone inválido - Use um número com DDD, ex: (44) 9XXXX-XXXX' });
+        if (!isValid) {
+          if (numbers.length === 10) {
+            // Caso de erro para fixo
+            return this.createError({ message: 'Telefone fixo inválido - Número deve possuir DDD, seguido de início entre 2 e 5' });
+          } else if (numbers.length === 11) {
+            //Caso de erro para móvel
+            return this.createError({ message: 'Telefone móvel inválido - Número deve possuir DDD, seguido de início com número 9' });
+          } else {
+            //Demais casos de erro
+            return this.createError({ message: 'Telefone inválido - Use um número com DDD, ex: (44) 9XXXX-XXXX' });
+          }
         }
 
         return true;
       }
     ),
   manager_email: Yup.string()
-    .email('E-mail inválido')
-    .required('E-mail do gerente é obrigatório'),
+    .email('E-mail inválido - Inclua endereço e domínio, ex: tecno@outlook.com')
+    .required('E-mail do gerente é obrigatório')
+    .min(5, 'E-mail deve conter pelo menos 5 digitos')
+    .matches(/@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/, 'E-mail inválido - Inclua endereço e domínio, ex: tecno@outlook.com'),
   // bank: Yup.string().required('Banco é obrigatório'),
 });
 

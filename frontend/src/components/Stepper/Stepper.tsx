@@ -1,9 +1,6 @@
 import React from "react";
 
-/**
- * Componente apenas visual do stepper
- * @param steps - array com nome de cada etapa
- */
+//Componente apenas visual do stepper para página de introdução 
 const Stepper: React.FC<{ steps: string[] }> = ({ steps }) => {
   const circleSize = 30; //Controla tamanho do círculo
   const lineTop = 15; // Altura da linha em relação ao topo do container

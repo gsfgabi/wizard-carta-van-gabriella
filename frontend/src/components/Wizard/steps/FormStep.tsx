@@ -133,6 +133,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* CNPJ */}
                   <Field name="cnpj">
                     {({ field }: any) => (
                       <InputField
@@ -172,6 +174,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* NOME DO RESPONSÁVEL */}
                   <Field name="responsible_person_name">
                     {({ field }: any) => (
                       <InputField
@@ -182,6 +186,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* EMAIL DO RESPONSÁVEL */}
                   <Field name="responsible_person_email">
                     {({ field }: any) => (
                       <InputField
@@ -193,6 +199,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* TELEFONE DO RESPONSÁVEL */}
                   <Field name="responsible_person_cellphone">
                     {({ field }: any) => (
                       <InputField
@@ -318,7 +326,7 @@ export const FormStep = memo(({
                   </div>
                 </div>
 
-
+                {/* CONVÊNIO */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <Field name="agreement_number">
                     {({ field }: any) => (
@@ -338,6 +346,8 @@ export const FormStep = memo(({
                         }}
                       />
                     )}
+                    
+                    {/* CNAB */}
                   </Field>
                   <div>
                     <label className="font-semibold text-black mb-2">CNAB</label>
@@ -387,6 +397,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* EMAIL DO GERENTE */}
                   <Field name="manager_email">
                     {({ field }: any) => (
                       <InputField
@@ -398,6 +410,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* TELEFONE DO GERENTE */}
                   <Field name="manager_cellphone">
                     {({ field }: any) => (
                       <InputField
@@ -441,7 +455,7 @@ export const FormStep = memo(({
                     console.log('Erros atuais:', errors);
                   }}
                 >
-                  Revisar
+                  Próximo
                 </Button>
               </div>
             </Form>
