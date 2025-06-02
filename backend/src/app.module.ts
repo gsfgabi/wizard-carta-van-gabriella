@@ -13,14 +13,13 @@ import { ReportSubmissionsModule } from './report-submissions/report-submissions
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { ZapierModule } from './zapier/zapier.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: 
   [ConfigModule.forRoot({
     isGlobal: true,
   }),
-  AuthModule,
+  FormsModule,
   BanksModule, 
   ProductsModule, 
   CnabsModule, 

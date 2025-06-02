@@ -1,6 +1,13 @@
-import { IsNotEmpty, IsEmail, IsNumberString, Length } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsEmail,
+  IsNumberString,
+  Length,
+  IsArray,
+  IsInt,
+} from 'class-validator';
 
-export class CreateAuthorizationLettersDto {
+export class CreateFormAuthorizationLettersDto {
   @IsNumberString()
   @Length(14, 14)
   cnpj: string;
@@ -47,4 +54,12 @@ export class CreateAuthorizationLettersDto {
 
   @IsNumberString()
   id_cnabs: string;
+
+  @IsArray()
+  @IsInt({ each: true })
+  id_products: number[];
+
+  @IsArray()
+  @IsInt({ each: true })
+  id_van_types: number[];
 }
