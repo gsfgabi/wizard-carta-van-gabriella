@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GeneratePdfsDto } from './dto/generate-pdfs';
-import { generatePdfBufferNexxera } from '../utils/pdf-models/nexxera-model';
-import { generatePdfBufferFinnet } from '../utils/pdf-models/finnet-model';
+import { generatePdfBufferNexxera } from './pdf-models/nexxera-model';
+import { generatePdfBufferFinnet } from './pdf-models/finnet-model';
 import * as JSZip from 'jszip';
 import { Buffer } from 'buffer';
 

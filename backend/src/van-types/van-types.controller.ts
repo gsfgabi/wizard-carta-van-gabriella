@@ -8,10 +8,10 @@ import { VanTypesDto } from './dto/select-van-types.dto';
 export class VanTypesController {
   constructor(private readonly vanTypesService: VanTypesService) {}
 
-  @Get(':id')
+  @Get()
   @ApiOkResponse({ type: [VanTypesDto] })
 
-  findAllByBankId(@Param('id', ParseIntPipe) id: number) {
-    return this.vanTypesService.findAllByBankId(id);
+  findAllByBankId() {
+    return this.vanTypesService.findAllVanTypes();
   }
 }

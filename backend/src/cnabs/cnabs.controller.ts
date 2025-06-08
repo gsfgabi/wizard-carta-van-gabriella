@@ -8,9 +8,9 @@ import { CnabsDto } from './dto/select-cnabs.dto';
 export class CnabsController {
   constructor(private readonly cnabsService: CnabsService) {}
 
-  @Get(':id')
+  @Get()
   @ApiOkResponse({ type: [CnabsDto] })
-  findAllByBankId(@Param('id', ParseIntPipe) id: number) {
-    return this.cnabsService.findAllByBankId(id);
+  findAllByBankId(){
+    return this.cnabsService.findAllCnabs();
   }
 }

@@ -5,7 +5,26 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BanksService {
   constructor(private prisma: PrismaService) {}
   
-  findAll() {
+  //Retorna todos os bancos
+  findAllBanks() {
     return this.prisma.banks.findMany();
+  }
+
+  //Retorna informações do banco pelo id
+  findBankDetailsById(bankId: number) {
+    return this.prisma.banks.findUnique({
+      where: { id: bankId },
+      include: {
+        banks_cnabs: {
+          select: { id: true },
+        },
+        banks_products: {
+          select: { id: true },
+        },
+        banks_van_types: {
+          select: { id: true },
+        },
+      },
+    });
   }
 }
