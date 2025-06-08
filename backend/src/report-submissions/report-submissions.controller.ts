@@ -2,7 +2,7 @@ import { Controller, Post, Body, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { ReportSubmissionsService } from './report-submissions.service';
 import { EmailService } from 'src/email/email.service';
-import { GeneratePdfsDto } from 'src/generate-pdf/dto/generate-pdfs';
+import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
 import { ZapierService } from 'src/zapier/zapier.service';
 import * as JSZip from 'jszip';
 
@@ -22,7 +22,6 @@ export class ReportSubmissionsController {
     try {
       const zipBuffer = await this.reportSubmissionsService.generateReportsWithMoreLogic(generatePdfsDto);
   
-      // Envia e-mail com ZIP
       await this.emailService.sendReportEmail(
         'kethellinpereira2018@outlook.com',
         'Carta de Van Bancária - Arquivo',

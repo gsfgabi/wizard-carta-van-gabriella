@@ -7,7 +7,7 @@ import { CnabsModule } from './cnabs/cnabs.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { VanTypesModule } from './van-types/van-types.module';
-import { GeneratePdfsModule } from './generate-pdf/generate-pdfs.module';
+import { GeneratePdfsModule } from './pdf/generate-pdfs.module';
 import { ReportSubmissionsModule } from './report-submissions/report-submissions.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';

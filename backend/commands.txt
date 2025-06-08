@@ -4,15 +4,15 @@ npm install form-data
 npm install @nestjs/axios
 npm install nodemailer
 npm install dotenv
-npx prisma db pull
 npx prisma generate
+npx prisma db pull
 
 ---------- PDF ----------------
 npm install pdfmake
 npm install class-validator class-transformer
 npm install jszip
 
----------  DOCKER ----------------
+---------  DOCKER / NÃO É NECESSÁRIO ----------------
 * Primera vez baixando o código rode o comando;
 * Ele criará a imagem no docker
 docker build -t carta-de-van .
