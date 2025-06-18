@@ -7,7 +7,7 @@ import {
   IsInt,
 } from 'class-validator';
 
-export class CreateFormAuthorizationLettersDto {
+export class CreateAuthorizationLettersDto {
   @IsNumberString()
   @Length(14, 14)
   cnpj: string;

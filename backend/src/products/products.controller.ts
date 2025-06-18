@@ -8,10 +8,10 @@ import { ProductsDto } from './dto/select-products.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Get(':id')
+  @Get()
   @ApiOkResponse({ type: [ProductsDto] })
 
-  findAllByBankId(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.findAllByBankId(id);
+  findAllProducts() {
+    return this.productsService.findAllProducts();
   }
 }

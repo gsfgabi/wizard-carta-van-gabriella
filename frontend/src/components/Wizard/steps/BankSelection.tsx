@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
   Combobox,
   ComboboxInput,
@@ -7,55 +7,41 @@ import {
   ComboboxOption,
 } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
-import Button from "../../Button/Button"; // ajuste o caminho se necessário
-import { getBanks, getProducts, getCNABs, getVanTypes, type ProductData, type CNABData, type VanTypeData } from '../../../services/api';
+import Button from "../../Button/Button";
+import { getProducts, getCNABs, getVanTypes, type ProductData, type CNABData, type VanTypeData, type BankData } from '../../../services/api';
+import { ErrorModal } from '../../Modal/ErrorModal';
+import BankSelectionSkeleton from '../../Skeleton/BankSelectionSkeleton';
 
-// Define Bank
-interface Bank {
-  id: number;
-  code: string;
-  name: string;
-}
-
-// Estados da caixa de seleção
 interface BankSelectionProps {
   onSelect: (bankId: number | null) => void;
   selectedBank: number | null;
   onNext: () => void;
   onBack: () => void;
+  banks: BankData[];
+  loading: boolean;
+  error: string | null;
+  onRetryFetchBanks: () => void;
+  bankFetchAttempts: number;
 }
 
-// Componente de seleção de bancos. Inicialmente fechada e carregando. 
-export const BankSelection: React.FC<BankSelectionProps> = ({
+export const BankSelection = memo(({
   onSelect,
   selectedBank,
   onNext,
   onBack,
-}) => {
-  const [banks, setBanks] = useState<Bank[]>([]);
+  banks,
+  loading,
+  error,
+  onRetryFetchBanks,
+  bankFetchAttempts,
+}: BankSelectionProps) => {
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState<ProductData[]>([]);
   const [cnabs, setCNABs] = useState<CNABData[]>([]);
   const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    getBanks()
-      .then((data) => {
-        setBanks(data);
-        setError(null);
-      })
-      .catch((error) => {
-        console.error('Erro ao buscar bancos:', error);
-        setError(error.message || 'Erro ao carregar a lista de bancos. Por favor, tente novamente.');
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
     if (selectedBank) {
@@ -83,7 +69,6 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
     }
   }, [selectedBank]);
 
-  // Função de filtrar bancos por texto
   const filteredBanks =
     query === ""
       ? banks
@@ -93,46 +78,41 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
             .includes(query.toLowerCase())
         );
 
-  // Salvar banco selecionado (executar ao avançar etapa)
   function SaveSelectedBank() {
     const finalBankSelected = banks.find(bank => bank.id === selectedBank);
     localStorage.setItem('selectedBank', JSON.stringify(finalBankSelected));
     console.log("Banco armazenado:", finalBankSelected);
   }
 
-  // Corpo da página
-  return (
-    <div className="w-full max-w-5xl mx-auto px-2">
-      <h2 className="text-2xl font-bold mb-2 text-black text-left">
-        1. Selecionar um Banco (Instituição Bancária)
-      </h2>
-      <p className="text-base text-black mb-6 text-left">
-        Selecione um banco para criar uma nova carta de VAN
-      </p>
-      <div className="mb-12 relative">
-        {error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <p className="text-red-600">{error}</p>
-            <button
-              onClick={() => {
-                setLoading(true);
-                setError(null);
-                getBanks()
-                  .then((data) => {
-                    setBanks(data);
-                    setError(null);
-                  })
-                  .catch((error) => {
-                    setError(error.message || 'Erro ao carregar a lista de bancos. Por favor, tente novamente.');
-                  })
-                  .finally(() => setLoading(false));
-              }}
-              className="mt-2 text-red-600 hover:text-red-700 font-medium"
-            >
-              Tentar novamente
-            </button>
-          </div>
-        ) : (
+  if (loading && !error) {
+    return <BankSelectionSkeleton />;
+  }
+
+  if (error && bankFetchAttempts < 3) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button
+          type="button"
+          className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
+          onClick={onRetryFetchBanks}
+        >
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  if (!loading && !error) {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-2">
+        <h2 className="text-2xl font-bold mb-2 text-black text-left">
+          1. Selecionar um Banco (Instituição Bancária)
+        </h2>
+        <p className="text-base text-black mb-6 text-left">
+          Selecione um banco para criar uma nova carta de VAN
+        </p>
+        <div className="mb-12 relative">
           <Combobox
             value={banks.find((bank) => bank.id === selectedBank) || null}
             onChange={(bank) => {
@@ -150,7 +130,7 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                   <ComboboxInput
                     className="w-full border border-[#E0E0E0] rounded-lg py-2 px-3 xs:py-3 xs:px-4 sm:py-4 sm:px-5 pr-12 text-gray-900 bg-white focus:ring-2 focus:ring-[#D1B3E0] focus:border-[#D1B3E0] focus:outline-none transition placeholder:text-gray-400 shadow-md text-base"
                     onChange={(event) => setQuery(event.target.value)}
-                    displayValue={(bank: Bank) =>
+                    displayValue={(bank: BankData) =>
                       bank ? `${bank.code} - ${bank.name}` : ""
                     }
                     placeholder="Selecione um banco"
@@ -163,11 +143,7 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                     )}
                   </ComboboxButton>
                   <ComboboxOptions className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg border border-[#D1B3E0] focus:outline-none sm:text-sm">
-                    {loading ? (
-                      <div key="loading" className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                        Carregando...
-                      </div>
-                    ) : filteredBanks.length === 0 ? (
+                    {filteredBanks.length === 0 ? (
                       <div key="no-results" className="relative cursor-default select-none py-2 px-4 text-gray-700">
                         Banco não localizado
                       </div>
@@ -175,15 +151,15 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                       filteredBanks.map((bank) => (
                         <ComboboxOption
                           key={bank.id}
-                          className={({ active, selected }) =>
+                          className={({ selected }) =>
                             `relative cursor-pointer select-none py-4 pl-12 pr-4 text-lg border-b border-[#ECECEC] last:border-b-0
-                              ${active ? "bg-[#E0D7F3] text-[#8B3DFF] font-semibold" : selected ? "bg-[#f3eaff] text-[#8B3DFF] font-semibold" : "text-gray-900 hover:bg-[#f3eaff]"}
-                              transition-colors duration-150`
+                              ${selected ? "bg-[#f3eaff] text-[#8B3DFF] font-semibold" : "text-gray-900 hover:bg-[#f3eaff]"}
+                              transition-colors duration-150 focus:bg-[#E0D7F3] focus:text-[#8B3DFF] focus:font-semibold`
                           }
                           value={bank}
                         >
-                          {({ selected, active }) => (
-                            <React.Fragment key={`${bank.id}-content`}>
+                          {({ selected }) => (
+                            <React.Fragment>
                               <span
                                 className={`block truncate ${
                                   selected ? "font-semibold" : "font-normal"
@@ -191,16 +167,13 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
                               >
                                 {bank.code} - {bank.name}
                               </span>
-                              {selected ? (
+                              {selected && (
                                 <span
-                                  key={`${bank.id}-check`}
-                                  className={`absolute inset-y-0 left-0 flex items-center pl-4 ${
-                                    active ? "text-white" : "text-[#8B3DFF]"
-                                  }`}
+                                  className={`absolute inset-y-0 left-0 flex items-center pl-4 ${selected ? "text-[#8B3DFF]" : "text-gray-400"}`}
                                 >
                                   <CheckIcon className="h-5 w-5" aria-hidden="true" />
                                 </span>
-                              ) : null}
+                              )}
                             </React.Fragment>
                           )}
                         </ComboboxOption>
@@ -211,32 +184,38 @@ export const BankSelection: React.FC<BankSelectionProps> = ({
               );
             }}
           </Combobox>
-        )}
-      </div>
+        </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-2 sm:gap-4">
-        <Button
-          type="button"
-          className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none w-full sm:w-auto"
-          onClick={onBack}
-        >
-          Voltar
-        </Button>
-        <Button
-          type="button"
-          className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50 w-full sm:w-auto"
-          // Ao clicar "Próximo", chama a função SaveSelectedBank e onNext
-          onClick={() => {
-            if (selectedBank) {
-              SaveSelectedBank();
-              onNext();
-            }
-          }}
-          disabled={!selectedBank}
-        >
-          Próximo
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-end">
+          <Button
+            type="button"
+            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none w-full sm:w-auto"
+            onClick={onBack}
+          >
+            Voltar
+          </Button>
+          <Button
+            type="button"
+            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50 w-full sm:w-auto"
+            onClick={() => {
+              if (selectedBank) {
+                SaveSelectedBank();
+                onNext();
+              }
+            }}
+            disabled={!selectedBank}
+          >
+            Próximo
+          </Button>
+        </div>
+
+        <ErrorModal 
+          isOpen={showErrorModal} 
+          onClose={() => setShowErrorModal(false)} 
+        />
       </div>
-    </div>
-  );
-};
+    );
+  }
+
+  return null;
+});

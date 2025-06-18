@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import { FaMoneyCheckAlt, FaFileAlt, FaExchangeAlt, FaBarcode } from 'react-icons/fa';
 import type { IconType } from 'react-icons';
 import Card from '../../Card/Card';
 import Button from '../../Button/Button';
-import { getProducts, type ProductData } from '../../../services/api';
+import type { ProductData } from '../../../services/api';
 
 interface ProductSelectionProps {
   selectedProducts: string[];
@@ -11,6 +11,7 @@ interface ProductSelectionProps {
   onNext: () => void;
   onBack: () => void;
   selectedBank: number | null;
+  products: ProductData[];
 }
 
 const PRODUCT_ICONS: Record<string, IconType> = {
@@ -20,78 +21,20 @@ const PRODUCT_ICONS: Record<string, IconType> = {
   'Boletos': FaBarcode,
 };
 
-export const ProductSelection: React.FC<ProductSelectionProps> = ({
+export const ProductSelection = memo(({
   selectedProducts,
   onSelect,
   onNext,
   onBack,
   selectedBank,
-}) => {
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (selectedBank) {
-      setLoading(true);
-      setError(null);
-      getProducts(selectedBank.toString())
-        .then((data) => {
-          setProducts(data);
-          setError(null);
-        })
-        .catch((error) => {
-          console.error('Erro ao carregar produtos:', error);
-          setError('Erro ao carregar os produtos. Por favor, tente novamente.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [selectedBank]);
-
+  products,
+}: ProductSelectionProps) => {
   const handleProductToggle = (productId: number) => {
     const newSelection = selectedProducts.includes(productId.toString())
       ? selectedProducts.filter((id) => id !== productId.toString())
       : [...selectedProducts, productId.toString()];
     onSelect(newSelection);
   };
-
-  if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-gray-600">Carregando produtos...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        <p className="text-red-600 mb-4">{error}</p>
-        <button
-          onClick={() => {
-            setLoading(true);
-            setError(null);
-            getProducts(selectedBank!.toString())
-              .then((data) => {
-                setProducts(data);
-                setError(null);
-              })
-              .catch((error) => {
-                setError('Erro ao carregar os produtos. Por favor, tente novamente.');
-              })
-              .finally(() => {
-                setLoading(false);
-              });
-          }}
-          className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
-        >
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
 
   return (
     <Card className="shadow-none p-0">
@@ -163,4 +106,4 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
       </div>
     </Card>
   );
-};
+});

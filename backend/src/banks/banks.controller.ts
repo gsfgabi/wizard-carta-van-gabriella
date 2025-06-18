@@ -1,4 +1,4 @@
-import { Controller, Get} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe} from '@nestjs/common';
 import { BanksService } from './banks.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { BanksDto } from './dto/select-banks.dto';
@@ -11,6 +11,12 @@ export class BanksController {
   @Get()
   @ApiOkResponse({ type: [BanksDto] })
   findAll() {
-    return this.banksService.findAll();
+    return this.banksService.findAllBanks();
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: BanksDto })
+  findBankDetailsById(@Param('id', ParseIntPipe) id: number) {
+    return this.banksService.findBankDetailsById(id);
   }
 }

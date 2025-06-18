@@ -4,26 +4,26 @@ import { AppService } from './app.service';
 import { BanksModule } from './banks/banks.module';
 import { ProductsModule } from './products/products.module';
 import { CnabsModule } from './cnabs/cnabs.module';
-import { FormsModule } from './forms/forms.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { VanTypesModule } from './van-types/van-types.module';
-import { GeneratePdfsModule } from './generate-pdf/generate-pdfs.module';
+import { GeneratePdfsModule } from './pdf/generate-pdfs.module';
 import { ReportSubmissionsModule } from './report-submissions/report-submissions.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { ZapierModule } from './zapier/zapier.module';
+import { AuthorizationModule} from './authorization-letters/authorization-letters.module';
 
 @Module({
   imports: 
   [ConfigModule.forRoot({
     isGlobal: true,
   }),
-  FormsModule,
+
+  AuthorizationModule,
   BanksModule, 
   ProductsModule, 
   CnabsModule, 
-  FormsModule, 
   PrismaModule, 
   VanTypesModule, 
   GeneratePdfsModule, 

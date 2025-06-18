@@ -1,27 +1,27 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { FormsService } from './forms.service';
-import { CreateFormAuthorizationLettersDto } from './dto/create-form-authorization-letters.dto';
+import { AuthorizationService } from './authorization-letters.service';
+import { CreateAuthorizationLettersDto } from './dto/create-authorization-letters.dto';
 import { convertBigIntToString } from 'src/utils/bigint.helper';
 
-@Controller('forms')
-export class FormsController {
-  constructor(private readonly authService: FormsService) {}
+@Controller('authorization')
+export class AuthorizationController {
+  constructor(private readonly authService: AuthorizationService) {}
 
-  @Post('form-authorization-letters')
+  @Post('authorization-letters')
   async saveAuthorizationLetters(
-    @Body() createFormAuthorizationLettersDto: CreateFormAuthorizationLettersDto,
+    @Body() createAuthorizationLettersDto: CreateAuthorizationLettersDto,
   ) {
-    const result = await this.authService.saveAuthorizationLetters(createFormAuthorizationLettersDto);
+    const result = await this.authService.saveAuthorizationLetters(createAuthorizationLettersDto);
     return convertBigIntToString(result);
   }
 
-  @Get('form-authorization-letters')
+  @Get('authorization-letters')
   async getAllAuthorizationLetters() {
     const result = await this.authService.getAllAuthorizationLetters();
     return result.map(convertBigIntToString);
   }
 
-  @Get('form-authorization-letters/:id')
+  @Get('authorization-letters/:id')
   async getAuthorizationLetterById(@Param('id') id: string) {
     const result = await this.authService.getAuthorizationLetterById(Number(id));
     return convertBigIntToString(result);
