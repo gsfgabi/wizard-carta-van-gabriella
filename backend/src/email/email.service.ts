@@ -14,7 +14,12 @@ export class EmailService {
     },
   });
 
-  async sendReportEmail(to: string, subject: string, text: string, attachment: Buffer) {
+  async sendReportEmail(to: string, attachment: Buffer, isZip: boolean) {
+    const subject = 'Carta de Van Bancária - Arquivo';
+    const text = 'Segue em anexo os PDFs gerados para a carta de VAN bancária.';
+
+    const filename = isZip ? 'cartas_de_van.zip' : 'carta_de_van.pdf';
+
     const mailOptions = {
       from: `"Plugboleto" <${process.env.EMAIL_USER}>`,
       to,
@@ -22,7 +27,7 @@ export class EmailService {
       text,
       attachments: [
         {
-          filename: 'cartas_de_van.zip',
+          filename,
           content: attachment,
         },
       ],

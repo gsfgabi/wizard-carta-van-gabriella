@@ -1,38 +1,35 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
-import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Controller, Post, Body, Header } from '@nestjs/common';
+import { ApiTags, ApiOkResponse, ApiProduces } from '@nestjs/swagger';
+import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
 import { generatePdfBufferNexxera } from 'src/pdf/pdf-models/nexxera-model';
 import { generatePdfBufferFinnet } from 'src/pdf/pdf-models/finnet-model';
-import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
 
+@ApiTags('PDF Models')
 @Controller('pdf-models')
 export class PdfModelsController {
 
+  private async generatePdf(
+    dto: GeneratePdfsDto,
+    generator: (dto: GeneratePdfsDto) => Promise<Buffer>,
+  ): Promise<Buffer> {
+    return generator(dto);
+  }
+
   @Post('nexxera')
-  @ApiOkResponse({ type: [GeneratePdfsDto] })
-  async generateNexxeraPdf(@Body() dto: GeneratePdfsDto, @Res() res: Response) {
-    const buffer = await generatePdfBufferNexxera(dto);
-
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename=nexxera-relatorio.pdf',
-      'Content-Length': buffer.length,
-    });
-
-    return res.send(buffer);
+  @ApiOkResponse({ description: "PDF Nexxera" })
+  @ApiProduces('application/pdf')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=nexxera-relatorio.pdf')
+  async generateNexxeraPdf(@Body() dto: GeneratePdfsDto): Promise<Buffer> {
+    return this.generatePdf(dto, generatePdfBufferNexxera);
   }
 
   @Post('finnet')
-  @ApiOkResponse({ type: [GeneratePdfsDto] })
-  async generateFinnetPdf(@Body() dto: GeneratePdfsDto, @Res() res: Response) {
-    const buffer = await generatePdfBufferFinnet(dto);
-
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename=finnet-relatorio.pdf',
-      'Content-Length': buffer.length,
-    });
-
-    return res.send(buffer);
+  @ApiOkResponse({ description: "PDF Finnet" })
+  @ApiProduces('application/pdf')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=finnet-relatorio.pdf')
+  async generateFinnetPdf(@Body() dto: GeneratePdfsDto): Promise<Buffer> {
+    return this.generatePdf(dto, generatePdfBufferFinnet);
   }
 }

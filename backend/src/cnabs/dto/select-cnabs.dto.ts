@@ -6,7 +6,4 @@ export class CnabsDto {
 
   @ApiProperty()
   name: string;
-
-  @ApiProperty()
-  avaliable: string;
 }
