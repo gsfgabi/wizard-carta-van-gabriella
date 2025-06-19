@@ -6,7 +6,4 @@ export class VanTypesDto {
 
   @ApiProperty()
   type: string;
-
-  @ApiProperty()
-  avaliable: string;
 }

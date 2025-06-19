@@ -3,27 +3,27 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs'; 
 import * as FormData from 'form-data';
 import { AxiosResponse } from 'axios';
+import { ZapierSendDataDto } from './dto/zapier-send-data.dto';
 
 @Injectable()
 export class ZapierService {
   constructor(private readonly httpService: HttpService) {}
 
-  async sendDataToZapier(
-    cnpj_SH: string,
-    email: string,
-    arquivo: string,
-    CNPJ_cliente: string,
-    Produto: string,
-  ): Promise<AxiosResponse> {
-    const zapierUrl = process.env.URL_ZAPIER!;
+  async sendDataToZapier(data: ZapierSendDataDto): Promise<AxiosResponse> {
+    const zapierUrl = process.env.URL_ZAPIER;
+
+    if (!zapierUrl) {
+      console.error('A URL do Zapier não está configurada');
+      throw new Error('A URL do Zapier não está configurada');
+    }
 
     const formData = new FormData();
     
-    formData.append('cnpj_SH', cnpj_SH);
-    formData.append('email', email);
-    formData.append('arquivo', arquivo);
-    formData.append('CNPJ_cliente', CNPJ_cliente);
-    formData.append('Produto', Produto);
+    formData.append('cnpj_sh', data.cnpj_sh);
+    formData.append('email', data.email);
+    formData.append('arquivo', data.arquivo);
+    formData.append('cnpj_cliente', data.cnpj_cliente);
+    formData.append('produto', data.produto);
 
     try {
       const response = await lastValueFrom(
@@ -34,7 +34,7 @@ export class ZapierService {
 
       return response;
     } catch (error) {
-      console.error('Erro ao enviar dados para o Zapier:', error);
+      console.error('Erro ao enviar dados para o Zapier:', error.message || error);
       throw error;
     }
   }

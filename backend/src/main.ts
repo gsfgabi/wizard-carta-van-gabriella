@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
+import helmet from 'helmet';
+
 dotenv.config();
 
 console.log("DATABASE_URL: ", process.env.DATABASE_URL);
@@ -10,11 +12,10 @@ console.log("DATABASE_URL: ", process.env.DATABASE_URL);
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(helmet());
+
   app.enableCors({
-    origin: [
-      'https://frontend-3tdulkfc4-gabriellas-projects-4c874924.vercel.app',
-      'https://frontend-phi-swart.vercel.app'
-    ],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:8080'],
     methods: 'GET,POST,PUT,PATCH,DELETE',
     credentials: true,
   });
@@ -31,6 +32,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
