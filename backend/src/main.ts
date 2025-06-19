@@ -7,6 +7,8 @@ import helmet from 'helmet';
 
 dotenv.config();
 
+console.log("DATABASE_URL: ", process.env.DATABASE_URL);
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -18,9 +20,9 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // ✅ Habilita a validação dos DTOs
   app.useGlobalPipes(new ValidationPipe());
 
-  
   const config = new DocumentBuilder()
     .setTitle('API de Carta de Van Bancária')
     .setDescription('Documentação da API de carta de van bancária')
