@@ -27,3 +27,7 @@ docker build -t carta-de-van .
 
 * Parar o docker quando não for usar mais
 docker stop carta-de-van
+
+-------------------JWT-----------------------------------------------
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt
+npm install --save-dev @types/passport-jwt

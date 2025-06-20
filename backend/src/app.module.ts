@@ -13,13 +13,22 @@ import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { ZapierModule } from './zapier/zapier.module';
 import { AuthorizationModule} from './authorization-letters/authorization-letters.module';
+import { AuthModule } from './auth/auth.module';
+import * as Joi from 'joi';
+
 
 @Module({
   imports: 
   [ConfigModule.forRoot({
     isGlobal: true,
+    envFilePath: '.env',
+  validationSchema: Joi.object({
+    JWT_SECRET: Joi.string().required(),
+    DATABASE_URL: Joi.string().required(),
   }),
-
+  }),
+  
+  AuthModule,
   AuthorizationModule,
   BanksModule, 
   ProductsModule, 
