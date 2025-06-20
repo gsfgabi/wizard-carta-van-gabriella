@@ -11,19 +11,16 @@ export class AuthorizationController {
   async saveAuthorizationLetters(
     @Body() createAuthorizationLettersDto: CreateAuthorizationLettersDto,
   ) {
-    const result = await this.authService.saveAuthorizationLetters(createAuthorizationLettersDto);
-    return convertBigIntToString(result);
+    return await this.authService.saveAuthorizationLetters(createAuthorizationLettersDto);
   }
 
   @Get('authorization-letters')
   async getAllAuthorizationLetters() {
-    const result = await this.authService.getAllAuthorizationLetters();
-    return result.map(convertBigIntToString);
+    return await this.authService.getAllAuthorizationLetters();
   }
 
   @Get('authorization-letters/:id')
   async getAuthorizationLetterById(@Param('id') id: string) {
-    const result = await this.authService.getAuthorizationLetterById(Number(id));
-    return convertBigIntToString(result);
+    return await this.authService.getAuthorizationLetterById(Number(id));
   }
 }
