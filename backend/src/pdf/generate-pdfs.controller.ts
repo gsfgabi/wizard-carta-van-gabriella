@@ -2,7 +2,7 @@ import { Controller, Get, Param, BadRequestException } from '@nestjs/common';
 import { GeneratePdfsService } from './generate-pdfs.service';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Gerar PDFs')
+@ApiTags('Generate PDFs')
 @Controller('pdfs')
 export class GeneratePdfsController {
   constructor(private readonly generatePdfsService: GeneratePdfsService) {}
