@@ -39,7 +39,7 @@ export class ReportSubmissionsService {
   private async sendZipToZapier(zip: JSZip, dto: GeneratePdfsDto): Promise<void> {
     for (const vanType of dto.id_van_types) {
       for (const product of dto.id_products) {
-        const fileName = `relatorio_produto_${product.id}_van_${vanType.id}.pdf`;
+        const fileName = `relatorio_produto_${product.id}_van_${vanType}.pdf`;
         const file = zip.files[fileName];
 
         if (!file) {

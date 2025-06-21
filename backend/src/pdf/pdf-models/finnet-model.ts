@@ -7,7 +7,6 @@ import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
 
 export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Buffer> {
   const {
-    bank_name,
     manager_name,
     corporate_name,
     responsible_person_name,
@@ -24,7 +23,7 @@ export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Bu
   const docDefinition = {
     content: [
       {
-        text: `Ao BANCO ${bank_name}\n\nA/C ${manager_name}`,
+        text: `Ao BANCO \n\nA/C ${manager_name}`,
         style: 'headerLeft',
         margin: [0, 0, 0, 10],
       },

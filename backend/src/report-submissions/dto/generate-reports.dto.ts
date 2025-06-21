@@ -12,17 +12,12 @@ export class GenerateReportsDto {
   @Type(() => ProductsDto)
   id_products: ProductsDto[];
 
-  @ApiProperty({ type: [VanTypesDto] })
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => VanTypesDto)
-  id_van_types: VanTypesDto[];
+  @ApiProperty()
+  id_van_types: number[];
 
-  @ApiProperty({ type: [CnabsDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CnabsDto)
-  id_cnabs: CnabsDto[];
+  @ApiProperty()
+  id_cnabs: string;
 
   @ApiProperty()
   @IsString()
