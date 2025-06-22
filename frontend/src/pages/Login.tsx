@@ -76,7 +76,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         <img
           src="/logo.png"
           alt="plugbank"
-          className="h-16 mb-7 mt-2"
+          width={120}
+          height={48}
+          className="h-16 mb-7 mt-2 w-auto"
         />
         <h2 className="text-center font-bold text-xl mb-2 text-black">Seja bem vindo!</h2>
         <p className="text-center text-base mb-7 text-black">
