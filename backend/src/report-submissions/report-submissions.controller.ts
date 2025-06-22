@@ -1,8 +1,10 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ReportSubmissionsService } from './report-submissions.service';
 import { GenerateReportsDto } from 'src/report-submissions/dto/generate-reports.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiTags('Report Submissions')
 @Controller('report-submissions')
 export class ReportSubmissionsController {

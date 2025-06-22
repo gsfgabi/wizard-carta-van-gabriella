@@ -1,7 +1,9 @@
-import { Controller, Get, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Param, BadRequestException, UseGuards } from '@nestjs/common';
 import { GeneratePdfsService } from './generate-pdfs.service';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiTags('Generate PDFs')
 @Controller('pdfs')
 export class GeneratePdfsController {
