@@ -21,6 +21,14 @@ const PRODUCT_ICONS: Record<string, IconType> = {
   'Boletos': FaBarcode,
 };
 
+// Lista de todos os produtos possíveis
+const ALL_PRODUCTS = [
+  { id: 1, name: 'Pagamentos', icon: 'Pagamentos' },
+  { id: 2, name: 'Extrato', icon: 'Extrato' },
+  { id: 3, name: 'DDA', icon: 'DDA' },
+  { id: 4, name: 'Boletos', icon: 'Boletos' },
+];
+
 export const ProductSelection = memo(({
   selectedProducts,
   onSelect,
@@ -36,6 +44,17 @@ export const ProductSelection = memo(({
     onSelect(newSelection);
   };
 
+  // Combinar produtos disponíveis com todos os produtos possíveis
+  const allProductsWithAvailability = ALL_PRODUCTS.map(product => {
+    const availableProduct = products.find(p => p.id === product.id);
+    return {
+      ...product,
+      available: !!availableProduct,
+      description: availableProduct?.description,
+      icon: availableProduct?.icon || product.icon
+    };
+  });
+
   return (
     <Card className="shadow-none p-0">
       <div className="w-full h-full px-0 py-0">
@@ -46,7 +65,7 @@ export const ProductSelection = memo(({
           Selecione quais produtos deseja utilizar a transferência de arquivos por VAN
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {products.map((product) => {
+          {allProductsWithAvailability.map((product) => {
             const selected = selectedProducts.includes(product.id.toString());
             const isDisabled = !product.available;
             const Icon = PRODUCT_ICONS[product.name];

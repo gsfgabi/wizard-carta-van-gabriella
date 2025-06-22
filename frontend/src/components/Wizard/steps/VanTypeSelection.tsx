@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo } from 'react';
 import Button from '../../Button/Button';
-import { getVanTypes, type VanTypeData } from '../../../services/api';
+import type { VanTypeData } from '../../../services/api';
 import VanTypeSelectionSkeleton from '../../Skeleton/VanTypeSelectionSkeleton';
 
 interface VanTypeSelectionProps {
@@ -9,6 +9,8 @@ interface VanTypeSelectionProps {
   onBack: () => void;
   onSelect: (vanTypes: string[]) => void;
   selectedVanTypes: string[];
+  vanTypes: VanTypeData[];
+  loading: boolean;
 }
 
 export const VanTypeSelection = memo(({
@@ -17,36 +19,16 @@ export const VanTypeSelection = memo(({
   onBack,
   onSelect,
   selectedVanTypes,
+  vanTypes,
+  loading,
 }: VanTypeSelectionProps) => {
-  const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (selectedBank) {
-      setLoading(true);
-      setError(null);
-      getVanTypes(selectedBank.toString())
-        .then((data) => {
-          setVanTypes(data);
-          if (data.length === 1 && data[0].available) {
-            onSelect([data[0].id.toString()]);
-          }
-          setError(null);
-        })
-        .catch((error) => {
-          console.error('Erro ao carregar tipos de VAN:', error);
-          setError('Erro ao carregar os tipos de VAN. Por favor, tente novamente.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setVanTypes([]);
-      setLoading(false);
-      setError(null);
+    if (vanTypes.length === 1 && vanTypes[0].available) {
+      onSelect([vanTypes[0].id.toString()]);
     }
-  }, [selectedBank, onSelect]);
+  }, [vanTypes, onSelect]);
 
   const handleVanTypeToggle = (vanTypeId: string) => {
     const newSelection = selectedVanTypes.includes(vanTypeId)
@@ -65,24 +47,7 @@ export const VanTypeSelection = memo(({
         <p className="text-red-600 mb-4">{error}</p>
         <button
           onClick={() => {
-            if (selectedBank) {
-              setLoading(true);
-              setError(null);
-              getVanTypes(selectedBank.toString())
-                .then((data) => {
-                  setVanTypes(data);
-                  if (data.length === 1 && data[0].available) {
-                    onSelect([data[0].id.toString()]);
-                  }
-                  setError(null);
-                })
-                .catch((error) => {
-                  setError('Erro ao carregar os tipos de VAN. Por favor, tente novamente.');
-                })
-                .finally(() => {
-                  setLoading(false);
-                });
-            }
+            setError(null);
           }}
           className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
         >
@@ -94,7 +59,7 @@ export const VanTypeSelection = memo(({
 
   const allVanTypesUnavailable = vanTypes.length > 0 && vanTypes.every(vanType => !vanType.available);
 
-  if (allVanTypesUnavailable) {
+  if (vanTypes.length === 0 || allVanTypesUnavailable) {
     return (
       <>
         <h2 className="text-2xl font-semibold text-black mb-1">
@@ -110,7 +75,7 @@ export const VanTypeSelection = memo(({
               Não há tipos de VAN disponíveis para o banco selecionado
             </p>
             <p className="text-gray-600">
-              Por favor, selecione outro banco ou entre em contato com o suporte.
+              Por favor, selecione outro banco ou entre em contato com o suporte.<br/>
             </p>
           </div>
         </div>

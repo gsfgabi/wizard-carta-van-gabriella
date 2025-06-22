@@ -9,9 +9,7 @@ import Card from "../Card/Card";
 import Stepper from "../Stepper/StepperSteps";
 import {
   getBanks,
-  getProducts,
-  getCNABs,
-  getVanTypes,
+  getAllBankData,
   type BankData,
   type ProductData,
   type CNABData,
@@ -25,7 +23,12 @@ import {
   ChevronUpIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+<<<<<<< Updated upstream
 import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton"; 
+=======
+import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton";
+import Button from "../Button/Button";
+>>>>>>> Stashed changes
 
 export type WizardStep =
   | "bank"
@@ -78,6 +81,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [errorBanks, setErrorBanks] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductData[]>([]);
   const [cnabs, setCNABs] = useState<CNABData[]>([]);
+  const [allCNABs, setAllCNABs] = useState<CNABData[]>([]);
   const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [generatedLetterContents, setGeneratedLetterContents] = useState<
@@ -103,7 +107,14 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
 
   const [bankFetchAttempts, setBankFetchAttempts] = useState(0);
   const [showBankFinalErrorModal, setShowBankFinalErrorModal] = useState(false);
+  const [showBankChangeConfirmation, setShowBankChangeConfirmation] = useState(false);
+  const [pendingBankSelection, setPendingBankSelection] = useState<number | null>(null);
   const MAX_BANK_FETCH_ATTEMPTS = 3;
+
+  // Carregar bancos automaticamente quando o componente montar
+  useEffect(() => {
+    fetchBanks();
+  }, []);
 
   const fetchBanks = async () => {
     try {
@@ -136,23 +147,15 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     }
   };
 
-  useEffect(() => {
-    if (bankFetchAttempts === 0) {
-      fetchBanks();
-    }
-  }, [bankFetchAttempts]);
-
+  // Buscar dados do banco quando selecionado
   useEffect(() => {
     if (selectedBank) {
       console.log("Iniciando busca de detalhes para o banco:", selectedBank);
       setLoadingProducts(true);
       const startTime = Date.now();
-      Promise.all([
-        getProducts(selectedBank.toString()),
-        getCNABs(selectedBank.toString()),
-        getVanTypes(selectedBank.toString()),
-      ])
-        .then(([productsData, cnabsData, vanTypesData]) => {
+      
+      getAllBankData(selectedBank.toString())
+        .then(({ products: productsData, cnabs: cnabsData, vanTypes: vanTypesData, allCNABs: allCNABsData }) => {
           const endTime = Date.now();
           console.log(
             "Detalhes do banco carregados em",
@@ -161,6 +164,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           );
           setProducts(productsData);
           setCNABs(cnabsData);
+          setAllCNABs(allCNABsData || []);
           setVanTypes(vanTypesData);
         })
         .catch((error) => {
@@ -179,6 +183,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     } else {
       setProducts([]);
       setCNABs([]);
+      setAllCNABs([]);
       setVanTypes([]);
       setLoadingProducts(false);
     }
@@ -409,10 +414,14 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       case "bank":
         return (
           <BankSelection
-            onSelect={setSelectedBank}
+            onSelect={handleBankSelection}
             selectedBank={selectedBank}
             onNext={() => handleNext(stepName)}
+<<<<<<< Updated upstream
             onBack={() => handleBack()} 
+=======
+            onBack={() => handleBack()}
+>>>>>>> Stashed changes
             banks={banks}
             loading={loadingBanks}
             error={errorBanks}
@@ -428,7 +437,11 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             selectedProducts={selectedProducts}
             onSelect={setSelectedProducts}
             onNext={() => handleNext(stepName)}
+<<<<<<< Updated upstream
             onBack={() => handleBack()} 
+=======
+            onBack={() => handleBack()}
+>>>>>>> Stashed changes
             selectedBank={selectedBank}
             products={products}
           />
@@ -439,9 +452,13 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             formData={formData}
             onUpdate={setFormData}
             onNext={() => handleNext(stepName)}
+<<<<<<< Updated upstream
             onBack={() => handleBack()} 
+=======
+            onBack={() => handleBack()}
+>>>>>>> Stashed changes
             selectedBank={selectedBank}
-            cnabs={cnabs}
+            cnabs={allCNABs}
             banks={banks}
             products={products}
             selectedProducts={selectedProducts}
@@ -456,7 +473,13 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             onNext={(vanTypesSelected) =>
               handleGenerateLetterAndNext(vanTypesSelected, stepName)
             }
+<<<<<<< Updated upstream
             onBack={() => handleBack()} 
+=======
+            onBack={() => handleBack()}
+            vanTypes={vanTypes}
+            loading={loadingProducts}
+>>>>>>> Stashed changes
           />
         );
       case "validation":
@@ -464,11 +487,19 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           <ValidationStep
             selectedProducts={selectedProducts}
             selectedVanTypes={selectedVanTypes}
+<<<<<<< Updated upstream
             onBack={() => handleBack()} 
+=======
+            onBack={() => handleBack()}
+>>>>>>> Stashed changes
             selectedBank={selectedBank}
             generatedLetterContents={generatedLetterContents}
             onConfirmAndSend={handleConfirmAndSend}
             loadingConfirmAndSend={loadingConfirmAndSend}
+            products={products}
+            vanTypes={vanTypes}
+            cnabs={cnabs}
+            banks={banks}
           />
         );
       case "completion":
@@ -485,6 +516,49 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   };
 
   const currentStepIndex = stepMap[currentStep];
+
+  // Função para limpar todas as seleções
+  const clearAllSelections = () => {
+    setSelectedProducts([]);
+    setSelectedVanTypes([]);
+    setFormData({});
+    setGeneratedLetterContents([]);
+    setTicketDetails(null);
+    setExpandedStep(null);
+  };
+
+  // Função para confirmar mudança de banco
+  const confirmBankChange = (newBankId: number | null) => {
+    setSelectedBank(newBankId);
+    clearAllSelections();
+    setCurrentStep("bank");
+    setShowBankChangeConfirmation(false);
+    setPendingBankSelection(null);
+  };
+
+  // Função para cancelar mudança de banco
+  const cancelBankChange = () => {
+    setShowBankChangeConfirmation(false);
+    setPendingBankSelection(null);
+  };
+
+  // Função para verificar se deve mostrar confirmação
+  const handleBankSelection = (bankId: number | null) => {
+    // Se não há banco selecionado ou é o mesmo banco, não precisa de confirmação
+    if (!selectedBank || bankId === selectedBank) {
+      setSelectedBank(bankId);
+      return;
+    }
+
+    // Se há seleções feitas, mostrar confirmação
+    if (selectedProducts.length > 0 || selectedVanTypes.length > 0 || Object.keys(formData).length > 0) {
+      setPendingBankSelection(bankId);
+      setShowBankChangeConfirmation(true);
+    } else {
+      // Se não há seleções, pode mudar diretamente
+      setSelectedBank(bankId);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2">
@@ -604,6 +678,37 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           isOpen={showBankFinalErrorModal}
           onClose={handleCloseBankFinalErrorModal}
         />
+      </Modal>
+
+      {/* Modal de confirmação de mudança de banco */}
+      <Modal
+        isOpen={showBankChangeConfirmation}
+        onClose={cancelBankChange}
+      >
+        <div className="flex flex-col items-center text-center">
+          <h1 className="text-2xl font-bold mb-4 text-black">
+            Alterar banco selecionado?
+          </h1>
+          <p className="text-gray-700 mb-6">
+            Ao alterar o banco, todas as seleções feitas (produtos, tipos de VAN e dados do formulário) serão perdidas.
+          </p>
+          <div className="w-full flex justify-between mt-6">
+            <Button
+              type="button"
+              className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+              onClick={cancelBankChange}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
+              onClick={() => confirmBankChange(pendingBankSelection)}
+            >
+              Confirmar
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

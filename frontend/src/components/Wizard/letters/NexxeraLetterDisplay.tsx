@@ -78,10 +78,10 @@ export const NexxeraLetterDisplay = memo(({
          <div className="mt-4 text-gray-700">
            <p className="font-semibold mb-2">Preferência por contato:</p>
            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-             <span>[ ] E-mail</span>
-             <span>[ ] Telefone</span>
-             <span>[ ] Whatsapp</span>
-             <span>Outro: _______</span>
+             <span>[{formData.contact_preference_email ? 'X' : ' '}] E-mail</span>
+             <span>[{formData.contact_preference_phone ? 'X' : ' '}] Telefone</span>
+             <span>[{formData.contact_preference_whatsapp ? 'X' : ' '}] Whatsapp</span>
+             <span>Outro: {formData.contact_preference_other || '_______'}</span>
            </div>
          </div>
          <p className="mt-2 text-sm text-gray-500">*** Este contato será utilizado apenas caso haja problemas ou atrasos no processo de liberação do relacionamento</p>
@@ -110,41 +110,52 @@ export const NexxeraLetterDisplay = memo(({
            <p className="text-gray-700">Nenhum produto selecionado.</p>
         ) : (
            <table className="w-full text-left border-collapse border border-gray-400 print:border-gray-800">
-             <thead><tr className="bg-gray-100 print:bg-gray-300 print:text-gray-900">
+             <thead>
+               <tr className="bg-gray-100 print:bg-gray-300 print:text-gray-900">
                  <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th>
-                 <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th> {/* Coluna duplicada conforme template */}
-                 <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th> {/* Coluna duplicada conforme template */}
-               </tr></thead><tbody><tr>
-                 {productInfo.slice(0, 3).map((product, prodIndex) => (
-                   <td key={prodIndex} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[{product.name.toUpperCase()}]</td>
-                 ))}
-                 
-                 {[...Array(Math.max(0, 3 - productInfo.length))].map((_, emptyIndex) => (
-                   <td key={`empty-${emptyIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[SERVIÇO DO BANCO]</td>
-                 ))}
+                 <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th>
+                 <th className="border border-gray-400 print:border-gray-800 px-4 py-2 font-semibold text-gray-800 print:text-gray-900">Serviço no Banco</th>
                </tr>
-                {productInfo.length > 3 && (
+             </thead>
+             <tbody>
+               {productInfo.length <= 3 ? (
+                 <tr>
+                   {productInfo.map((product, prodIndex) => (
+                     <td key={prodIndex} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[{product.name.toUpperCase()}]</td>
+                   ))}
+                   {[...Array(Math.max(0, 3 - productInfo.length))].map((_, emptyIndex) => (
+                     <td key={`empty-${emptyIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top"></td>
+                   ))}
+                 </tr>
+               ) : (
+                 <>
                    <tr>
-                      {productInfo.slice(3, 6).map((product, prodIndex) => (
+                     {productInfo.slice(0, 3).map((product, prodIndex) => (
+                       <td key={prodIndex} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[{product.name.toUpperCase()}]</td>
+                     ))}
+                   </tr>
+                   {productInfo.length > 3 && (
+                     <tr>
+                       {productInfo.slice(3, 6).map((product, prodIndex) => (
                          <td key={`add-${prodIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[{product.name.toUpperCase()}]</td>
-                      ))}
+                       ))}
                        {[...Array(Math.max(0, 3 - productInfo.slice(3, 6).length))].map((_, emptyIndex) => (
-                         <td key={`empty-add-${emptyIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[SERVIÇO DO BANCO]</td>
+                         <td key={`empty-add-${emptyIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top"></td>
                        ))}
-                   </tr>
-                )}
-                 
-                {productInfo.length > 6 && (
-                   <tr>
-                      {productInfo.slice(6, 9).map((product, prodIndex) => (
+                     </tr>
+                   )}
+                   {productInfo.length > 6 && (
+                     <tr>
+                       {productInfo.slice(6, 9).map((product, prodIndex) => (
                          <td key={`add2-${prodIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[{product.name.toUpperCase()}]</td>
-                      ))}
-                       {[...Array(Math.max(0, 3 - productInfo.slice(6, 9).length))].map((_, emptyIndex) => (
-                         <td key={`empty-add2-${emptyIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top">[SERVIÇO DO BANCO]</td>
                        ))}
-                   </tr>
-                )}
-                
+                       {[...Array(Math.max(0, 3 - productInfo.slice(6, 9).length))].map((_, emptyIndex) => (
+                         <td key={`empty-add2-${emptyIndex}`} className="border border-gray-400 print:border-gray-800 px-4 py-2 text-gray-700 align-top"></td>
+                       ))}
+                     </tr>
+                   )}
+                 </>
+               )}
              </tbody>
            </table>
         )}
