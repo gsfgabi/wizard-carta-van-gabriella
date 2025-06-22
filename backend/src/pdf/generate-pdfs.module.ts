@@ -3,10 +3,12 @@ import { GeneratePdfsService } from './generate-pdfs.service';
 import { generatePdfBufferNexxera } from './pdf-models/nexxera-model';
 import { generatePdfBufferFinnet } from './pdf-models/finnet-model';
 import { PdfModelsController } from './pdf-model-controller';
+import { GeneratePdfsController } from './generate-pdfs.controller';
+import { PrismaModule } from '../prisma/prisma.module'; 
 
 @Module({
-  imports: [],
-  controllers: [PdfModelsController],
+  imports: [PrismaModule],
+  controllers: [PdfModelsController, GeneratePdfsController],
   providers: [
     GeneratePdfsService,
     {

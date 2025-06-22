@@ -16,13 +16,13 @@ export class BanksService {
       where: { id: bankId },
       include: {
         banks_cnabs: {
-          select: { id: true },
+          select: { id_cnabs: true },
         },
         banks_products: {
-          select: { id: true },
+          select: { id_products: true },
         },
         banks_van_types: {
-          select: { id: true },
+          select: { id_van_types: true },
         },
       },
     });

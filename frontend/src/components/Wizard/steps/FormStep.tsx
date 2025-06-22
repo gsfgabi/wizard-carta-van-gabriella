@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import { IMaskInput } from 'react-imask';
 import InputField from '../../Form/InputField';
@@ -24,6 +24,10 @@ interface FormData {
   manager_name: string;
   manager_cellphone: string;
   manager_email: string;
+  contact_preference_email: boolean;
+  contact_preference_phone: boolean;
+  contact_preference_whatsapp: boolean;
+  contact_preference_other: string;
 }
 
 interface FormStepProps {
@@ -65,6 +69,10 @@ export const FormStep = memo(({
     manager_name: formData.manager_name || '',
     manager_cellphone: formData.manager_cellphone || '',
     manager_email: formData.manager_email || '',
+    contact_preference_email: formData.contact_preference_email || false,
+    contact_preference_phone: formData.contact_preference_phone || false,
+    contact_preference_whatsapp: formData.contact_preference_whatsapp || false,
+    contact_preference_other: formData.contact_preference_other || '',
   };
 
   return (
@@ -117,6 +125,16 @@ export const FormStep = memo(({
       >
         {({ errors, touched, setFieldValue, values, isValid, handleSubmit }) => {
           console.log('Formik State:', { errors, touched, isValid, values });
+          
+          // Auto-selecionar CNAB se houver apenas um disponível
+          useEffect(() => {
+            const availableCNABs = cnabs.filter(cnab => cnab.available);
+            if (availableCNABs.length === 1 && !values.cnab) {
+              console.log('Auto-selecionando CNAB:', availableCNABs[0].name);
+              setFieldValue('cnab', availableCNABs[0].name);
+            }
+          }, [cnabs, values.cnab, setFieldValue]);
+
           return (
             <Form onSubmit={handleSubmit}>
               {/* EMPRESA */}
@@ -133,6 +151,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* CNPJ */}
                   <Field name="cnpj">
                     {({ field }: any) => (
                       <InputField
@@ -172,6 +192,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* NOME DO RESPONSÁVEL */}
                   <Field name="responsible_person_name">
                     {({ field }: any) => (
                       <InputField
@@ -182,6 +204,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* EMAIL DO RESPONSÁVEL */}
                   <Field name="responsible_person_email">
                     {({ field }: any) => (
                       <InputField
@@ -193,6 +217,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* TELEFONE DO RESPONSÁVEL */}
                   <Field name="responsible_person_cellphone">
                     {({ field }: any) => (
                       <InputField
@@ -218,19 +244,17 @@ export const FormStep = memo(({
                 </div>
               </div>
 
-              {/* CONTA */}
+              {/* CONTA BANCÁRIA */}
               <div className="mb-6">
-                <h3 className="font-semibold text-black mb-2">Conta</h3>
-
-                {/* Linha com Banco, Conta+DV e Agência+DV */}
-                <div className="w-full flex justify-center gap-4">
+                <h3 className="font-semibold text-black mb-2">Conta Bancária</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Conta + DV */}
                   <div className="flex gap-2 flex-grow">
                     <Field name="account_number">
                       {({ field }: any) => (
                         <InputField
                           label="Conta"
-                          placeholder="Inserir o número da conta"
+                          placeholder="Inserir número da conta"
                           error={touched.account_number && errors.account_number ? errors.account_number : ''}
                           {...field}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -267,48 +291,53 @@ export const FormStep = memo(({
                   </div>
 
                   {/* Agência + DV */}
-                  <div className="flex gap-2 flex-grow">
-                    <Field name="branch_number">
-                      {({ field }: any) => (
-                        <InputField
-                          label="Agência"
-                          placeholder="Inserir o número da agência"
-                          error={touched.branch_number && errors.branch_number ? errors.branch_number : ''}
-                          {...field}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const maskedValue = maskBranch(e.target.value);
-                            field.onChange({
-                              target: {
-                                name: field.name,
-                                value: maskedValue
-                              }
-                            });
-                          }}
-                        />
-                      )}
-                    </Field>
-                    <Field name="branch_dv">
-                      {({ field }: any) => (
-                        <InputField
-                          label="DV"
-                          placeholder="DV"
-                          error={touched.branch_dv && errors.branch_dv ? errors.branch_dv : ''}
-                          {...field}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const maskedValue = maskBranchDV(e.target.value);
-                            field.onChange({
-                              target: {
-                                name: field.name,
-                                value: maskedValue
-                              }
-                            });
-                          }}
-                        />
-                      )}
-                    </Field>
+                  <div className="flex gap-2 flex-1">
+                    <div className="flex-1">
+                      <Field name="branch_number">
+                        {({ field }: any) => (
+                          <InputField
+                            label="Agência"
+                            placeholder="Inserir o número da agência"
+                            error={touched.branch_number && errors.branch_number ? errors.branch_number : ''}
+                            {...field}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const maskedValue = maskBranch(e.target.value);
+                              field.onChange({
+                                target: {
+                                  name: field.name,
+                                  value: maskedValue
+                                }
+                              });
+                            }}
+                          />
+                        )}
+                      </Field>
+                    </div>
+                    <div className="w-20">
+                      <Field name="branch_dv">
+                        {({ field }: any) => (
+                          <InputField
+                            label="DV"
+                            placeholder="DV"
+                            error={touched.branch_dv && errors.branch_dv ? errors.branch_dv : ''}
+                            {...field}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const maskedValue = maskBranchDV(e.target.value);
+                              field.onChange({
+                                target: {
+                                  name: field.name,
+                                  value: maskedValue
+                                }
+                              });
+                            }}
+                          />
+                        )}
+                      </Field>
+                    </div>
                   </div>
                 </div>
 
+                {/* CONVÊNIO */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <Field name="agreement_number">
                     {({ field }: any) => (
@@ -328,6 +357,8 @@ export const FormStep = memo(({
                         }}
                       />
                     )}
+                    
+                    {/* CNAB */}
                   </Field>
                   <div>
                     <label className="font-semibold text-black mb-2">CNAB</label>
@@ -352,6 +383,11 @@ export const FormStep = memo(({
                             <span className={`text-base ${!cnab.available ? 'text-gray-400' : 'text-gray-700'}`}>
                               {cnab.name}
                             </span>
+                            {!cnab.available && (
+                              <span className="text-xs text-gray-500">
+                                {/* (Indisponível) */}
+                              </span>
+                            )}
                           </label>
                         ))
                       )}
@@ -377,6 +413,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* EMAIL DO GERENTE */}
                   <Field name="manager_email">
                     {({ field }: any) => (
                       <InputField
@@ -388,6 +426,8 @@ export const FormStep = memo(({
                       />
                     )}
                   </Field>
+
+                  {/* TELEFONE DO GERENTE */}
                   <Field name="manager_cellphone">
                     {({ field }: any) => (
                       <InputField
@@ -413,6 +453,68 @@ export const FormStep = memo(({
                 </div>
               </div>
 
+              {/* PREFERÊNCIA POR CONTATO */}
+              <div className="mb-8">
+                <h3 className="font-semibold text-black mb-2">Preferência por contato</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Field name="contact_preference_email">
+                      {({ field }: any) => (
+                        <input
+                          type="checkbox"
+                          {...field}
+                          checked={field.value}
+                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+                        />
+                      )}
+                    </Field>
+                    <label className="text-gray-700">E-mail</label>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Field name="contact_preference_phone">
+                      {({ field }: any) => (
+                        <input
+                          type="checkbox"
+                          {...field}
+                          checked={field.value}
+                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+                        />
+                      )}
+                    </Field>
+                    <label className="text-gray-700">Telefone</label>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Field name="contact_preference_whatsapp">
+                      {({ field }: any) => (
+                        <input
+                          type="checkbox"
+                          {...field}
+                          checked={field.value}
+                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+                        />
+                      )}
+                    </Field>
+                    <label className="text-gray-700">WhatsApp</label>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <label className="text-gray-700">Outro:</label>
+                    <Field name="contact_preference_other">
+                      {({ field }: any) => (
+                        <input
+                          type="text"
+                          {...field}
+                          placeholder="Especificar outro meio de contato"
+                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#8D44AD] focus:border-[#8D44AD] focus:outline-none"
+                        />
+                      )}
+                    </Field>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center mt-8">
                 <Button
                   type="button"
@@ -431,7 +533,7 @@ export const FormStep = memo(({
                     console.log('Erros atuais:', errors);
                   }}
                 >
-                  Revisar
+                  Próximo
                 </Button>
               </div>
             </Form>

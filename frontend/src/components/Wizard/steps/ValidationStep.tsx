@@ -5,33 +5,13 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Button from "../../Button/Button";
 import Modal from "../../Modal/Modal";
 import Confirmation from "../../Modal/Confirmation";
-import {
-  getVanTypes,
-  type VanTypeData,
-  getProducts,
-  type ProductData,
-} from "../../../services/api";
+import type { VanTypeData, ProductData, CNABData, BankData } from "../../../services/api";
 import { FinnetLetterDisplay } from "../letters/FinnetLetterDisplay";
 import { NexxeraLetterDisplay } from "../letters/NexxeraLetterDisplay";
 import ValidationStepSkeleton from "../../Skeleton/ValidationStepSkeleton";
 
 // Configuração do worker do PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
-interface BankData {
-  id: number;
-  name: string;
-  code: string;
-  // Add other bank properties as needed
-}
-
-interface CNABData {
-  id: number;
-  code: string;
-  name: string;
-  available: boolean;
-  // Add other CNAB properties as needed
-}
 
 interface ValidationStepProps {
   selectedProducts: string[];
@@ -50,6 +30,10 @@ interface ValidationStepProps {
   }[];
   onConfirmAndSend: () => Promise<void>;
   loadingConfirmAndSend: boolean;
+  products: ProductData[];
+  vanTypes: VanTypeData[];
+  cnabs: CNABData[];
+  banks: BankData[];
 }
 
 interface LetterDisplayProps {
@@ -74,15 +58,15 @@ export const ValidationStep = memo(
     generatedLetterContents,
     onConfirmAndSend,
     loadingConfirmAndSend,
+    products,
+    vanTypes,
+    cnabs,
+    banks,
   }: ValidationStepProps) => {
     const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
-    const [loadingData, setLoadingData] = useState(true);
     const [loadingPdf, setLoadingPdf] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-    const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
-    const [products, setProducts] = useState<ProductData[]>([]);
-    const [dataError, setDataError] = useState<string | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
     const [internalLoadingConfirmAndSend, setInternalLoadingConfirmAndSend] =
       useState(false);
@@ -106,48 +90,20 @@ export const ValidationStep = memo(
     };
 
     useEffect(() => {
-      if (selectedBank) {
-        setLoadingData(true);
-        setDataError(null);
-        Promise.all([
-          getVanTypes(selectedBank.toString()),
-          getProducts(selectedBank.toString()),
-        ])
-          .then(([vanTypesData, productsData]) => {
-            setVanTypes(vanTypesData);
-            setProducts(productsData);
-            // Seleciona o primeiro produto por padrão (agora considera selectedProducts)
-            if (selectedProducts.length > 0 && productsData.length > 0) {
-              const firstSelectedProduct = productsData.find(
-                (p) => p.id.toString() === selectedProducts[0]
-              );
-              if (firstSelectedProduct) {
-                setSelectedProduct(firstSelectedProduct.id.toString());
-              } else if (productsData.length > 0) {
-                // Fallback: se o primeiro selectedProduct não for encontrado nos dados carregados, use o primeiro dos dados carregados
-                setSelectedProduct(productsData[0].id.toString());
-              }
-            } else if (productsData.length > 0) {
-              // Se não há produtos selecionados na etapa anterior, mas há produtos carregados, use o primeiro dos carregados
-              setSelectedProduct(productsData[0].id.toString());
-            }
-          })
-          .catch((error) => {
-            console.error("Erro ao carregar dados para revisão:", error);
-            setDataError(
-              "Erro ao carregar informações para revisão. Por favor, tente novamente."
-            );
-          })
-          .finally(() => {
-            setLoadingData(false);
-          });
-      } else {
-        setVanTypes([]);
-        setProducts([]);
-        setLoadingData(false);
-        setDataError(null); // Clear error if no bank is selected
+      // Seleciona o primeiro produto por padrão
+      if (selectedProducts.length > 0 && products.length > 0) {
+        const firstSelectedProduct = products.find(
+          (p) => p.id.toString() === selectedProducts[0]
+        );
+        if (firstSelectedProduct) {
+          setSelectedProduct(firstSelectedProduct.id.toString());
+        } else if (products.length > 0) {
+          setSelectedProduct(products[0].id.toString());
+        }
+      } else if (products.length > 0) {
+        setSelectedProduct(products[0].id.toString());
       }
-    }, [selectedBank, selectedProducts]);
+    }, [selectedProducts, products]);
 
     const handleGeneratePDF = async () => {
       setLoadingPdf(true);
@@ -172,8 +128,6 @@ export const ValidationStep = memo(
         // TODO: Implementar envio de e-mail
         await new Promise((resolve) => setTimeout(resolve, 2000));
         toast.success("Carta enviada com sucesso!");
-        // Aqui você deve implementar a lógica para passar para o CompletionStep
-        // com o número do ticket e link gerados
       } catch (error) {
         console.error("Erro ao enviar carta:", error);
         toast.error("Erro ao enviar a carta. Tente novamente.");
@@ -196,52 +150,22 @@ export const ValidationStep = memo(
 
     const currentLetter = filteredLetters[currentLetterIndex];
 
-    // Renderiza o esqueleto se estiver carregando dados e não houver erro
-    if (loadingData && !dataError) {
+    // Renderiza o esqueleto se estiver carregando dados
+    if (!products.length && !vanTypes.length) {
       return <ValidationStepSkeleton />;
     }
 
-    // Renderiza mensagem de erro se houver erro e não estiver carregando
-    if (dataError && !loadingData) {
+    // Renderiza mensagem de erro se não houver dados
+    if (!products.length && !vanTypes.length) {
       return (
         <div className="w-full h-full flex flex-col items-center justify-center">
-          <p className="text-red-600 mb-4">{dataError}</p>
-          <button
-            onClick={() => {
-              if (selectedBank) {
-                setLoadingData(true);
-                setDataError(null);
-                Promise.all([
-                  getVanTypes(selectedBank.toString()),
-                  getProducts(selectedBank.toString()),
-                ])
-                  .then(([vanTypesData, productsData]) => {
-                    setVanTypes(vanTypesData);
-                    setProducts(productsData);
-                  })
-                  .catch((error) => {
-                    console.error(
-                      "Erro ao carregar dados para revisão:",
-                      error
-                    );
-                    setDataError(
-                      "Erro ao carregar informações para revisão. Por favor, tente novamente."
-                    );
-                  })
-                  .finally(() => {
-                    setLoadingData(false);
-                  });
-              }
-            }}
-            className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
-          >
-            Tentar novamente
-          </button>
+          <p className="text-red-600 mb-4">
+            Erro ao carregar informações para revisão. Por favor, tente novamente.
+          </p>
         </div>
       );
     }
 
-    // Renderiza o conteúdo normal se não estiver carregando e não houver erro
     return (
       <>
         <h2 className="text-2xl font-semibold text-black mb-1">
@@ -251,6 +175,65 @@ export const ValidationStep = memo(
           Revise os dados preenchidos e o conteúdo da carta gerada antes de
           finalizar.
         </p>
+
+        {/* Resumo das Seleções */}
+        {/* <div className="space-y-6 mb-8">
+          <div>
+            <h3 className="text-lg font-semibold text-black mb-2">
+              Produtos Selecionados
+            </h3>
+            <div className="space-y-2">
+              {selectedProducts.length === 0 ? (
+                <p className="text-gray-600">Nenhum produto selecionado.</p>
+              ) : products.length === 0 ? (
+                <p className="text-gray-600">
+                  Carregando produtos selecionados...
+                </p>
+              ) : (
+                selectedProducts.map((productId) => {
+                  const product = products.find(
+                    (p) => p.id.toString() === productId
+                  );
+                  return product ? (
+                    <div key={productId} className="flex items-center">
+                      <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
+                      <span className="text-gray-700">{product.name}</span>
+                    </div>
+                  ) : null;
+                })
+              )}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-black mb-2">
+              Tipos de VAN Selecionados
+            </h3>
+            <div className="space-y-2">
+              {selectedVanTypes.length === 0 ? (
+                <p className="text-gray-600">
+                  Nenhum tipo de VAN selecionado.
+                </p>
+              ) : vanTypes.length === 0 ? (
+                <p className="text-gray-600">
+                  Carregando tipos de VAN selecionados...
+                </p>
+              ) : (
+                selectedVanTypes.map((vanTypeId) => {
+                  const vanType = vanTypes.find(
+                    (vt) => vt.id.toString() === vanTypeId
+                  );
+                  return vanType ? (
+                    <div key={vanTypeId} className="flex items-center">
+                      <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
+                      <span className="text-gray-700">{vanType.type}</span>
+                    </div>
+                  ) : null;
+                })
+              )}
+            </div>
+          </div>
+        </div> */}
 
         {/* Seletor de Produto */}
         {selectedProducts.length > 1 && products.length > 0 && (
@@ -336,74 +319,13 @@ export const ValidationStep = memo(
           )}
         </div>
 
-        {/* Se não estiver carregando e não houver erro, exibe as listas de produtos e VANs */}
-        {!loadingData && !dataError && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-black mb-2">
-                Produtos Selecionados
-              </h3>
-              <div className="space-y-2">
-                {selectedProducts.length === 0 ? (
-                  <p className="text-gray-600">Nenhum produto selecionado.</p>
-                ) : products.length === 0 ? (
-                  <p className="text-gray-600">
-                    Carregando produtos selecionados...
-                  </p>
-                ) : (
-                  selectedProducts.map((productId) => {
-                    const product = products.find(
-                      (p) => p.id.toString() === productId
-                    );
-                    return product ? (
-                      <div key={productId} className="flex items-center">
-                        <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
-                        <span className="text-gray-700">{product.name}</span>
-                      </div>
-                    ) : null;
-                  })
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-black mb-2">
-                Tipos de VAN Selecionados
-              </h3>
-              <div className="space-y-2">
-                {selectedVanTypes.length === 0 ? (
-                  <p className="text-gray-600">
-                    Nenhum tipo de VAN selecionado.
-                  </p>
-                ) : vanTypes.length === 0 ? (
-                  <p className="text-gray-600">
-                    Carregando tipos de VAN selecionados...
-                  </p>
-                ) : (
-                  selectedVanTypes.map((vanTypeId) => {
-                    const vanType = vanTypes.find(
-                      (vt) => vt.id.toString() === vanTypeId
-                    );
-                    return vanType ? (
-                      <div key={vanTypeId} className="flex items-center">
-                        <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
-                        <span className="text-gray-700">{vanType.type}</span>
-                      </div>
-                    ) : null;
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Botões de Ação */}
         <div className="flex justify-between items-center mt-8">
           <Button
             type="button"
             className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
             onClick={onBack}
-            disabled={loadingData || loadingPdf || loadingConfirmAndSend}
+            disabled={loadingPdf || loadingConfirmAndSend}
           >
             Voltar
           </Button>
@@ -414,7 +336,6 @@ export const ValidationStep = memo(
             className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
             onClick={() => setIsModalOpen(true)}
             disabled={
-              loadingData ||
               loadingPdf ||
               loadingConfirmAndSend ||
               selectedProducts.length === 0 ||
@@ -431,15 +352,17 @@ export const ValidationStep = memo(
           >
             {loadingConfirmAndSend ? "Enviando..." : "Confirmar e Enviar Carta"}
           </Button>
-
-          <Modal isOpen={isModalOpen} onClose={handleCancel}>
-            <Confirmation
-              onConfirm={handleConfirm}
-              onCancel={handleCancel}
-              loading={loadingConfirmAndSend}
-            />
-          </Modal>
         </div>
+
+        <Modal isOpen={isModalOpen} onClose={handleCancel}>
+          <Confirmation
+            title="Confirmar Envio"
+            message="Tem certeza que deseja enviar as cartas de VAN?"
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+            loading={loadingConfirmAndSend || internalLoadingConfirmAndSend}
+          />
+        </Modal>
       </>
     );
   }

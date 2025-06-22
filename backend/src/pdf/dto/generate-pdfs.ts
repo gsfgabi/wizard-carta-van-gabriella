@@ -1,23 +1,81 @@
-import { CnabsDto } from 'src/cnabs/dto/select-cnabs.dto';
-import { ProductsDto } from 'src/products/dto/select-products.dto';
-import { VanTypesDto } from 'src/van-types/dto/select-van-types.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsEmail,
+  IsNumberString,
+  Length,
+  IsArray,
+  IsInt,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class GeneratePdfsDto {
-  bank_name: string;
-  manager_name: string;
-  corporate_name: string;
-  responsible_person_name: string;
-  cnpj: string;
-  branch_number: string;
-  account_number: string;
-  agreement_number: string;
-  responsible_person_email: string;
-  responsible_person_cellphone: string;
-  responsible_person_title: string;
-  manager_email: string;
-  manager_cellphone: string;
-  id_products: ProductsDto[];
-  id_cnabs: CnabsDto[];
-  id_van_types: VanTypesDto[];
+export class ProductDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
 }
 
+export class GeneratePdfsDto {
+  @IsNumberString()
+  @Length(14, 14)
+  @ApiProperty()
+  cnpj: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  corporate_name: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  responsible_person_name: string;
+
+  @IsNumberString()
+  @ApiProperty()
+  responsible_person_cellphone: string;
+
+  @IsEmail()
+  @ApiProperty()
+  responsible_person_email: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  manager_name: string;
+
+  @IsNumberString()
+  @ApiProperty()
+  manager_cellphone: string;
+
+  @IsEmail()
+  @ApiProperty()
+  manager_email: string;
+
+  @IsNumberString()
+  @ApiProperty()
+  branch_number: string;
+
+  @IsNumberString()
+  @ApiProperty()
+  account_number: string;
+
+  @IsNumberString()
+  @ApiProperty()
+  agreement_number: string;
+
+  @IsNumberString()
+  @ApiProperty()
+  id_cnabs: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductDto)
+  @ApiProperty({ type: [ProductDto] })
+  id_products: ProductDto[];
+
+  @IsArray()
+  @IsInt({ each: true })
+  @ApiProperty()
+  id_van_types: number[];
+}

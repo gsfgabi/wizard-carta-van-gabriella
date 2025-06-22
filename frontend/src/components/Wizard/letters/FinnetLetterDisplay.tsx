@@ -74,11 +74,9 @@ export const FinnetLetterDisplay = memo(({
           <p className="text-gray-700">Nenhum produto selecionado.</p>
         ) : (
           <ul>
-            {productInfo.map(product => (
-              <li key={product.id} className="flex items-center mb-1 text-gray-700">
-                <span className="mr-2">(&nbsp;)</span>{product.name}
-              </li>
-            ))}
+            <li className="flex items-center mb-1 text-gray-700">
+              <span className="mr-2">(X)</span>{productInfo[0].name}
+            </li>
           </ul>
         )}
       </div>
