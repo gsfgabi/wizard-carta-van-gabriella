@@ -107,11 +107,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               maxLength={32}
               autoComplete="off"
             />
-            <span
-              className="absolute right-3 top-9 cursor-pointer"
+            <button
+              type="button"
+              className="absolute right-3 inset-y-0 my-auto min-w-[44px] min-h-[44px] flex items-center justify-center bg-transparent border-none p-0 m-0 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8D44AD]"
+              style={{ boxShadow: 'none' }}
               onClick={() => setShowToken((v) => !v)}
-              tabIndex={0}
-              role="button"
               aria-label={showToken ? 'Ocultar token' : 'Mostrar token'}
             >
               {showToken ? (
@@ -119,7 +119,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               ) : (
                 <EyeIcon className="h-5 w-5 text-gray-500" />
               )}
-            </span>
+            </button>
             {!tokenValid && token.length > 0 && (
               <div className="text-red-600 text-xs mt-1">O token deve ter pelo menos 6 caracteres.</div>
             )}
