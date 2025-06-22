@@ -90,45 +90,6 @@ export const ValidationStep = memo(
     };
 
     useEffect(() => {
-<<<<<<< Updated upstream
-      if (selectedBank) {
-        setLoadingData(true);
-        setDataError(null);
-        Promise.all([
-          getVanTypes(selectedBank.toString()),
-          getProducts(selectedBank.toString()),
-        ])
-          .then(([vanTypesData, productsData]) => {
-            setVanTypes(vanTypesData);
-            setProducts(productsData);
-            if (selectedProducts.length > 0 && productsData.length > 0) {
-              const firstSelectedProduct = productsData.find(
-                (p) => p.id.toString() === selectedProducts[0]
-              );
-              if (firstSelectedProduct) {
-                setSelectedProduct(firstSelectedProduct.id.toString());
-              } else if (productsData.length > 0) {
-                setSelectedProduct(productsData[0].id.toString());
-              }
-            } else if (productsData.length > 0) {
-              setSelectedProduct(productsData[0].id.toString());
-            }
-          })
-          .catch((error) => {
-            console.error("Erro ao carregar dados para revisão:", error);
-            setDataError(
-              "Erro ao carregar informações para revisão. Por favor, tente novamente."
-            );
-          })
-          .finally(() => {
-            setLoadingData(false);
-          });
-      } else {
-        setVanTypes([]);
-        setProducts([]);
-        setLoadingData(false);
-        setDataError(null);
-=======
       // Seleciona o primeiro produto por padrão
       if (selectedProducts.length > 0 && products.length > 0) {
         const firstSelectedProduct = products.find(
@@ -141,7 +102,6 @@ export const ValidationStep = memo(
         }
       } else if (products.length > 0) {
         setSelectedProduct(products[0].id.toString());
->>>>>>> Stashed changes
       }
     }, [selectedProducts, products]);
 
@@ -190,13 +150,6 @@ export const ValidationStep = memo(
 
     const currentLetter = filteredLetters[currentLetterIndex];
 
-<<<<<<< Updated upstream
-    if (loadingData && !dataError) {
-      return <ValidationStepSkeleton />;
-    }
-
-    if (dataError && !loadingData) {
-=======
     // Renderiza o esqueleto se estiver carregando dados
     if (!products.length && !vanTypes.length) {
       return <ValidationStepSkeleton />;
@@ -204,7 +157,6 @@ export const ValidationStep = memo(
 
     // Renderiza mensagem de erro se não houver dados
     if (!products.length && !vanTypes.length) {
->>>>>>> Stashed changes
       return (
         <div className="w-full h-full flex flex-col items-center justify-center">
           <p className="text-red-600 mb-4">
