@@ -34,6 +34,12 @@ const retryRequest = async (fn: () => Promise<any>, retries = 3, delay = 1000) =
 // Interceptor para logging
 api.interceptors.request.use(
   (config) => {
+    // Adiciona o token de autenticação, se existir
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     console.log('Request:', {
       method: config.method?.toUpperCase(),
       url: config.url,
@@ -390,4 +396,6 @@ export const getAllBankData = async (bankId: string): Promise<{
     console.error('Erro ao buscar dados do banco:', error);
     throw error;
   }
-}; 
+};
+
+export { api }; 

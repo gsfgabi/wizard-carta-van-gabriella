@@ -5,6 +5,7 @@ import { Button } from '../components/Form/Button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { isValidCNPJ, isValidToken } from '../utils/validation'; 
 import { maskCNPJ } from '../utils/mask';
+import { api } from '../services/api';
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -38,16 +39,29 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setError('');
     setLoading(true);
 
-    // Simula uma requisição 
-    setTimeout(() => {
-      setLoading(false);
-      // Simulação de resposta da API
-      if (cnpj === '1' && token === '111111') {
+    try {
+      const response = await api.post('/auth/login', {
+        cnpj: cnpj.replace(/\D/g, ''),
+        token
+      });
+      const jwtToken = response.data.access_token;
+      if (jwtToken) {
+        localStorage.setItem('token', jwtToken);
+        localStorage.setItem('cnpj', cnpj.replace(/\D/g, ''));
+        setLoading(false);
         onLoginSuccess();
+      } else {
+        setLoading(false);
+        setError('Resposta inválida do servidor.');
+      }
+    } catch (err: any) {
+      setLoading(false);
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
       } else {
         setError('CNPJ ou Token inválido.');
       }
-    }, 1200);
+    }
   };
 
   return (
