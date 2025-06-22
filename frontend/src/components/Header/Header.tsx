@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout, onLogoClick }) => {
             title="Usuário"
             type="button"
           >
-            <UserIcon className="h-6 w-6" />
+            <UserIcon className="h-6 w-6 text-white" />
           </button>
           {open && (
             <div className="absolute right-0 mt-2 w-56 bg-[#8D44AD] border border-[#7d379c] rounded-lg shadow-xl z-50 overflow-hidden animate-fade-in">
