@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Header from './components/Header/Header';
-import { Wizard } from './components/Wizard/Wizard';
+const Wizard = React.lazy(() => import('./components/Wizard/Wizard'));
 import WizardIntro from './pages/WizardIntro';
 import Login from './pages/Login';
 import { isTokenExpired } from './utils/validation';
@@ -52,7 +52,9 @@ function App() {
         {showIntro ? (
           <WizardIntro onStart={() => setShowIntro(false)} />
         ) : (
-          <Wizard onBackToIntro={handleBackToIntro} />
+          <Suspense fallback={<div className="flex-1 flex items-center justify-center text-primary text-lg">Carregando assistente...</div>}>
+            <Wizard onBackToIntro={handleBackToIntro} />
+          </Suspense>
         )}
       </main>
     </div>
