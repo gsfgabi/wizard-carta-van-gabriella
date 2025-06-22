@@ -8,4 +8,4 @@ export class LoginDto {
   @IsNotEmpty()
   @Length(6, 32)
   token: string;
-}
+} 

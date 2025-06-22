@@ -21,4 +21,4 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // Retorna o que será injetado no req.user
     return { cnpj: payload.cnpj };
   }
-}
+} 

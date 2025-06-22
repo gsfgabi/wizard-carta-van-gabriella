@@ -14,6 +14,6 @@ export class AuthController {
       throw new UnauthorizedException('CNPJ ou token inválido.');
     }
 
-    return this.authService.login(body.cnpj);
+    return this.authService.login(body.cnpj); 
   }
 }

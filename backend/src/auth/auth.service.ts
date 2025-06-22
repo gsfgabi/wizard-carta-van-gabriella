@@ -11,7 +11,7 @@ export class AuthService {
   }
 
   async login(cnpj: string) {
-    const payload = { cnpj };
+    const payload = { cnpj }; 
     return {
       access_token: this.jwtService.sign(payload),
     };
