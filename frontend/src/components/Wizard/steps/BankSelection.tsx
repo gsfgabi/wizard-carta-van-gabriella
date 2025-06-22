@@ -6,11 +6,18 @@ import {
   ComboboxOptions,
   ComboboxOption,
 } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
+import { 
+  CheckIcon, 
+  ChevronUpDownIcon, 
+  ChevronDownIcon, 
+  ChevronUpIcon, 
+  ExclamationTriangleIcon, 
+  ArrowPathIcon 
+} from "@heroicons/react/20/solid";
 import Button from "../../Button/Button";
-import { getProducts, getCNABs, getVanTypes, type ProductData, type CNABData, type VanTypeData, type BankData } from '../../../services/api';
 import { ErrorModal } from '../../Modal/ErrorModal';
 import BankSelectionSkeleton from '../../Skeleton/BankSelectionSkeleton';
+import type { BankData } from '../../../services/api';
 
 interface BankSelectionProps {
   onSelect: (bankId: number | null) => void;
@@ -37,37 +44,7 @@ export const BankSelection = memo(({
 }: BankSelectionProps) => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [cnabs, setCNABs] = useState<CNABData[]>([]);
-  const [vanTypes, setVanTypes] = useState<VanTypeData[]>([]);
-  const [loadingDetails, setLoadingDetails] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
-
-  useEffect(() => {
-    if (selectedBank) {
-      setLoadingDetails(true);
-      Promise.all([
-        getProducts(selectedBank.toString()),
-        getCNABs(selectedBank.toString()),
-        getVanTypes(selectedBank.toString())
-      ])
-        .then(([productsData, cnabsData, vanTypesData]) => {
-          setProducts(productsData);
-          setCNABs(cnabsData);
-          setVanTypes(vanTypesData);
-        })
-        .catch(error => {
-          console.error('Erro ao carregar detalhes do banco:', error);
-        })
-        .finally(() => {
-          setLoadingDetails(false);
-        });
-    } else {
-      setProducts([]);
-      setCNABs([]);
-      setVanTypes([]);
-    }
-  }, [selectedBank]);
 
   const filteredBanks =
     query === ""
@@ -90,14 +67,17 @@ export const BankSelection = memo(({
 
   if (error && bankFetchAttempts < 3) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        <p className="text-red-600 mb-4">{error}</p>
+      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white rounded-lg">
+        <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Falha ao carregar bancos</h3>
+        <p className="text-red-600 mb-6">{error}</p>
         <Button
           type="button"
-          className="text-[#8D44AD] hover:text-[#7d379c] font-medium"
+          className="bg-[#8D44AD] text-white rounded-full px-6 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition flex items-center gap-2"
           onClick={onRetryFetchBanks}
         >
-          Tentar novamente
+          <ArrowPathIcon className="h-5 w-5" />
+          Tentar Novamente
         </Button>
       </div>
     );

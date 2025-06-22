@@ -85,23 +85,33 @@ export interface BankData {
   name: string;
 }
 
+export interface BankDetailsData {
+  id: number;
+  name: string;
+  code: string;
+  banks_cnabs: { id_cnabs: number }[];
+  banks_products: { id_products: number }[];
+  banks_van_types: { id_van_types: number }[];
+}
+
 export interface ProductData {
   id: number;
   name: string;
-  available: boolean;
+  description?: string;
+  icon?: string;
+  available?: boolean;
 }
 
 export interface CNABData {
   id: number;
-  code: string;
   name: string;
-  available: boolean;
+  available?: boolean;
 }
 
 export interface VanTypeData {
   id: number;
   type: string;
-  available: boolean;
+  available?: boolean;
 }
 
 export interface AuthorizationLetterData {
@@ -153,8 +163,24 @@ export const getBanks = async (): Promise<BankData[]> => {
 export const getProducts = async (bankId: string): Promise<ProductData[]> => {
   try {
     return await retryRequest(async () => {
-      const response = await api.get(`/products/${bankId}`);
-      return response.data;
+      // Primeiro, buscar os dados do banco para obter os IDs dos produtos
+      const bankResponse = await api.get(`/banks/${bankId}`);
+      const bankData: BankDetailsData = bankResponse.data;
+      
+      // Buscar todos os produtos
+      const productsResponse = await api.get('/products');
+      const allProducts = productsResponse.data;
+      
+      // Filtrar produtos baseado nos IDs do banco
+      const bankProductIds = bankData.banks_products.map((bp) => bp.id_products);
+      const filteredProducts = allProducts.filter((product: any) => 
+        bankProductIds.includes(product.id)
+      );
+      
+      return filteredProducts.map((product: any) => ({
+        ...product,
+        available: true
+      }));
     });
   } catch (error) {
     console.error('Erro ao buscar produtos:', error);
@@ -165,13 +191,25 @@ export const getProducts = async (bankId: string): Promise<ProductData[]> => {
 export const getCNABs = async (bankId: string): Promise<CNABData[]> => {
   try {
     return await retryRequest(async () => {
-      const response = await api.get(`/cnabs/${bankId}`);
-      console.log('Resposta da API CNABs:', response.data);
-      return response.data.map((cnab: any) => ({
+      // Primeiro, buscar os dados do banco para obter os IDs dos CNABs
+      const bankResponse = await api.get(`/banks/${bankId}`);
+      const bankData: BankDetailsData = bankResponse.data;
+      
+      // Buscar todos os CNABs
+      const cnabsResponse = await api.get('/cnabs');
+      const allCNABs = cnabsResponse.data;
+      
+      // Filtrar CNABs baseado nos IDs do banco
+      const bankCNABIds = bankData.banks_cnabs.map((bc) => bc.id_cnabs);
+      const filteredCNABs = allCNABs.filter((cnab: any) => 
+        bankCNABIds.includes(cnab.id)
+      );
+      
+      console.log('Resposta da API CNABs:', filteredCNABs);
+      return filteredCNABs.map((cnab: any) => ({
         id: cnab.id,
-        code: cnab.name,
         name: cnab.name,
-        available: cnab.available
+        available: true
       }));
     });
   } catch (error) {
@@ -183,8 +221,24 @@ export const getCNABs = async (bankId: string): Promise<CNABData[]> => {
 export const getVanTypes = async (bankId: string): Promise<VanTypeData[]> => {
   try {
     return await retryRequest(async () => {
-      const response = await api.get(`/van-types/${bankId}`);
-      return response.data;
+      // Primeiro, buscar os dados do banco para obter os IDs dos tipos de VAN
+      const bankResponse = await api.get(`/banks/${bankId}`);
+      const bankData: BankDetailsData = bankResponse.data;
+      
+      // Buscar todos os tipos de VAN
+      const vanTypesResponse = await api.get('/van-types');
+      const allVanTypes = vanTypesResponse.data;
+      
+      // Filtrar tipos de VAN baseado nos IDs do banco
+      const bankVanTypeIds = bankData.banks_van_types.map((bvt) => bvt.id_van_types);
+      const filteredVanTypes = allVanTypes.filter((vanType: any) => 
+        bankVanTypeIds.includes(vanType.id)
+      );
+      
+      return filteredVanTypes.map((vanType: any) => ({
+        ...vanType,
+        available: true
+      }));
     });
   } catch (error) {
     console.error('Erro ao buscar tipos de VAN:', error);
@@ -249,6 +303,91 @@ export const createAuthorizationLetter = async (data: AuthorizationLetterData): 
     });
   } catch (error) {
     console.error('Erro ao criar carta de autorização:', error);
+    throw error;
+  }
+};
+
+export const getAllCNABs = async (): Promise<CNABData[]> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.get('/cnabs');
+      return response.data.map((cnab: any) => ({
+        id: cnab.id,
+        name: cnab.name,
+        available: true
+      }));
+    });
+  } catch (error) {
+    console.error('Erro ao buscar todos os CNABs:', error);
+    throw error;
+  }
+};
+
+export const getAllBankData = async (bankId: string): Promise<{
+  products: ProductData[];
+  cnabs: CNABData[];
+  vanTypes: VanTypeData[];
+  allCNABs?: CNABData[];
+}> => {
+  try {
+    return await retryRequest(async () => {
+      // Buscar todos os dados em paralelo
+      const [bankResponse, productsResponse, cnabsResponse, vanTypesResponse] = await Promise.all([
+        api.get(`/banks/${bankId}`),
+        api.get('/products'),
+        api.get('/cnabs'),
+        api.get('/van-types')
+      ]);
+
+      const bankData: BankDetailsData = bankResponse.data;
+      const allProducts = productsResponse.data;
+      const allCNABs = cnabsResponse.data;
+      const allVanTypes = vanTypesResponse.data;
+
+      // Filtrar produtos baseado nos IDs do banco
+      const bankProductIds = bankData.banks_products.map((bp) => bp.id_products);
+      const filteredProducts = allProducts.filter((product: any) => 
+        bankProductIds.includes(product.id)
+      ).map((product: any) => ({
+        ...product,
+        available: true
+      }));
+
+      // Filtrar CNABs baseado nos IDs do banco
+      const bankCNABIds = bankData.banks_cnabs.map((bc) => bc.id_cnabs);
+      const filteredCNABs = allCNABs.filter((cnab: any) => 
+        bankCNABIds.includes(cnab.id)
+      ).map((cnab: any) => ({
+        id: cnab.id,
+        name: cnab.name,
+        available: true
+      }));
+
+      // Criar lista de todos os CNABs com disponibilidade
+      const allCNABsWithAvailability = allCNABs.map((cnab: any) => ({
+        id: cnab.id,
+        name: cnab.name,
+        available: bankCNABIds.includes(cnab.id)
+      }));
+
+      // Filtrar tipos de VAN baseado nos IDs do banco
+      const bankVanTypeIds = bankData.banks_van_types.map((bvt) => bvt.id_van_types);
+      const filteredVanTypes = allVanTypes.filter((vanType: any) => 
+        bankVanTypeIds.includes(vanType.id)
+      ).map((vanType: any) => ({
+        ...vanType,
+        available: true
+      }));
+
+      return {
+        products: filteredProducts,
+        cnabs: filteredCNABs,
+        vanTypes: filteredVanTypes,
+        allCNABs: allCNABsWithAvailability
+      };
+    });
+  } catch (error) {
+    console.error('Erro ao buscar dados do banco:', error);
     throw error;
   }
 }; 
