@@ -23,12 +23,8 @@ import {
   ChevronUpIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
-<<<<<<< Updated upstream
-import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton"; 
-=======
 import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton";
 import Button from "../Button/Button";
->>>>>>> Stashed changes
 
 export type WizardStep =
   | "bank"
@@ -417,11 +413,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             onSelect={handleBankSelection}
             selectedBank={selectedBank}
             onNext={() => handleNext(stepName)}
-<<<<<<< Updated upstream
-            onBack={() => handleBack()} 
-=======
             onBack={() => handleBack()}
->>>>>>> Stashed changes
             banks={banks}
             loading={loadingBanks}
             error={errorBanks}
@@ -437,11 +429,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             selectedProducts={selectedProducts}
             onSelect={setSelectedProducts}
             onNext={() => handleNext(stepName)}
-<<<<<<< Updated upstream
-            onBack={() => handleBack()} 
-=======
             onBack={() => handleBack()}
->>>>>>> Stashed changes
             selectedBank={selectedBank}
             products={products}
           />
@@ -452,11 +440,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             formData={formData}
             onUpdate={setFormData}
             onNext={() => handleNext(stepName)}
-<<<<<<< Updated upstream
-            onBack={() => handleBack()} 
-=======
             onBack={() => handleBack()}
->>>>>>> Stashed changes
             selectedBank={selectedBank}
             cnabs={allCNABs}
             banks={banks}
@@ -473,13 +457,9 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             onNext={(vanTypesSelected) =>
               handleGenerateLetterAndNext(vanTypesSelected, stepName)
             }
-<<<<<<< Updated upstream
-            onBack={() => handleBack()} 
-=======
             onBack={() => handleBack()}
             vanTypes={vanTypes}
             loading={loadingProducts}
->>>>>>> Stashed changes
           />
         );
       case "validation":
@@ -487,11 +467,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           <ValidationStep
             selectedProducts={selectedProducts}
             selectedVanTypes={selectedVanTypes}
-<<<<<<< Updated upstream
-            onBack={() => handleBack()} 
-=======
             onBack={() => handleBack()}
->>>>>>> Stashed changes
             selectedBank={selectedBank}
             generatedLetterContents={generatedLetterContents}
             onConfirmAndSend={handleConfirmAndSend}

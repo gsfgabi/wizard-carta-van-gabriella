@@ -246,57 +246,6 @@ export const FormStep = memo(({
 
               {/* CONTA BANCÁRIA */}
               <div className="mb-6">
-<<<<<<< Updated upstream
-                <h3 className="font-semibold text-black mb-2">Conta</h3>
-
-                {/* Linha com Banco, Conta+DV e Agência+DV */}
-                <div className="w-full flex flex-col md:flex-row justify-center gap-4">
-                  
-                  {/* Conta + DV */}
-                  <div className="flex gap-2 flex-1">
-                    <div className="flex-1">
-                      <Field name="account_number">
-                        {({ field }: any) => (
-                          <InputField
-                            label="Conta"
-                            placeholder="Inserir o número da conta"
-                            error={touched.account_number && errors.account_number ? errors.account_number : ''}
-                            {...field}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              const maskedValue = maskAccount(e.target.value);
-                              field.onChange({
-                                target: {
-                                  name: field.name,
-                                  value: maskedValue
-                                }
-                              });
-                            }}
-                          />
-                        )}
-                      </Field>
-                    </div>
-                    <div className="w-20">
-                      <Field name="account_dv">
-                        {({ field }: any) => (
-                          <InputField
-                            label="DV"
-                            placeholder="DV"
-                            error={touched.account_dv && errors.account_dv ? errors.account_dv : ''}
-                            {...field}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              const maskedValue = maskAccountDV(e.target.value);
-                              field.onChange({
-                                target: {
-                                  name: field.name,
-                                  value: maskedValue
-                                }
-                              });
-                            }}
-                          />
-                        )}
-                      </Field>
-                    </div>
-=======
                 <h3 className="font-semibold text-black mb-2">Conta Bancária</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Conta + DV */}
@@ -339,7 +288,6 @@ export const FormStep = memo(({
                         />
                       )}
                     </Field>
->>>>>>> Stashed changes
                   </div>
 
                   {/* Agência + DV */}
