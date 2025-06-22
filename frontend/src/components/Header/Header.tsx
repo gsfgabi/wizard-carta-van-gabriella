@@ -32,7 +32,9 @@ const Header: React.FC<HeaderProps> = ({ onLogout, onLogoClick }) => {
         <img
           src="/logo.png"
           alt="Plugbank"
-          className="h-12 cursor-pointer object-contain"
+          width={120}
+          height={48}
+          className="w-24 sm:w-32 md:w-40 h-auto cursor-pointer object-contain"
           onClick={onLogoClick}
         />
         <div className="relative" ref={menuRef}>
@@ -41,6 +43,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout, onLogoClick }) => {
             onClick={() => setOpen((v) => !v)}
             title="Usuário"
             type="button"
+            aria-expanded={open}
           >
             <UserIcon className="h-6 w-6 text-white" />
           </button>
