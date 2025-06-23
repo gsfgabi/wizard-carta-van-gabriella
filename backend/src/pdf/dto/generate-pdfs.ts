@@ -19,6 +19,9 @@ export class ProductDto {
 }
 
 export class GeneratePdfsDto {
+  @ApiProperty()
+  id: string;
+
   @IsNumberString()
   @Length(14, 14)
   @ApiProperty()

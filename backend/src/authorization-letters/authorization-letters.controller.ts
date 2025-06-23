@@ -4,7 +4,7 @@ import { CreateAuthorizationLettersDto } from './dto/create-authorization-letter
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('authorization')
+@Controller()
 export class AuthorizationController {
   constructor(private readonly authService: AuthorizationService) {}
 

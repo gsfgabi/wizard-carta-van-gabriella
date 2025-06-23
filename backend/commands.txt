@@ -7,6 +7,11 @@ npm install helmet
 npm install dotenv
 npx prisma generate
 npx prisma db pull
+npm install redis
+
+------------FILAS REDIS---------
+npm install @nestjs/bull bull redis
+npm install --save-dev @types/bull
 
 ---------- PDF ----------------
 npm install pdfmake
