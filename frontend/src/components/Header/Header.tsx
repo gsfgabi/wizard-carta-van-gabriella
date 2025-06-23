@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserIcon, ClockIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
+import { FaUser } from 'react-icons/fa';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -32,35 +33,49 @@ const Header: React.FC<HeaderProps> = ({ onLogout, onLogoClick }) => {
         <img
           src="/logo.png"
           alt="Plugbank"
-          className="h-12 cursor-pointer object-contain"
+          width={120}
+          height={48}
+          className="w-24 sm:w-32 md:w-40 h-auto cursor-pointer object-contain"
           onClick={onLogoClick}
         />
         <div className="relative" ref={menuRef}>
           <button
-            className="flex items-center justify-center bg-[#8D44AD] text-white rounded-full h-10 w-10 hover:bg-[#7d379c] transition-colors duration-200"
+            className="flex items-center justify-center bg-[#8D44AD] text-white rounded-full h-12 w-12 hover:bg-[#7d379c] transition-colors duration-200 shadow-lg border-2 border-white"
             onClick={() => setOpen((v) => !v)}
             title="Usuário"
             type="button"
+            aria-expanded={open}
+            style={{ padding: 0 }}
           >
-            <UserIcon className="h-6 w-6" />
+            <FaUser size={28} color="#fff" style={{ filter: 'drop-shadow(0 1px 2px #0008)' }} />
           </button>
           {open && (
-            <div className="absolute right-0 mt-2 w-56 bg-[#8D44AD] border border-[#7d379c] rounded-lg shadow-xl z-50 overflow-hidden animate-fade-in">
+            <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in border border-[#ececec] transition-all duration-200 ease-in-out" style={{ minWidth: 220, boxShadow: '0 8px 32px 0 rgba(141,68,173,0.10)' }}>
+              <div className="px-6 pt-4 pb-2 bg-white">
+                <span className="block text-xs font-semibold text-[#8D44AD] tracking-widest uppercase opacity-80 select-none">Conta</span>
+              </div>
+              <div className="h-px bg-[#ececec] mx-4" />
               <a
                 href="/historico"
-                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-[#7d379c] transition-colors"
+                className="flex items-center gap-3 px-6 py-3 text-[#8D44AD] font-normal bg-white transition-all duration-200 ease-in-out text-base outline-none group rounded-none focus:outline-[#8D44AD] focus:outline-2 focus:z-10 hover:bg-[#8D44AD] hover:text-white focus:bg-[#8D44AD] focus:text-white"
                 onClick={() => setOpen(false)}
+                tabIndex={0}
+                style={{ borderRadius: 0 }}
               >
-                <ClockIcon className="h-5 w-5 text-white" />
+                <ClockIcon className="h-5 w-5 text-[#8D44AD] group-hover:text-white group-focus:text-white transition-colors" style={{ minWidth: 20 }} />
                 <span>Histórico</span>
               </a>
+              <div className="h-px bg-[#ececec] mx-4" />
               <button
-                className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#7d379c] transition-colors"
+                className="w-full flex items-center gap-3 px-6 py-3 text-[#8D44AD] font-normal bg-white transition-all duration-200 ease-in-out text-base outline-none group rounded-none focus:outline-[#8D44AD] focus:outline-2 focus:z-10 hover:bg-[#8D44AD] hover:text-white focus:bg-[#8D44AD] focus:text-white"
                 onClick={() => { setOpen(false); onLogout(); }}
+                tabIndex={0}
+                style={{ borderRadius: 0 }}
               >
-                <ArrowRightStartOnRectangleIcon className="h-5 w-5 text-white" />
+                <ArrowRightStartOnRectangleIcon className="h-5 w-5 text-[#8D44AD] group-hover:text-white group-focus:text-white transition-colors" style={{ minWidth: 20 }} />
                 <span>Sair</span>
               </button>
+              <div className="pb-2" />
             </div>
           )}
         </div>

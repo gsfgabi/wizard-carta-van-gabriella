@@ -5,6 +5,7 @@ import { Button } from '../components/Form/Button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { isValidCNPJ, isValidToken } from '../utils/validation'; 
 import { maskCNPJ } from '../utils/mask';
+import { api } from '../services/api';
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -38,16 +39,29 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setError('');
     setLoading(true);
 
-    // Simula uma requisição 
-    setTimeout(() => {
-      setLoading(false);
-      // Simulação de resposta da API
-      if (cnpj === '1' && token === '111111') {
+    try {
+      const response = await api.post('/auth/login', {
+        cnpj: cnpj.replace(/\D/g, ''),
+        token
+      });
+      const jwtToken = response.data.access_token;
+      if (jwtToken) {
+        localStorage.setItem('token', jwtToken);
+        localStorage.setItem('cnpj', cnpj.replace(/\D/g, ''));
+        setLoading(false);
         onLoginSuccess();
+      } else {
+        setLoading(false);
+        setError('Resposta inválida do servidor.');
+      }
+    } catch (err: any) {
+      setLoading(false);
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
       } else {
         setError('CNPJ ou Token inválido.');
       }
-    }, 1200);
+    }
   };
 
   return (
@@ -62,7 +76,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         <img
           src="/logo.png"
           alt="plugbank"
-          className="h-16 mb-7 mt-2"
+          width={120}
+          height={48}
+          className="h-16 mb-7 mt-2 w-auto"
         />
         <h2 className="text-center font-bold text-xl mb-2 text-black">Seja bem vindo!</h2>
         <p className="text-center text-base mb-7 text-black">
@@ -93,11 +109,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               maxLength={32}
               autoComplete="off"
             />
-            <span
-              className="absolute right-3 top-9 cursor-pointer"
+            <button
+              type="button"
+              className="absolute right-3 inset-y-0 my-auto min-w-[44px] min-h-[44px] flex items-center justify-center bg-transparent border-none p-0 m-0 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8D44AD]"
+              style={{ boxShadow: 'none' }}
               onClick={() => setShowToken((v) => !v)}
-              tabIndex={0}
-              role="button"
               aria-label={showToken ? 'Ocultar token' : 'Mostrar token'}
             >
               {showToken ? (
@@ -105,7 +121,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               ) : (
                 <EyeIcon className="h-5 w-5 text-gray-500" />
               )}
-            </span>
+            </button>
             {!tokenValid && token.length > 0 && (
               <div className="text-red-600 text-xs mt-1">O token deve ter pelo menos 6 caracteres.</div>
             )}

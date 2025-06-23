@@ -20,7 +20,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // ✅ Habilita a validação dos DTOs
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()

@@ -1,14 +1,25 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { GeneratePdfsDto } from './dto/generate-pdfs';
 import { generatePdfBufferNexxera } from './pdf-models/nexxera-model';
 import { generatePdfBufferFinnet } from './pdf-models/finnet-model';
 import * as JSZip from 'jszip';
 import { Buffer } from 'buffer';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class GeneratePdfsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectQueue('pdf-generation') private pdfQueue: Queue,
+    private redisService: RedisService,
+  ) {}
+
+  async enqueuePdfGeneration(dto: GeneratePdfsDto) {
+    await this.pdfQueue.add(dto);
+  }
 
   async generateReports(dto: GeneratePdfsDto): Promise<{ buffer: Buffer; isZip: boolean }> {
     this.validateInput(dto);
@@ -44,7 +55,7 @@ export class GeneratePdfsService {
         };
 
         const pdf = await this.generatePdf(data, vanType);
-        const filename = `relatorio_produto_${product}_van_${vanType}.pdf`;
+        const filename = `relatorio_produto_${product.name}_van_${vanType}.pdf`;
 
         zip.file(filename, pdf);
       }
@@ -64,53 +75,12 @@ export class GeneratePdfsService {
     }
   }
 
-  async generateMultipleFromId(id: number): Promise<{ buffers: { filename: string; buffer: Buffer }[] }> {
-    const record = await this.prisma.authorization_letters.findUnique({
-      where: { id },
-      include: {
-        authorization_letters_products: {
-          include: {
-            products: true,
-          },
-        },
-        authorization_letters_van_types: true,
-        banks: true,
-      },
-    });
-  
-    if (!record) {
-      throw new BadRequestException('Registro não encontrado');
-    }
+  async generateMultipleFromDto(dto: GeneratePdfsDto): Promise<{ filename: string; buffer: Buffer }[]> {
+    this.validateInput(dto);
+    console.log("entrou aqui");
 
-    console.log(record);
-  
-    const dto: GeneratePdfsDto = {
-      manager_name: record.manager_name,
-      corporate_name: record.corporate_name,
-      responsible_person_name: record.responsible_person_name,
-      cnpj: record.cnpj,
-      branch_number: record.branch_number,
-      account_number: record.account_number,
-      agreement_number: record.agreement_number,
-      responsible_person_email: record.responsible_person_email,
-      responsible_person_cellphone: record.responsible_person_cellphone,
-      manager_email: record.manager_email,
-      manager_cellphone: record.manager_cellphone,
-      id_cnabs: record.id_cnabs.toString(),
-      id_products: record.authorization_letters_products.map(p => ({
-        id: p.products.id,
-        name: p.products.name,
-      })),
-      id_van_types: record.authorization_letters_van_types.map((v) => v.id_van_types),
-    };
-    
-  
-    if (!dto.id_products.length || !dto.id_van_types.length) {
-      throw new BadRequestException('Produtos ou VANs não encontrados');
-    }
-  
     const buffers: { filename: string; buffer: Buffer }[] = [];
-  
+
     for (const product of dto.id_products) {
       for (const vanType of dto.id_van_types) {
         const localDto: GeneratePdfsDto = {
@@ -118,14 +88,29 @@ export class GeneratePdfsService {
           id_products: [product],
           id_van_types: [vanType],
         };
-  
+
         const buffer = await this.generatePdf(localDto, vanType);
-        const filename = `relatorio_produto_${product}_van_${vanType}.pdf`;
-  
+        const filename = `relatorio_produto_${product.name}_van_${vanType}.pdf`;
+
         buffers.push({ filename, buffer });
+        console.log(`PDF gerado: ${filename}`);
       }
     }
+
+    return buffers;
+  }
+
+  async generateAndCachePdfs(dto: GeneratePdfsDto) {
+    const buffers = await this.generateMultipleFromDto(dto);
   
-    return { buffers };
-  }  
+    const pdfs = buffers.map(({ filename, buffer }) => ({
+      filename,
+      data: buffer.toString('base64'),
+    }));
+  
+    const cacheKey = `pdfs:${dto.id}`;
+    await this.redisService.set(cacheKey, pdfs);
+    return { cacheKey, pdfs };
+  }
+  
 }

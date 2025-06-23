@@ -5,11 +5,26 @@ import { generatePdfBufferFinnet } from './pdf-models/finnet-model';
 import { PdfModelsController } from './pdf-model-controller';
 import { GeneratePdfsController } from './generate-pdfs.controller';
 import { PrismaModule } from '../prisma/prisma.module'; 
+import { GeneratePdfsProcessor } from './generate-pdfs.processor';
+import { RedisService } from '../redis/redis.service';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    PrismaModule,
+    BullModule.registerQueue({
+      name: 'pdf-generation',
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD || undefined,
+      },
+    }),
+  ],
   controllers: [PdfModelsController, GeneratePdfsController],
   providers: [
+    GeneratePdfsProcessor,
+    RedisService,
     GeneratePdfsService,
     {
       provide: 'PDF_GENERATOR_NEXXERA',
@@ -20,5 +35,6 @@ import { PrismaModule } from '../prisma/prisma.module';
       useValue: generatePdfBufferFinnet,
     },
   ],
+  exports: [GeneratePdfsService],
 })
 export class GeneratePdfsModule {}

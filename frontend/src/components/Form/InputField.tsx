@@ -28,10 +28,17 @@ const InputField: React.FC<InputFieldProps> = ({ label, error, className = '', .
         ${error ? 'border-red-500' : ''}
         ${className}
       `}
+      aria-invalid={!!error}
+      aria-describedby={error ? `${props.id || label}-error` : undefined}
       {...props}
     />
-    <span className={`block text-xs h-4 ${error ? 'text-red-500' : 'text-transparent'}`}>
-      {error || '   '} {/* caractere invisível para ocupar espaço reservado para erros mesmo que não haja um*/}
+    <span
+      id={`${props.id || label}-error`}
+      className={`block text-xs h-4 ${error ? 'text-red-500' : 'text-transparent'}`}
+      aria-live="polite"
+      style={{ minHeight: '1rem', display: 'block' }}
+    >
+      {error || '\u00A0'}
     </span>
   </div>
 );
