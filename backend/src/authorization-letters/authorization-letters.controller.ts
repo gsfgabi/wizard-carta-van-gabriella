@@ -2,8 +2,10 @@ import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { AuthorizationService } from './authorization-letters.service';
 import { CreateAuthorizationLettersDto } from './dto/create-authorization-letters.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('jwt')
 @Controller('authorization')
 export class AuthorizationController {
   constructor(private readonly authService: AuthorizationService) {}

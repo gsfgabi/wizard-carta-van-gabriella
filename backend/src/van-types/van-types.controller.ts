@@ -1,10 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { VanTypesService } from './van-types.service';
-import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { VanTypesDto } from './dto/select-van-types.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('jwt')
 @ApiTags('Van Types')
 @Controller('van-types')
 export class VanTypesController {

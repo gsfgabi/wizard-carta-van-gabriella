@@ -1,9 +1,10 @@
 import { Controller, Get, Param, BadRequestException, UseGuards } from '@nestjs/common';
 import { GeneratePdfsService } from './generate-pdfs.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('jwt')
 @ApiTags('Generate PDFs')
 @Controller('pdfs')
 export class GeneratePdfsController {
