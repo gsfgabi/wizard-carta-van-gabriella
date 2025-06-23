@@ -26,8 +26,8 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
         table: {
           widths: ['*'],
           body: [
-            [{ text: '[LOGO]\n' + corporate_name, alignment: 'center', margin: [0, 10] }],
-            [{ text: 'Carta Circular', alignment: 'center' }]
+            [{ text: '[LOGO]\n' + corporate_name, alignment: 'center', margin: [0, 10, 0, 10] }],
+            [{ text: 'Carta Circular', alignment: 'center' }] // segunda linha centralizada também
           ]
         },
         margin: [0, 10]
@@ -37,35 +37,39 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
 
       {
         columns: [
-          { text: `Banco: ${bank_name}` },
-          { text: `Agência: ${branch_number}` }
-        ]
+          { text: [{ text: 'Banco: ', bold: true }, bank_name], margin: [0, 0, 10, 0] },
+          { text: [{ text: 'Agência: ', bold: true }, branch_number] }
+        ],
+        margin: [0, 0, 0, 5]
       },
 
       {
         columns: [
-          { text: 'Cidade: __________________' },
-          { text: 'UF: ____' }
-        ]
+          { text: [{ text: 'Cidade: ', bold: true }, '__________________'], margin: [0, 0, 10, 0] },
+          { text: [{ text: 'UF: ', bold: true }, '____'] }
+        ],
+        margin: [0, 0, 0, 10]
       },
 
       {
         text: 'Dados do gerente responsável pela abertura (ou setor responsável pela abertura do processo) (OBRIGATÓRIO):',
-        margin: [0, 10, 0, 0]
+        bold: true,
+        margin: [0, 10, 0, 5]
       },
 
       {
         columns: [
-          { text: `Nome: ${manager_name}` },
-          { text: `Telefone/Celular: ${manager_cellphone}` }
-        ]
+          { text: [{ text: 'Nome: ', bold: true }, manager_name], margin: [0, 0, 10, 0] },
+          { text: [{ text: 'Telefone/Celular: ', bold: true }, manager_cellphone] }
+        ],
+        margin: [0, 0, 0, 5]
       },
 
-      { text: `E-mail: ${manager_email}` },
+      { text: [{ text: 'E-mail: ', bold: true }, manager_email], margin: [0, 0, 0, 10] },
 
       {
-        text: 'Preferência por contato: [ ] E-mail    [ ] Telefone    [ ] Whatsapp    Outro: _______',
-        margin: [0, 5]
+        text: 'Preferência por contato: ( ) E-mail    ( ) Telefone    ( ) Whatsapp    Outro: _______',
+        margin: [0, 5, 0, 10]
       },
 
       {
@@ -84,10 +88,15 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
       { text: 'Prezados Senhores,', margin: [0, 0, 0, 10] },
 
       {
-        text:
-          `Avaliando os processos eletrônicos existentes na ${corporate_name}, 
-percebemos a necessidade de alterarmos a forma de entrega e recebimento de arquivos eletrônicos com bancos, implantando em nossa empresa maior padronização e controle nestes processos.
-Em função de atender estas necessidades de integração, informamos que a VAN NEXXERA TECNOLOGIA E SERVIÇOS S/A ficará responsável pelo tráfego de dados entre a ${corporate_name} e o Banco, para os arquivos da tabela abaixo, em substituição ao atual meio de comunicação.`,
+        text: [
+          'Avaliando os processos eletrônicos existentes na ',
+          { text: 'Nexxera tecnologia e serviços s/a', bold: true },
+          ', percebemos a necessidade de alterarmos a forma de entrega e recebimento de arquivos eletrônicos com bancos, implantando em nossa empresa maior padronização e controle nestes processos.\nEm função de atender estas necessidades de integração, informamos que a ',
+          { text: 'VAN NEXXERA TECNOLOGIA E SERVIÇOS S/A', bold: true },
+          ' ficará responsável pelo tráfego de dados entre a ',
+          corporate_name,
+          ' e o Banco, para os arquivos da tabela abaixo, em substituição ao atual meio de comunicação.'
+        ],
         margin: [0, 0, 0, 10]
       },
 
@@ -95,8 +104,16 @@ Em função de atender estas necessidades de integração, informamos que a VAN 
         table: {
           widths: ['*', '*', '*'],
           body: [
-            ['Serviço no Banco', 'Serviço no Banco', 'Serviço no Banco'],
-            ['[SERVIÇO 1]', '[SERVIÇO 2]', '[SERVIÇO 3]']
+            [
+              { text: 'Serviço no Banco', bold: true, alignment: 'center' },
+              { text: 'Serviço no Banco', bold: true, alignment: 'center' },
+              { text: 'Serviço no Banco', bold: true, alignment: 'center' }
+            ],
+            [
+              { text: '[SERVIÇO 1]', alignment: 'center' },
+              { text: '[SERVIÇO 2]', alignment: 'center' },
+              { text: '[SERVIÇO 3]', alignment: 'center' }
+            ]
           ]
         },
         margin: [0, 0, 0, 10]
@@ -112,14 +129,27 @@ Atenciosamente,`,
         margin: [0, 0, 0, 10]
       },
 
+      // Segunda planilha (última tabela)
       {
         table: {
           widths: ['*', '*'],
           body: [
-            [`RAZÃO SOCIAL: ${corporate_name}`, `CNPJ: ${cnpj}`],
-            [`NOME: ${responsible_person_name}`, `CARGO: ${responsible_person_title}`],
-            [`TELEFONE: ${responsible_person_cellphone}`, `E-MAIL: ${responsible_person_email}`],
-            ['RESPONSÁVEL: [RESP TECNOSPEED]', 'E-MAIL RESP TEC: [RESP. TECNOSPEED]']
+            [
+              { text: [{ text: 'RAZÃO SOCIAL: ', bold: true }, corporate_name] },
+              { text: [{ text: 'CNPJ: ', bold: true }, cnpj] }
+            ],
+            [
+              { text: [{ text: 'NOME: ', bold: true }, responsible_person_name] },
+              { text: [{ text: 'CARGO: ', bold: true }, responsible_person_title] }
+            ],
+            [
+              { text: [{ text: 'TELEFONE: ', bold: true }, responsible_person_cellphone] },
+              { text: [{ text: 'E-MAIL: ', bold: true }, responsible_person_email] }
+            ],
+            [
+              { text: [{ text: 'RESPONSÁVEL: ', bold: true }, '[RESP TECNOSPEED]'] },
+              { text: [{ text: 'E-MAIL RESP: ', bold: true }, '[RESP. TECNOSPEED]'] }
+            ]
           ]
         },
         margin: [0, 20, 0, 0]

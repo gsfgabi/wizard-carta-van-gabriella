@@ -18,7 +18,7 @@ export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Bu
     responsible_person_email,
     responsible_person_cellphone,
     manager_email,
-    manager_cellphone, 
+    manager_cellphone,
   } = data;
 
   const docDefinition = {
@@ -40,26 +40,38 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
       },
       { text: 'Contratante', bold: true, margin: [0, 0, 0, 5] },
       {
-        ul: [
-          `Razão Social: ${corporate_name}`,
-          `CNPJ: ${cnpj}`,
-          `Agência / Conta Corrente: ${branch_number} / ${account_number}`,
-          `Convênio: ${agreement_number}`,
+        text: [
+          { text: 'Razão Social: ', bold: true },
+          `${corporate_name}\n`,
+          { text: 'CNPJ: ', bold: true },
+          `${cnpj}\n`,
+          { text: 'Agência / Conta Corrente: ', bold: true },
+          `${branch_number} / ${account_number}\n`,
+          { text: 'Convênio: ', bold: true },
+          `${agreement_number}`,
         ],
         margin: [0, 0, 0, 10],
       },
       { text: 'Van Contratada', bold: true },
       {
-        text: 'Razão Social: FINNET S/A Tecnologia \nCNPJ: 05.607.266/0001-10',
+        text: [
+          { text: 'Razão Social: ', bold: true },
+          'FINNET S/A Tecnologia\n',
+          { text: 'CNPJ: ', bold: true },
+          '05.607.266/0001-10',
+        ],
         margin: [0, 0, 0, 10],
       },
       { text: 'Produtos Financeiros', bold: true },
       {
-        ul: [ {text: 'Pagamentos'}, {text: 'Boletos'}, {text: 'DDA'}, {text: 'Extrato'} ],
+        text: `( ) Pagamentos\n( ) Boletos\n( ) DDA\n( ) Extrato`,
         margin: [0, 0, 0, 10],
       },
-      { text: 'Ambiente:', bold: true },
-      { text: '( ) Arquivo em produção', margin: [0, 0, 0, 10] },
+      { text: 'Ambiente:', bold: true, margin: [0, 0, 0, 0] },
+      {
+        text: `( ) Arquivo em produção\n\nCNAB:\n( ) 240\n( ) 400`,
+        margin: [0, 0, 0, 10],
+      },
       {
         text:
           'Os custos serão assumidos 100% pela Empresa (alterar para 100% Banco se assim for negociado entre Empresa e Banco)\n\nQualquer dúvida contatar:',
@@ -67,19 +79,25 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
       },
       { text: 'Contato da Empresa', bold: true, margin: [0, 0, 0, 5] },
       {
-        ul: [
-          `Nome: ${responsible_person_name}`,
-          `E-mail: ${responsible_person_email}`,
-          `Telefone: ${responsible_person_cellphone}`,
+        text: [
+          { text: 'Nome: ', bold: true },
+          `${responsible_person_name}\n`,
+          { text: 'E-mail: ', bold: true },
+          `${responsible_person_email}\n`,
+          { text: 'Telefone: ', bold: true },
+          `${responsible_person_cellphone}`,
         ],
         margin: [0, 0, 0, 10],
       },
       { text: 'Contato da VAN FINNET', bold: true, margin: [0, 0, 0, 5] },
       {
-        ul: [
-          'Nome: Bianca e João',
-          'E-mail: pis.posvenda@finnet.com.br',
-          'Telefone: (11) 94457-8493 (11) 99189-2213',
+        text: [
+          { text: 'Nome: ', bold: true },
+          `Bianca e João\n`,
+          { text: 'E-mail: ', bold: true },
+          `pis.posvenda@finnet.com.br\n`,
+          { text: 'Telefone: ', bold: true },
+          `(11) 94457-8493 (11) 99189-2213`,
         ],
         margin: [0, 0, 0, 10],
       },
@@ -89,9 +107,11 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
         margin: [0, 0, 0, 5],
       },
       {
-        ul: [
-          'Nome: [VARIÁVEL NOME RESPONSÁVEL TECNOSPEED]',
-          'E-mail: [VARIÁVEL E-MAIL RESPONSÁVEL TECNOSPEED]',
+        text: [
+          { text: 'Nome: ', bold: true },
+          '[VARIÁVEL NOME RESPONSÁVEL TECNOSPEED]\n',
+          { text: 'E-mail: ', bold: true },
+          '[VARIÁVEL E-MAIL RESPONSÁVEL TECNOSPEED]',
         ],
         margin: [0, 0, 0, 10],
       },
@@ -101,22 +121,41 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
         margin: [0, 0, 0, 5],
       },
       {
-        ul: [
-          `Nome: ${manager_name}`,
-          `Telefone: ${manager_cellphone}`,
-          `E-mail: ${manager_email}`,
+        text: [
+          { text: 'Nome: ', bold: true },
+          `${manager_name}\n`,
+          { text: 'Telefone: ', bold: true },
+          `${manager_cellphone}\n`,
+          { text: 'E-mail: ', bold: true },
+          `${manager_email}`,
         ],
         margin: [0, 0, 0, 10],
       },
       {
         text:
           'Colocamo-nos à disposição para quaisquer esclarecimentos adicionais.\n\nAtenciosamente,',
-        margin: [0, 0, 0, 20],
+        bold: true,
         alignment: 'right',
+        margin: [0, 0, 0, 40], 
       },
       {
-        text: '________________________________\nAssinatura do Responsável pela empresa',
+        canvas: [
+          {
+            type: 'line',
+            x1: 0,
+            y1: 0,
+            x2: 250,
+            y2: 0,
+            lineWidth: 1,
+          },
+        ],
         alignment: 'right',
+        margin: [0, 0, 0, 0], 
+      },
+      {
+        text: 'Assinatura do Responsável pela empresa',
+        alignment: 'right',
+        margin: [0, -9, 0, 0], 
       },
     ],
     styles: {
