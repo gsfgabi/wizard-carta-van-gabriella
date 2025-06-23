@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-import { Controller, Get, Param, BadRequestException, UseGuards } from '@nestjs/common';
-import { GeneratePdfsService } from './generate-pdfs.service';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-=======
 import { Controller, Get, Post, Param, BadRequestException, UseGuards, Body } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
->>>>>>> 768a83f1845d8d5934a519c49e7e443283449a54
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { RedisService } from '../redis/redis.service';
 import { GeneratePdfsService } from './generate-pdfs.service';
 import { GeneratePdfsDto } from './dto/generate-pdfs';

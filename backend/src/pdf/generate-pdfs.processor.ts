@@ -12,7 +12,6 @@ export class GeneratePdfsProcessor {
   ) {}
 
   @Process()
-  @Process()
   async handlePdfGeneration(job: Job<GeneratePdfsDto>) {
     console.log('Job recebido:', job.id, job.data);
     const dto = job.data;
