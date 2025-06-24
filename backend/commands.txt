@@ -8,6 +8,7 @@ npm install dotenv
 npx prisma generate
 npx prisma db pull
 npm install redis
+npm install --save-dev cpx
 
 ------------FILAS REDIS---------
 npm install @nestjs/bull bull redis
