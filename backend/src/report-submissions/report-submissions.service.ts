@@ -44,13 +44,13 @@ export class ReportSubmissionsService {
       });
       const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 
-      await this.emailService.sendReportEmail(dto.responsible_person_email, zipBuffer, true);
+      await this.emailService.sendReportEmail(dto.responsible_person_email, dto.responsible_person_name, zipBuffer, true);
 
       for (const [index, pdfBuffer] of cachedBuffers.entries()) {
         await this.prepareAndSendToZapier(`relatorio_${index + 1}`, pdfBuffer, dto);
       }
     } else {
-      await this.emailService.sendReportEmail(dto.responsible_person_email, cachedBuffers[0], false);
+      await this.emailService.sendReportEmail(dto.responsible_person_email, dto.responsible_person_name, cachedBuffers[0], false);
       await this.prepareAndSendToZapier(dto.id_products[0].name, cachedBuffers[0], dto);
     }
   }
