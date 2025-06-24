@@ -18,7 +18,7 @@ export class AuthorizationService {
       id_banks: Number(data.id_banks),
       id_cnabs: Number(data.id_cnabs),
       id_products: data.id_products,
-      id_van_types: data.id_van_types,
+      // id_van_types: data.id_van_types,
     };
 
     await validateForeignKeys(foreignKeysToValidate);
@@ -48,9 +48,9 @@ export class AuthorizationService {
           authorization_letters_products: {
             create: data.id_products.map((id) => ({ id_products: id })),
           },
-          authorization_letters_van_types: {
-            create: data.id_van_types.map((id) => ({ id_van_types: id })),
-          },
+          // authorization_letters_van_types: {
+          //   create: data.id_van_types.map((id) => ({ id_van_types: id })),
+          // },
         },
         include: {
           banks: true,
