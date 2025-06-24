@@ -121,30 +121,24 @@ export interface VanTypeData {
 }
 
 export interface AuthorizationLetterData {
-  company: {
-    corporate_name: string;
-    cnpj: string;
-  };
-  bank: {
-    id: number;
-    bank_name: string;
-    branch_number: string;
-    account_number: string;
-    agreement_number: string;
-  };
-  responsible_person: {
-    responsible_person_name: string;
-    responsible_person_email: string;
-    responsible_person_cellphone: string;
-  };
-  manager: {
-    manager_name: string;
-    manager_email: string;
-    manager_cellphone: string;
-  };
-  id_products: { id: number }[];
-  id_van_types: { id: number }[];
-  id_cnabs: { id: number }[];
+  cnpj: string;
+  corporate_name: string;
+  responsible_person_name: string;
+  responsible_person_title: string;
+  responsible_person_cellphone: string;
+  responsible_person_email: string;
+  manager_name: string;
+  manager_cellphone: string;
+  manager_email: string;
+  branch_number: string;
+  branch_dv: string;
+  account_number: string;
+  account_dv: string;
+  agreement_number: string;
+  id_banks: string;
+  id_cnabs: string;
+  id_products: number[];
+  id_van_types: number[];
 }
 
 export const getBanks = async (): Promise<BankData[]> => {
@@ -304,7 +298,7 @@ export const sendEmail = async (
 export const createAuthorizationLetter = async (data: AuthorizationLetterData): Promise<any> => {
   try {
     return await retryRequest(async () => {
-      const response = await api.post('/auth/authorization-letters', data);
+      const response = await api.post('/authorization-letters/validate', data);
       return response.data;
     });
   } catch (error) {
@@ -394,6 +388,42 @@ export const getAllBankData = async (bankId: string): Promise<{
     });
   } catch (error) {
     console.error('Erro ao buscar dados do banco:', error);
+    throw error;
+  }
+};
+
+export const validateAuthorizationLetter = async (data: AuthorizationLetterData): Promise<any> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.post('/authorization-letters/validate', data);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao validar carta de autorização:', error);
+    throw error;
+  }
+};
+
+export const generatePDFs = async (data: AuthorizationLetterData): Promise<{ id_request: string }> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.post('/pdfs/generate', data);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao gerar PDFs:', error);
+    throw error;
+  }
+};
+
+export const getPDFStatus = async (pdfId: string): Promise<{ status: string; pdfs?: Array<{ filename: string; data: string }> }> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.get(`/pdfs/status/${pdfId}`);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao verificar status do PDF:', error);
     throw error;
   }
 };

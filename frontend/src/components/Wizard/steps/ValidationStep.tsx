@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo, useMemo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import toast from "react-hot-toast";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -9,9 +9,70 @@ import type { VanTypeData, ProductData, CNABData, BankData } from "../../../serv
 import { FinnetLetterDisplay } from "../letters/FinnetLetterDisplay";
 import { NexxeraLetterDisplay } from "../letters/NexxeraLetterDisplay";
 import ValidationStepSkeleton from "../../Skeleton/ValidationStepSkeleton";
+import { getPDFStatus } from '../../../services/api';
 
 // Configuração do worker do PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+// Componente otimizado para visualização de PDF
+const PDFViewer = memo(({ blob, filename }: { blob: Blob; filename: string }) => {
+  const [url, setUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (blob) {
+      const objectUrl = URL.createObjectURL(blob);
+      setUrl(objectUrl);
+      setLoading(false);
+
+      // Cleanup function
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
+    }
+  }, [blob]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8D44AD]"></div>
+        <span className="ml-2 text-gray-600">Carregando PDF...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8 text-red-600">
+        <p>Erro ao carregar PDF: {error}</p>
+      </div>
+    );
+  }
+
+  if (!url) {
+    return (
+      <div className="text-center p-8 text-gray-600">
+        <p>PDF não disponível</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+      <iframe
+        src={url}
+        className="w-full h-96"
+        title={filename}
+        onLoad={() => setLoading(false)}
+        onError={() => {
+          setError('Erro ao carregar PDF');
+          setLoading(false);
+        }}
+      />
+    </div>
+  );
+});
 
 interface ValidationStepProps {
   selectedProducts: string[];
@@ -28,8 +89,10 @@ interface ValidationStepProps {
     cnabs: CNABData[];
     productName: string;
   }[];
+  pdfData?: Array<{ filename: string; blob: Blob }>;
   onConfirmAndSend: () => Promise<void>;
   loadingConfirmAndSend: boolean;
+  loadingPdfs?: boolean;
   products: ProductData[];
   vanTypes: VanTypeData[];
   cnabs: CNABData[];
@@ -56,8 +119,10 @@ export const ValidationStep = memo(
     onBack,
     selectedBank,
     generatedLetterContents,
+    pdfData = [],
     onConfirmAndSend,
     loadingConfirmAndSend,
+    loadingPdfs = false,
     products,
     vanTypes,
     cnabs,
@@ -70,6 +135,94 @@ export const ValidationStep = memo(
     const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
     const [internalLoadingConfirmAndSend, setInternalLoadingConfirmAndSend] =
       useState(false);
+    
+    // Novos estados para o fluxo de PDF
+    const [pdfGenerationId, setPdfGenerationId] = useState<string | null>(null);
+    const [pdfStatus, setPdfStatus] = useState<string>('pending');
+    const [pdfBlobs, setPdfBlobs] = useState<Array<{ filename: string; blob: Blob }>>([]);
+    const [statusError, setStatusError] = useState<string | null>(null);
+
+    // Recuperar o ID do localStorage e iniciar polling
+    useEffect(() => {
+      const savedId = localStorage.getItem('pdfGenerationId');
+      if (savedId) {
+        setPdfGenerationId(savedId);
+        checkPDFStatus(savedId);
+      }
+    }, []);
+
+    // Função para verificar o status dos PDFs
+    const checkPDFStatus = async (id: string) => {
+      try {
+        setLoadingPdf(true);
+        setStatusError(null);
+        
+        console.log('Verificando status para ID:', id);
+        const response = await getPDFStatus(id);
+        console.log('Resposta do status:', response);
+        
+        setPdfStatus(response.status);
+        
+        if ((response.status === 'ready' || response.status === 'done') && response.pdfs && response.pdfs.length > 0) {
+          console.log('PDFs prontos:', response.pdfs);
+          // Converter base64 para Blob
+          const blobs = response.pdfs.map(pdf => {
+            try {
+              console.log('Processando PDF:', pdf.filename);
+              const binaryString = atob(pdf.data);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              const blob = new Blob([bytes], { type: 'application/pdf' });
+              console.log('Blob criado para:', pdf.filename, 'tamanho:', blob.size);
+              return {
+                filename: pdf.filename,
+                blob: blob
+              };
+            } catch (error) {
+              console.error('Erro ao converter PDF:', pdf.filename, error);
+              throw new Error(`Erro ao processar PDF ${pdf.filename}`);
+            }
+          });
+          console.log('Blobs criados:', blobs);
+          setPdfBlobs(blobs);
+          setLoadingPdf(false);
+          toast.success('PDFs prontos para visualização!');
+        } else if (response.status === 'pending' || response.status === 'processing') {
+          console.log('Status ainda pendente/processando, continuando polling...');
+          // Continuar polling
+          setTimeout(() => checkPDFStatus(id), 2000);
+        } else {
+          console.log('Status desconhecido:', response.status);
+          setStatusError('Status desconhecido: ' + response.status);
+          setLoadingPdf(false);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar status:', error);
+        setStatusError('Erro ao verificar status dos PDFs');
+        setLoadingPdf(false);
+      }
+    };
+
+    // Filtrar PDFs baseado no produto selecionado
+    const filteredPdfs = pdfBlobs.filter((pdf) => {
+      const filename = pdf.filename.toLowerCase();
+      if (!selectedProduct) return true;
+      
+      // Extrair o ID do produto do nome do arquivo
+      const productMatch = filename.match(/produto_(\d+)/);
+      if (productMatch) {
+        const productId = productMatch[1];
+        return productId === selectedProduct;
+      }
+      return true;
+    });
+
+    console.log('PDFs filtrados:', filteredPdfs);
+    console.log('PDF atual:', filteredPdfs[currentLetterIndex]);
+    console.log('Status atual:', pdfStatus);
+    console.log('Loading PDF:', loadingPdf);
 
     const filteredLetters = generatedLetterContents.filter((letter) =>
       letter.productInfo.some((p) => p.id.toString() === selectedProduct)
@@ -149,6 +302,7 @@ export const ValidationStep = memo(
     };
 
     const currentLetter = filteredLetters[currentLetterIndex];
+    const currentPdf = filteredPdfs[currentLetterIndex];
 
     // Renderiza o esqueleto se estiver carregando dados
     if (!products.length && !vanTypes.length) {
@@ -176,64 +330,24 @@ export const ValidationStep = memo(
           finalizar.
         </p>
 
-        {/* Resumo das Seleções */}
-        {/* <div className="space-y-6 mb-8">
-          <div>
-            <h3 className="text-lg font-semibold text-black mb-2">
-              Produtos Selecionados
-            </h3>
-            <div className="space-y-2">
-              {selectedProducts.length === 0 ? (
-                <p className="text-gray-600">Nenhum produto selecionado.</p>
-              ) : products.length === 0 ? (
-                <p className="text-gray-600">
-                  Carregando produtos selecionados...
-                </p>
-              ) : (
-                selectedProducts.map((productId) => {
-                  const product = products.find(
-                    (p) => p.id.toString() === productId
-                  );
-                  return product ? (
-                    <div key={productId} className="flex items-center">
-                      <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
-                      <span className="text-gray-700">{product.name}</span>
-                    </div>
-                  ) : null;
-                })
-              )}
-            </div>
+        {/* Status da geração de PDFs */}
+        {pdfGenerationId && (
+          <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+            <h4 className="font-semibold text-black mb-2">Status da Geração:</h4>
+            {statusError ? (
+              <p className="text-red-600">{statusError}</p>
+            ) : pdfStatus === 'pending' ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8D44AD] mr-2"></div>
+                <span className="text-gray-700">Gerando PDFs...</span>
+              </div>
+            ) : pdfStatus === 'ready' ? (
+              <p className="text-green-600">PDFs prontos!</p>
+            ) : (
+              <p className="text-gray-700">Status: {pdfStatus}</p>
+            )}
           </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-black mb-2">
-              Tipos de VAN Selecionados
-            </h3>
-            <div className="space-y-2">
-              {selectedVanTypes.length === 0 ? (
-                <p className="text-gray-600">
-                  Nenhum tipo de VAN selecionado.
-                </p>
-              ) : vanTypes.length === 0 ? (
-                <p className="text-gray-600">
-                  Carregando tipos de VAN selecionados...
-                </p>
-              ) : (
-                selectedVanTypes.map((vanTypeId) => {
-                  const vanType = vanTypes.find(
-                    (vt) => vt.id.toString() === vanTypeId
-                  );
-                  return vanType ? (
-                    <div key={vanTypeId} className="flex items-center">
-                      <span className="w-2 h-2 bg-[#8D44AD] rounded-full mr-2"></span>
-                      <span className="text-gray-700">{vanType.type}</span>
-                    </div>
-                  ) : null;
-                })
-              )}
-            </div>
-          </div>
-        </div> */}
+        )}
 
         {/* Seletor de Produto */}
         {selectedProducts.length > 1 && products.length > 0 && (
@@ -272,7 +386,7 @@ export const ValidationStep = memo(
         {/* Container principal para a carta e botões de navegação */}
         <div className="relative flex items-center justify-center mb-6">
           {/* Botão de Navegação Anterior */}
-          {filteredLetters.length > 1 && (
+          {(filteredPdfs.length > 1 || filteredLetters.length > 1) && (
             <Button
               type="button"
               className="absolute left-0 z-10 p-2 bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] disabled:opacity-50 transition-colors duration-200 -translate-y-1/2 top-1/2"
@@ -284,34 +398,55 @@ export const ValidationStep = memo(
             </Button>
           )}
 
-          {currentLetter && (
-            <div className="flex-grow max-w-full px-12 py-4">
-              <h4 className="font-semibold text-black mb-2">
-                Carta: {currentLetter.type} - {currentLetter.productName}
-                {filteredLetters.length > 1 &&
-                  ` (${currentLetterIndex + 1} de ${filteredLetters.length})`}
-              </h4>
-              {currentLetter.type === "Finnet" && (
-                <FinnetLetterDisplay data={currentLetter} />
-              )}
-              {currentLetter.type === "Nexxera" && (
-                <NexxeraLetterDisplay data={currentLetter} />
-              )}
-              {!["Finnet", "Nexxera"].includes(currentLetter.type) && (
-                <div className="whitespace-pre-wrap text-sm text-gray-800">
-                  {currentLetter.content}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Exibir PDF se disponível, senão exibir carta tradicional */}
+          <div className="flex-grow max-w-full px-12 py-4">
+            {loadingPdf ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8D44AD]"></div>
+                <span className="ml-2 text-gray-600">Verificando status dos PDFs...</span>
+              </div>
+            ) : currentPdf ? (
+              <div>
+                <h4 className="font-semibold text-black mb-2">
+                  PDF: {currentPdf.filename}
+                  {(filteredPdfs.length > 1) &&
+                    ` (${currentLetterIndex + 1} de ${filteredPdfs.length})`}
+                </h4>
+                <PDFViewer blob={currentPdf.blob} filename={currentPdf.filename} />
+              </div>
+            ) : currentLetter ? (
+              <div>
+                <h4 className="font-semibold text-black mb-2">
+                  Carta: {currentLetter.type} - {currentLetter.productName}
+                  {filteredLetters.length > 1 &&
+                    ` (${currentLetterIndex + 1} de ${filteredLetters.length})`}
+                </h4>
+                {currentLetter.type === "Finnet" && (
+                  <FinnetLetterDisplay data={currentLetter} />
+                )}
+                {currentLetter.type === "Nexxera" && (
+                  <NexxeraLetterDisplay data={currentLetter} />
+                )}
+                {!["Finnet", "Nexxera"].includes(currentLetter.type) && (
+                  <div className="whitespace-pre-wrap text-sm text-gray-800">
+                    {currentLetter.content}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center p-8 text-gray-600">
+                Nenhum documento disponível para visualização.
+              </div>
+            )}
+          </div>
 
           {/* Botão de Navegação Próximo */}
-          {filteredLetters.length > 1 && (
+          {(filteredPdfs.length > 1 || filteredLetters.length > 1) && (
             <Button
               type="button"
               className="absolute right-0 z-10 p-2 bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] disabled:opacity-50 transition-colors duration-200 -translate-y-1/2 top-1/2"
               onClick={handleNextLetter}
-              disabled={currentLetterIndex === filteredLetters.length - 1}
+              disabled={currentLetterIndex === (filteredPdfs.length > 0 ? filteredPdfs.length - 1 : filteredLetters.length - 1)}
               aria-label="Próxima carta"
             >
               <ChevronRightIcon className="h-6 w-6" aria-hidden="true" />
@@ -325,7 +460,7 @@ export const ValidationStep = memo(
             type="button"
             className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
             onClick={onBack}
-            disabled={loadingPdf || loadingConfirmAndSend}
+            disabled={loadingPdf || loadingConfirmAndSend || loadingPdfs}
           >
             Voltar
           </Button>
@@ -338,14 +473,15 @@ export const ValidationStep = memo(
             disabled={
               loadingPdf ||
               loadingConfirmAndSend ||
+              loadingPdfs ||
               selectedProducts.length === 0 ||
               selectedVanTypes.length === 0 ||
-              filteredLetters.length === 0
+              (filteredLetters.length === 0 && filteredPdfs.length === 0)
             }
             title={
               selectedProducts.length === 0 || selectedVanTypes.length === 0
                 ? "Selecione produtos e tipos de VAN para continuar."
-                : filteredLetters.length === 0
+                : (filteredLetters.length === 0 && filteredPdfs.length === 0)
                 ? "Nenhuma carta gerada para os produtos e tipos de VAN selecionados."
                 : ""
             }
