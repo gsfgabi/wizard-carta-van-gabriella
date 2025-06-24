@@ -7,6 +7,7 @@ import { RedisService } from '../redis/redis.service';
 import { GeneratePdfsService } from './generate-pdfs.service';
 import { GeneratePdfsDto } from './dto/generate-pdfs';
 import { randomUUID } from 'crypto';
+import { CreateAuthorizationLettersDto } from 'src/authorization-letters/dto/create-authorization-letters.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('jwt')
@@ -20,7 +21,7 @@ export class GeneratePdfsController {
   ) {}
 
   @Post('generate')
-  async generate(@Body() dto: GeneratePdfsDto) {
+  async generate(@Body() dto: CreateAuthorizationLettersDto) {
 
     const requestId = randomUUID();
 

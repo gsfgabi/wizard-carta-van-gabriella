@@ -8,6 +8,7 @@ import * as JSZip from 'jszip';
 import { Buffer } from 'buffer';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
+import { CreateAuthorizationLettersDto } from 'src/authorization-letters/dto/create-authorization-letters.dto';
 
 @Injectable()
 export class GeneratePdfsService {
@@ -17,7 +18,7 @@ export class GeneratePdfsService {
     private redisService: RedisService,
   ) {}
 
-  async enqueuePdfGeneration(dto: GeneratePdfsDto) {
+  async enqueuePdfGeneration(dto: CreateAuthorizationLettersDto) {
     await this.pdfQueue.add(dto);
   }
 
