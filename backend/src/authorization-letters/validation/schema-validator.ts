@@ -39,5 +39,5 @@ export const authorizationLetterSchema: Schema = {
   id_banks: [{ required: true }, { type: 'number' }],
   id_cnabs: [{ required: true }, { type: 'number' }],
   id_products: [{ required: true }, { type: 'array', min: 1 }],
-  id_van_types: [{ required: true }, { type: 'array', min: 1 }],
+  // id_van_types: [{ required: true }, { type: 'array', min: 1 }],
 };
