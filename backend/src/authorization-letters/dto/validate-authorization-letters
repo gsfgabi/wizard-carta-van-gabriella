@@ -8,7 +8,7 @@ import {
   IsInt,
 } from 'class-validator';
 
-export class CreateAuthorizationLettersDto {
+export class ValidateAuthorizationLettersDto {
   @IsNumberString()
   @Length(14, 14)
   @ApiProperty()
@@ -78,9 +78,4 @@ export class CreateAuthorizationLettersDto {
   @IsInt({ each: true })
   @ApiProperty()
   id_products: number[];
-
-  @IsArray()
-  @IsInt({ each: true })
-  @ApiProperty()
-  id_van_types: number[];
 }
