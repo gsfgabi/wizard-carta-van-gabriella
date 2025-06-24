@@ -136,7 +136,7 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
           'Colocamo-nos à disposição para quaisquer esclarecimentos adicionais.\n\nAtenciosamente,',
         bold: true,
         alignment: 'right',
-        margin: [0, 0, 0, 40], 
+        margin: [0, -10, 0, 40], 
       },
       {
         canvas: [
@@ -150,12 +150,12 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
           },
         ],
         alignment: 'right',
-        margin: [0, 0, 0, 0], 
+        margin: [0, -12, 0, 0], 
       },
       {
         text: 'Assinatura do Responsável pela empresa',
         alignment: 'right',
-        margin: [0, -9, 0, 0], 
+        margin: [0, -1, 0, 0], 
       },
     ],
     styles: {
