@@ -6,6 +6,6 @@ export class ProfileController {
   @UseGuards(AuthGuard('jwt'))
   @Get()
   getProfile(@Request() req) {
-    return req.user; // vai conter o objeto retornado no validate() do JwtStrategy
+    return req.user;
   }
 }
