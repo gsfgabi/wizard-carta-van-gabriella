@@ -26,11 +26,19 @@ export class EmailService {
   async sendReportEmail(to: string, nomeDestinatario: string, attachment: Buffer, isZip: boolean) {
 
     try {
-      // const templatePath = path.join(__dirname, 'templates', 'authorization-letters.html');
-      const templatePath = path.resolve(
+      const devTemplatePath = path.resolve(
         process.cwd(),
         'src/email/templates/authorization-letters.html',
       );
+      
+      const prodTemplatePath = path.resolve(
+        __dirname,
+        'templates/authorization-letters.html',
+      );
+      
+      const templatePath = fs.existsSync(devTemplatePath)
+        ? devTemplatePath
+        : prodTemplatePath;      
       
       let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
 
