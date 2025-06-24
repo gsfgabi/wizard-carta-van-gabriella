@@ -79,8 +79,8 @@ export class CreateAuthorizationLettersDto {
   @ApiProperty()
   id_products: number[];
 
-  @IsArray()
-  @IsInt({ each: true })
-  @ApiProperty()
-  id_van_types: number[];
+  // @IsArray()
+  // @IsInt({ each: true })
+  // @ApiProperty()
+  // id_van_types: number[];
 }
