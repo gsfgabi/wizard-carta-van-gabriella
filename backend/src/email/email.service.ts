@@ -3,6 +3,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Mantido comentado, conforme seu código original.
 // export interface SendReportEmailOptions {
 //   to: string;
 //   nomeDestinatario: string;
@@ -23,7 +24,7 @@ export class EmailService {
     },
   });
 
-  async sendReportEmail(to: string, nomeDestinatario: string, attachment: Buffer, isZip: boolean) {
+  async sendReportEmail(to: string, recipientName: string, attachment: Buffer, isZip: boolean) {
 
     try {
       const devTemplatePath = path.resolve(
@@ -38,11 +39,22 @@ export class EmailService {
       
       const templatePath = fs.existsSync(devTemplatePath)
         ? devTemplatePath
-        : prodTemplatePath;      
+        : prodTemplatePath;       
       
       let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
 
-      htmlTemplate = htmlTemplate.replace('{{nomeDestinatario}}', nomeDestinatario);
+      const formattedDate = new Date().toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+      const fileFormat = isZip ? 'ZIP' : 'PDF';
+
+      htmlTemplate = htmlTemplate
+        .replace('{{recipientName}}', recipientName)
+        .replace('{{generationDate}}', formattedDate.toUpperCase())
+        .replace('{{fileFormat}}', fileFormat);
+
 
       const filename = isZip ? 'cartas_de_van.zip' : 'carta_de_van.pdf';
       const subject = `Plugbank | Sua Carta de VAN Bancária está disponível`;
