@@ -3,7 +3,7 @@ const pdfMake = require('pdfmake/build/pdfmake');
 const pdfFonts = require('pdfmake/build/vfs_fonts');
 pdfMake.vfs = pdfFonts.vfs;
 
-import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
+import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs.dto';
 
 export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Buffer> {
   const {

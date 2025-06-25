@@ -9,8 +9,7 @@ import {
 } from 'class-validator';
 
 export class CreateAuthorizationLettersDto {
-  // @IsNumberString()
-  // @Length(14, 14)
+  @Length(14, 18)
   @ApiProperty()
   cnpj: string;
 
@@ -25,11 +24,10 @@ export class CreateAuthorizationLettersDto {
   @ApiProperty()
   responsible_person_name: string;
 
-  // @IsNotEmpty()
+  @IsNotEmpty()
   @ApiProperty()
   responsible_person_title: string;
 
-  // @IsNumberString()
   @ApiProperty()
   responsible_person_cellphone: string;
 
@@ -41,7 +39,6 @@ export class CreateAuthorizationLettersDto {
   @ApiProperty()
   manager_name: string;
 
-  // @IsNumberString()
   @ApiProperty()
   manager_cellphone: string;
 
@@ -69,11 +66,9 @@ export class CreateAuthorizationLettersDto {
   @ApiProperty()
   agreement_number: string;
 
-  // @IsNumberString()
   @ApiProperty()
   id_banks: string;
 
-  // @IsNumberString()
   @ApiProperty()
   id_cnabs: string;
 
