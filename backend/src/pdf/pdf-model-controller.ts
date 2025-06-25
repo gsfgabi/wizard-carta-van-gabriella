@@ -3,7 +3,7 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { generatePdfBufferNexxera } from 'src/pdf/pdf-models/nexxera-model';
 import { generatePdfBufferFinnet } from 'src/pdf/pdf-models/finnet-model';
-import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
+import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs.dto';
 
 @ApiTags('PDF Models')
 @Controller('pdf-models')

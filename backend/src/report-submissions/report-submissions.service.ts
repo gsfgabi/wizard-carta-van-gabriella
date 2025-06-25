@@ -86,8 +86,8 @@ export class ReportSubmissionsService {
   }
 
   private async prepareAndSendToZapier(produto: string, buffer: Buffer, dto: GenerateReportsDto): Promise<void> {
-    const cnpj_sh = '11111111111111';
-    const email = 'guilherme.ganassin@tecnospeed.com.br';
+    const cnpj_sh = process.env.CNPJ_SH || '';;
+    const email = process.env.ZAPIER_EMAIL || '';
     const cnpj_cliente = dto.cnpj;
     const arquivoBase64 = buffer.toString('base64');
 

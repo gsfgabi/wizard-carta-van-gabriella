@@ -35,7 +35,7 @@ export class GeneratePdfsController {
 
     const requestId = randomUUID();
 
-    const jobDto = { ...dto, id: requestId };
+    const jobDto = { ...dto, id: requestId};
 
     await this.generatePdfsService.enqueuePdfGeneration(jobDto);
 

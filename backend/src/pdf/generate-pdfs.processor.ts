@@ -1,6 +1,6 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
-import { GeneratePdfsDto } from './dto/generate-pdfs';
+import { GeneratePdfsDto } from './dto/generate-pdfs.dto';
 import { GeneratePdfsService } from './generate-pdfs.service';
 import { RedisService } from '../redis/redis.service';
 

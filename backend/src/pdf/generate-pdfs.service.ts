@@ -1,13 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { GeneratePdfsDto } from './dto/generate-pdfs';
 import { generatePdfBufferNexxera } from './pdf-models/nexxera-model';
 import { generatePdfBufferFinnet } from './pdf-models/finnet-model';
 import * as JSZip from 'jszip';
 import { Buffer } from 'buffer';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
+import { GeneratePdfsDto } from './dto/generate-pdfs.dto';
 import { CreateAuthorizationLettersDto } from 'src/authorization-letters/dto/create-authorization-letters.dto';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class GeneratePdfsService {
     private prisma: PrismaService,
     @InjectQueue('pdf-generation') private pdfQueue: Queue,
     private redisService: RedisService,
-  ) {}
+  ) { }
 
   async enqueuePdfGeneration(dto: CreateAuthorizationLettersDto) {
     await this.pdfQueue.add(dto);
@@ -47,16 +47,26 @@ export class GeneratePdfsService {
   private async generateZip(dto: GeneratePdfsDto): Promise<Buffer> {
     const zip = new JSZip();
 
-    for (const product of dto.id_products) {
-      for (const vanType of dto.id_van_types) {
+    // carregar todos os produtos
+    const products = await this.prisma.products.findMany();
+
+    // carregar todas as vans
+    const vans = await this.prisma.van_types.findMany();
+
+    for (const product_id of dto.id_products) {
+      for (const van_type_id of dto.id_van_types) {
         const data: GeneratePdfsDto = {
           ...dto,
-          id_products: [product],
-          id_van_types: [vanType],
+          id_products: [product_id],
+          id_van_types: [van_type_id],
         };
 
-        const pdf = await this.generatePdf(data, vanType);
-        const filename = `relatorio_produto_${product.name}_van_${vanType}.pdf`;
+        const selectedProduct = products.filter((p) => p.id === product_id);
+        const selectedVan = vans.filter((v) => v.id === van_type_id);
+
+        const pdf = await this.generatePdf(data, van_type_id);
+
+        const filename = `Van_${selectedVan[0].type}_${selectedProduct[0].name}.pdf`;
 
         zip.file(filename, pdf);
       }
@@ -77,21 +87,32 @@ export class GeneratePdfsService {
   }
 
   async generateMultipleFromDto(dto: GeneratePdfsDto): Promise<{ filename: string; buffer: Buffer }[]> {
-    this.validateInput(dto);
     console.log("entrou aqui");
+    this.validateInput(dto);
 
     const buffers: { filename: string; buffer: Buffer }[] = [];
 
-    for (const product of dto.id_products) {
-      for (const vanType of dto.id_van_types) {
+    // carregar todos os produtos
+    const products = await this.prisma.products.findMany();
+
+    // carregar todas as vans
+    const vans = await this.prisma.van_types.findMany();
+
+    for (const product_id of dto.id_products) {
+      for (const van_type_id of dto.id_van_types) {
         const localDto: GeneratePdfsDto = {
           ...dto,
-          id_products: [product],
-          id_van_types: [vanType],
+          id_products: [product_id],
+          id_van_types: [van_type_id],
         };
 
-        const buffer = await this.generatePdf(localDto, vanType);
-        const filename = `relatorio_produto_${product.name}_van_${vanType}.pdf`;
+        const selectedProduct = products.filter((p) => p.id === product_id);
+        const selectedVan = vans.filter((v) => v.id === van_type_id);
+
+        const buffer = await this.generatePdf(localDto, van_type_id);
+        const filename = `Van_${selectedVan[0].type}_${selectedProduct[0].name}.pdf`;
+        
+        console.log('arquivo gerado', filename);
 
         buffers.push({ filename, buffer });
         console.log(`PDF gerado: ${filename}`);
@@ -103,15 +124,15 @@ export class GeneratePdfsService {
 
   async generateAndCachePdfs(dto: GeneratePdfsDto) {
     const buffers = await this.generateMultipleFromDto(dto);
-  
+
     const pdfs = buffers.map(({ filename, buffer }) => ({
       filename,
       data: buffer.toString('base64'),
     }));
-  
+
     const cacheKey = `pdfs:${dto.id}`;
     await this.redisService.set(cacheKey, pdfs);
     return { cacheKey, pdfs };
   }
-  
+
 }

@@ -74,8 +74,8 @@ export class GeneratePdfsDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductDto)
-  @ApiProperty({ type: [ProductDto] })
-  id_products: ProductDto[];
+  // @ApiProperty({ type: [ProductDto] })
+  id_products: number[];
 
   @IsArray()
   @IsInt({ each: true })
