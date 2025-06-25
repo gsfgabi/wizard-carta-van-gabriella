@@ -4,7 +4,7 @@ import React from "react";
 const Stepper: React.FC<{ steps: string[] }> = ({ steps }) => {
   const circleSize = 30; //Controla tamanho do círculo
   const lineTop = 15; // Altura da linha em relação ao topo do container
-  const lineLenght = 64; //Comprimento da linha
+  const lineLenght = 80; //Comprimento da linha
 
   return (
     <nav className="w-full flex justify-center py-3 sm:py-4 md:py-6 bg-transparent overflow-x-auto">

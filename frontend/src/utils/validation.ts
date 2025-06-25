@@ -44,13 +44,18 @@ export function isValidToken(token: string): boolean {
  */
 export function isTokenExpired(token: string): boolean {
   if (!token) return true;
+  // Se não for JWT (não tem 3 partes), considere sempre válido
+  if (token.split('.').length !== 3) return false;
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    if (!payload.exp) return true;
+    const payloadBase64 = token.split('.')[1];
+    // Tenta decodificar o payload como JSON
+    const payload = JSON.parse(atob(payloadBase64));
+    if (!payload.exp) return false; // Se não houver exp, considere válido
     const now = Math.floor(Date.now() / 1000);
     return payload.exp < now;
   } catch (e) {
-    return true;
+    // Se não for possível decodificar como JSON, considere válido
+    return false;
   }
 }
 

@@ -119,6 +119,8 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [showFormBackConfirm, setShowFormBackConfirm] = useState(false);
   const [loadingFormBack, setLoadingFormBack] = useState(false);
 
+  const [blockStepExpansion, setBlockStepExpansion] = useState(false);
+
   // Carregar bancos automaticamente quando o componente montar
   useEffect(() => {
     fetchBanks();
@@ -209,12 +211,12 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       const availableVanTypes = vanTypes.filter(vanType => vanType.available !== false);
       
       if (availableProducts.length === 0) {
-        toast.error("Este banco não possui produtos disponíveis. Selecione outro banco.");
+        // toast.error("Este banco não possui produtos disponíveis. Selecione outro banco.");
         return;
       }
       
       if (availableVanTypes.length === 0) {
-        toast.error("Este banco não possui tipos de VAN disponíveis. Selecione outro banco.");
+        // toast.error("Este banco não possui tipos de VAN disponíveis. Selecione outro banco.");
         return;
       }
       
@@ -319,13 +321,10 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       setPdfGenerationId(id_request);
       localStorage.setItem('pdfGenerationId', id_request);
       
-      // 3. Avançar para o passo de revisão (o ValidationStep fará a consulta do status)
+      // 3. Avançar para o passo de revisão 
       setCurrentStep("validation");
       setExpandedStep(null);
-      toast.success("Geração de PDFs iniciada!");
     } catch (error) {
-      console.error("Erro ao gerar PDFs:", error);
-      toast.error("Erro ao gerar PDFs. Tente novamente.");
     } finally {
       setLoadingPdfs(false);
     }
@@ -333,6 +332,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
 
   const handleConfirmAndSend = async () => {
     setLoadingConfirmAndSend(true);
+    setBlockStepExpansion(true);
     try {
       // Encontrar o banco e CNAB selecionados
       const selectedBankData = banks.find(bank => bank.id === selectedBank);
@@ -370,15 +370,12 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       console.log('ID da requisição (pdfGenerationId):', pdfGenerationId);
       
       await submitReport(formDataToSend);
-      toast.success("Carta enviada com sucesso!");
       setTicketDetails({
         number: "456981",
         link: "https://www.zendesk.com.br/tecnospeed/456981",
       });
       setCurrentStep("completion");
     } catch (error) {
-      console.error("Erro ao enviar carta:", error);
-      toast.error("Erro ao enviar a carta. Tente novamente.");
     } finally {
       setLoadingConfirmAndSend(false);
     }
@@ -413,6 +410,10 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   };
 
   const handleStepHeaderClick = (stepName: WizardStep) => {
+    if (blockStepExpansion) {
+      toast("A navegação entre etapas está bloqueada após o envio das cartas para evitar envios duplicados. Caso precise reiniciar, clique em 'Início'.", { icon: "🔒" });
+      return;
+    }
     if (isStepCompleted(stepName) || stepName === currentStep) {
       setExpandedStep(expandedStep === stepName ? null : stepName);
     }
@@ -662,7 +663,11 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
               }`}
             >
               <div
-                className={`px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between cursor-pointer ${
+                className={`px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between ${
+                  blockStepExpansion
+                    ? "cursor-default"
+                    : "cursor-pointer"
+                } ${
                   !isCompleted && !isCurrent
                     ? "opacity-50 cursor-not-allowed"
                     : ""
