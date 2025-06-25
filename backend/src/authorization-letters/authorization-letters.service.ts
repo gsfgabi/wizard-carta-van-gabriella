@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { CreateAuthorizationLettersDto } from './dto/create-authorization-letters.dto';
 import { validateFields } from './validation/validate-fields';
-import { authorizationLetterSchema } from './validation/schema-validator';
+import { authorizationLetterSchema, authorizationLetterValidateSchema } from './validation/schema-validator';
 import { validateForeignKeys } from './validation/validate-foreign-keys';
 
 const prisma = new PrismaClient();
@@ -10,10 +10,8 @@ const prisma = new PrismaClient();
 @Injectable()
 export class AuthorizationService {
   async saveAuthorizationLetters(data: CreateAuthorizationLettersDto) {
-    // Validação do esquema básico
     validateFields(data, authorizationLetterSchema);
 
-    // Preparar foreign keys para validação e para inserir no DB como números
     const foreignKeysToValidate = {
       id_banks: Number(data.id_banks),
       id_cnabs: Number(data.id_cnabs),
@@ -130,4 +128,16 @@ export class AuthorizationService {
       throw new InternalServerErrorException('Erro ao salvar os dados.');
     }
   }
+
+  async validateAuthorizationLetterData(data: CreateAuthorizationLettersDto): Promise<void> {
+    validateFields(data, authorizationLetterValidateSchema);
+  
+    const foreignKeysToValidate = {
+      id_banks: Number(data.id_banks),
+      id_cnabs: Number(data.id_cnabs),
+      id_products: data.id_products,
+    };
+  
+    await validateForeignKeys(foreignKeysToValidate);
+  }  
 }

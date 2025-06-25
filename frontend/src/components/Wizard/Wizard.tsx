@@ -10,6 +10,8 @@ import Stepper from "../Stepper/StepperSteps";
 import {
   getBanks,
   getAllBankData,
+  generatePDFs,
+  getPDFStatus,
   type BankData,
   type ProductData,
   type CNABData,
@@ -72,6 +74,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedVanTypes, setSelectedVanTypes] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({});
+  const [authorizationId, setAuthorizationId] = useState<number | null>(null);
   const [banks, setBanks] = useState<BankData[]>([]);
   const [loadingBanks, setLoadingBanks] = useState(true);
   const [errorBanks, setErrorBanks] = useState<string | null>(null);
@@ -92,6 +95,8 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
       productName: string;
     }[]
   >([]);
+  const [pdfData, setPdfData] = useState<Array<{ filename: string; blob: Blob }>>([]);
+  const [loadingPdfs, setLoadingPdfs] = useState(false);
   const [ticketDetails, setTicketDetails] = useState<{
     number: string;
     link: string;
@@ -106,6 +111,8 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const [showBankChangeConfirmation, setShowBankChangeConfirmation] = useState(false);
   const [pendingBankSelection, setPendingBankSelection] = useState<number | null>(null);
   const MAX_BANK_FETCH_ATTEMPTS = 3;
+
+  const [pdfGenerationId, setPdfGenerationId] = useState<string | null>(null);
 
   // Carregar bancos automaticamente quando o componente montar
   useEffect(() => {
@@ -256,45 +263,44 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     }
   };
 
-  const handleGenerateLetterAndNext = (
+  const handleAuthorizationCreated = (id: number) => {
+    setAuthorizationId(id);
+    console.log('ID da autorização criada:', id);
+  };
+
+  const handleGenerateLetterAndNext = async (
     vanTypesSelected: string[],
     triggeredByStep: WizardStep
   ) => {
     setStepBeforeValidation(triggeredByStep);
-    console.log(
-      "handleGenerateLetterAndNext chamado com vanTypesSelected:",
-      vanTypesSelected
-    );
-
-    const bankInfo = banks.find((b) => b.id === selectedBank);
-    const productInfo = products.filter((p) =>
-      selectedProducts.includes(p.id.toString())
-    );
-    const vanTypeInfo = vanTypes.filter((v) =>
-      vanTypesSelected.includes(v.id.toString())
-    );
-
-    if (!bankInfo) {
-      console.error("Banco selecionado não encontrado!");
-      return;
+    setLoadingPdfs(true);
+    setSelectedVanTypes(vanTypesSelected);
+    try {
+      // Montar payload completo
+      const payload = {
+        ...formData,
+        id_van_types: vanTypesSelected.map((id) => parseInt(id)),
+        id_products: selectedProducts.map((id) => parseInt(id)),
+      };
+      
+      // 1. Chamar endpoint de geração
+      const { id_request } = await generatePDFs(payload);
+      console.log('ID gerado:', id_request);
+      
+      // 2. Salvar o id no localStorage
+      setPdfGenerationId(id_request);
+      localStorage.setItem('pdfGenerationId', id_request);
+      
+      // 3. Avançar para o passo de revisão (o ValidationStep fará a consulta do status)
+      setCurrentStep("validation");
+      setExpandedStep(null);
+      toast.success("Geração de PDFs iniciada!");
+    } catch (error) {
+      console.error("Erro ao gerar PDFs:", error);
+      toast.error("Erro ao gerar PDFs. Tente novamente.");
+    } finally {
+      setLoadingPdfs(false);
     }
-
-    const lettersWithTypes = productInfo.flatMap((product) =>
-      vanTypeInfo.map((van) => ({
-        type: van.type,
-        content: "",
-        formData: formData,
-        bankInfo: bankInfo,
-        productInfo: [product],
-        vanTypeInfo: [van],
-        cnabs: cnabs,
-        productName: product.name,
-      }))
-    );
-
-    setGeneratedLetterContents(lettersWithTypes);
-    setCurrentStep("validation");
-    setExpandedStep(null);
   };
 
   const handleConfirmAndSend = async () => {
@@ -323,12 +329,15 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     setSelectedProducts([]);
     setSelectedVanTypes([]);
     setFormData({});
+    setPdfGenerationId(null);
     setGeneratedLetterContents([]);
+    setPdfData([]);
     setTicketDetails(null);
     setBankFetchAttempts(0);
     setShowBankFinalErrorModal(false);
     setErrorBanks(null);
     setExpandedStep(null);
+    localStorage.removeItem('pdfGenerationId');
   };
 
   const handleCloseBankFinalErrorModal = () => {
@@ -446,6 +455,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             banks={banks}
             products={products}
             selectedProducts={selectedProducts}
+            onAuthorizationCreated={handleAuthorizationCreated}
           />
         );
       case "van-type":
@@ -459,7 +469,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             }
             onBack={() => handleBack()}
             vanTypes={vanTypes}
-            loading={loadingProducts}
+            loading={loadingProducts || loadingPdfs}
           />
         );
       case "validation":
@@ -470,8 +480,10 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             onBack={() => handleBack()}
             selectedBank={selectedBank}
             generatedLetterContents={generatedLetterContents}
+            pdfData={pdfData}
             onConfirmAndSend={handleConfirmAndSend}
             loadingConfirmAndSend={loadingConfirmAndSend}
+            loadingPdfs={loadingPdfs}
             products={products}
             vanTypes={vanTypes}
             cnabs={cnabs}

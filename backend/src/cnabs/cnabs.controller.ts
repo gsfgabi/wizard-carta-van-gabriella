@@ -1,8 +1,11 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CnabsService } from './cnabs.service';
-import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CnabsDto } from './dto/select-cnabs.dto';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('jwt')
 @ApiTags('Cnabs')
 @Controller('cnabs')
 export class CnabsController {

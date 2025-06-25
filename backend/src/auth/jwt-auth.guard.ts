@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class ProfileController {
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  getProfile(@Request() req) { 
-    return req.user; // vai conter o objeto retornado no validate() do JwtStrategy
+  getProfile(@Request() req) {
+    return req.user;
   }
 }

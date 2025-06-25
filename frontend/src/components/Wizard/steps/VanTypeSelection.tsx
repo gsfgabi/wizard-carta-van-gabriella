@@ -144,6 +144,7 @@ export const VanTypeSelection = memo(({
           type="button"
           className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
           onClick={onBack}
+          disabled={loading}
         >
           Voltar
         </Button>
@@ -151,10 +152,10 @@ export const VanTypeSelection = memo(({
           type="button"
           className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
           onClick={() => onNext(selectedVanTypes)}
-          disabled={selectedVanTypes.length === 0 || vanTypes.length === 0}
+          disabled={selectedVanTypes.length === 0 || vanTypes.length === 0 || loading}
           title={vanTypes.length === 0 ? "Nenhum tipo de VAN disponível para este banco." : selectedVanTypes.length === 0 ? "Selecione pelo menos um tipo de VAN para continuar." : ""}
         >
-          Gerar Cartas
+          {loading ? "Gerando PDFs..." : "Gerar Cartas"}
         </Button>
       </div>
     </>

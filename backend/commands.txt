@@ -7,11 +7,22 @@ npm install helmet
 npm install dotenv
 npx prisma generate
 npx prisma db pull
+npm install redis
+npm install --save-dev cpx
+
+------------FILAS REDIS---------
+npm install @nestjs/bull bull redis
+npm install --save-dev @types/bull
 
 ---------- PDF ----------------
 npm install pdfmake
 npm install class-validator class-transformer
 npm install jszip
+
+-------------------JWT-----------------------------------------------
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt
+npm install --save-dev @types/passport-jwt
+npm install --save-dev @types/joi
 
 ---------  DOCKER / NÃO É NECESSÁRIO ----------------
 * Primera vez baixando o código rode o comando;
@@ -29,6 +40,20 @@ docker build -t carta-de-van .
 * Parar o docker quando não for usar mais
 docker stop carta-de-van
 
--------------------JWT-----------------------------------------------
-npm install @nestjs/jwt @nestjs/passport passport passport-jwt
-npm install --save-dev @types/passport-jwt
+------------------ TESTE DE CARGA --------------------  
+Para instalar o k6, que é a ferramenta de teste de carga utilizada, siga o passo abaixo:
+
+- No Linux (Debian/Ubuntu), rode:
+
+```bash
+sudo apt install -y gnupg software-properties-common
+wget -q -O - https://dl.k6.io/key.gpg | sudo apt-key add -
+echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt update
+sudo apt install k6
+
+- No macOS, rode:
+brew install k6
+
+- No Windows, rode:
+winget install k6

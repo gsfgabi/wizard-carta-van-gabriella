@@ -32,12 +32,18 @@ export const authorizationLetterSchema: Schema = {
   ],
   manager_email: [{ required: true }, { type: 'email' }],
   branch_number: [{ required: true }, { type: 'number' }],
-  branch_dv: [], // opcional
+  branch_dv: [],
   account_number: [{ required: true }, { type: 'number' }],
-  account_dv: [], // opcional
+  account_dv: [],
   agreement_number: [{ required: true }, { type: 'number' }],
   id_banks: [{ required: true }, { type: 'number' }],
   id_cnabs: [{ required: true }, { type: 'number' }],
   id_products: [{ required: true }, { type: 'array', min: 1 }],
   id_van_types: [{ required: true }, { type: 'array', min: 1 }],
 };
+
+export const authorizationLetterValidateSchema: Schema = {
+  ...authorizationLetterSchema,
+};
+
+delete authorizationLetterValidateSchema.id_van_types;

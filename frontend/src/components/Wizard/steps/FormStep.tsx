@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 import { IMaskInput } from 'react-imask';
 import InputField from '../../Form/InputField';
@@ -6,7 +6,9 @@ import Button from '../../Button/Button';
 import type { CNABData, BankData, ProductData } from '../../../services/api';
 import { formValidationSchema, isValidCNPJ, validatePhone } from '../../../utils/validation';
 import { maskCNPJ, maskPhone, maskAccount, maskAccountDV, maskBranch, maskBranchDV, maskAgreement } from '../../../utils/mask';
+import { createAuthorizationLetter, type AuthorizationLetterData, validateAuthorizationLetter } from '../../../services/api';
 import * as Yup from 'yup';
+import toast from 'react-hot-toast';
 
 interface FormData {
   cnpj: string;
@@ -40,6 +42,7 @@ interface FormStepProps {
   banks: BankData[];
   products: ProductData[];
   selectedProducts: string[];
+  onAuthorizationCreated?: (authorizationId: number) => void;
 }
 
 export const FormStep = memo(({
@@ -52,7 +55,10 @@ export const FormStep = memo(({
   banks,
   products,
   selectedProducts,
+  onAuthorizationCreated,
 }: FormStepProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const initialValues: FormData = {
     cnpj: formData.cnpj || '',
     corporate_name: formData.corporate_name || '',
@@ -73,6 +79,51 @@ export const FormStep = memo(({
     contact_preference_phone: formData.contact_preference_phone || false,
     contact_preference_whatsapp: formData.contact_preference_whatsapp || false,
     contact_preference_other: formData.contact_preference_other || '',
+  };
+
+  const handleSubmit = async (values: FormData) => {
+    setIsSubmitting(true);
+    try {
+      // Preparar dados para a API
+      const selectedCNAB = cnabs.find(cnab => cnab.name === values.cnab);
+      const selectedBankData = banks.find(bank => bank.id === selectedBank);
+      
+      if (!selectedCNAB || !selectedBankData) {
+        throw new Error('Dados do banco ou CNAB não encontrados');
+      }
+
+      const authorizationData: AuthorizationLetterData = {
+        cnpj: values.cnpj.replace(/\D/g, ''),
+        corporate_name: values.corporate_name,
+        responsible_person_name: values.responsible_person_name,
+        responsible_person_title: values.responsible_person_position,
+        responsible_person_cellphone: values.responsible_person_cellphone.replace(/\D/g, ''),
+        responsible_person_email: values.responsible_person_email,
+        manager_name: values.manager_name,
+        manager_cellphone: values.manager_cellphone.replace(/\D/g, ''),
+        manager_email: values.manager_email,
+        branch_number: values.branch_number.replace(/\D/g, ''),
+        branch_dv: values.branch_dv,
+        account_number: values.account_number.replace(/\D/g, ''),
+        account_dv: values.account_dv,
+        agreement_number: values.agreement_number.replace(/\D/g, ''),
+        id_banks: selectedBankData.id.toString(),
+        id_cnabs: selectedCNAB.id.toString(),
+        id_products: selectedProducts.map(id => parseInt(id)),
+        id_van_types: [], // Será preenchido no próximo passo
+      };
+
+      // Apenas validação!
+      await validateAuthorizationLetter(authorizationData);
+      onUpdate(values);
+      toast.success('Dados validados com sucesso!');
+      onNext();
+    } catch (error) {
+      console.error('Erro ao validar dados:', error);
+      toast.error('Erro ao validar dados. Corrija o formulário.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -114,11 +165,7 @@ export const FormStep = memo(({
       <Formik
         initialValues={initialValues}
         validationSchema={formValidationSchema}
-        onSubmit={(values) => {
-          console.log('Formulário submetido com sucesso:', values);
-          onUpdate(values);
-          onNext();
-        }}
+        onSubmit={handleSubmit}
         validateOnMount={true}
         validateOnChange={true}
         validateOnBlur={true}
@@ -520,20 +567,21 @@ export const FormStep = memo(({
                   type="button"
                   className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
                   onClick={onBack}
+                  disabled={isSubmitting}
                 >
                   Voltar
                 </Button>
                 <Button
                   type="submit"
                   className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
-                  disabled={!isValid}
+                  disabled={!isValid || isSubmitting}
                   onClick={() => {
                     console.log('Botão Revisar clicado');
                     console.log('Formulário é válido:', isValid);
                     console.log('Erros atuais:', errors);
                   }}
                 >
-                  Próximo
+                  {isSubmitting ? 'Enviando...' : 'Próximo'}
                 </Button>
               </div>
             </Form>

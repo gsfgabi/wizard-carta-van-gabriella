@@ -1,30 +1,52 @@
-import { Controller, Get, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Param, BadRequestException, UseGuards, Body } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { RedisService } from '../redis/redis.service';
 import { GeneratePdfsService } from './generate-pdfs.service';
-import { ApiTags } from '@nestjs/swagger';
+import { GeneratePdfsDto } from './dto/generate-pdfs';
+import { randomUUID } from 'crypto';
+import { CreateAuthorizationLettersDto } from 'src/authorization-letters/dto/create-authorization-letters.dto';
 
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('jwt')
 @ApiTags('Generate PDFs')
 @Controller('pdfs')
 export class GeneratePdfsController {
-  constructor(private readonly generatePdfsService: GeneratePdfsService) {}
+  constructor(
+    @InjectQueue('pdf-generation') private pdfQueue: Queue,
+    private readonly redisService: RedisService,
+    private readonly generatePdfsService: GeneratePdfsService
+  ) {}
 
-  @Get('generate/:id')
-  async generateById(@Param('id') id: string) {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      throw new BadRequestException('ID inválido');
+  @Post('generate')
+  async generate(@Body() dto: CreateAuthorizationLettersDto) {
+
+    const requestId = randomUUID();
+
+    const jobDto = { ...dto, id: requestId };
+
+    await this.generatePdfsService.enqueuePdfGeneration(jobDto);
+
+    const cachedPdfs = await this.redisService.get(`pdfs:${requestId}`);
+    if (cachedPdfs) {
+      return { status: 'done', pdfs: cachedPdfs };
+    }
+  
+    return { message: 'Processamento iniciado. Consulte /pdfs/status/:id para resultado.', id_request: requestId };
+  }  
+
+  @Get('status/:id')
+  async getStatus(@Param('id') id: string) {
+
+    const cachedPdfs = await this.redisService.get(`pdfs:${id}`);
+    console.log(`🔍 Conteúdo encontrado no cache para ${id}:`, cachedPdfs);
+
+    if (!cachedPdfs) {
+      return { status: 'processing', pdfs: [] };
     }
 
-    const { buffers } = await this.generatePdfsService.generateMultipleFromId(numericId);
-
-    if (!buffers.length) {
-      throw new BadRequestException('Nenhum PDF gerado');
-    }
-
-    const pdfsBase64 = buffers.map(({ filename, buffer }) => ({
-      filename,
-      base64: buffer.toString('base64'),
-    }));
-
-    return { pdfs: pdfsBase64 };
+    return { status: 'done', pdfs: cachedPdfs };
   }
 }

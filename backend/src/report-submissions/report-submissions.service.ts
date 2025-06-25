@@ -1,63 +1,91 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { GeneratePdfsService } from 'src/pdf/generate-pdfs.service';
 import { EmailService } from 'src/email/email.service';
 import { ZapierService } from 'src/zapier/zapier.service';
-import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs';
+import { GenerateReportsDto } from './dto/generate-reports.dto';
 import * as JSZip from 'jszip';
+import { RedisService } from 'src/redis/redis.service';
+
+interface CachedPdf {
+  filename?: string;
+  data: string;
+}
 
 @Injectable()
 export class ReportSubmissionsService {
   constructor(
-    private readonly generatePdfsService: GeneratePdfsService,
     private readonly emailService: EmailService,
     private readonly zapierService: ZapierService,
+    private readonly redisService: RedisService,
   ) {}
 
-  async generateSendAndNotify(dto: GeneratePdfsDto): Promise<void> {
-    const { buffer, isZip } = await this.generatePdfsService.generateReports(dto);
-
-    await this.emailService.sendReportEmail('kethellinpereira2018@outlook.com', buffer, isZip);
-
-    if (isZip) {
-      const zip = await JSZip.loadAsync(buffer);
-      this.validateZipContents(zip, dto);
-      await this.sendZipToZapier(zip, dto);
-    } else {
-      await this.sendSinglePdfToZapier(buffer, dto);
+  async generateSendAndNotify(dto: GenerateReportsDto): Promise<void> {
+    if (!dto.responsible_person_email) {
+      throw new BadRequestException('E-mail da pessoa responsável não informado.');
     }
-  }
-
-  private validateZipContents(zip: JSZip, dto: GeneratePdfsDto): void {
-    const fileNames = Object.keys(zip.files).filter(name => name.endsWith('.pdf'));
-    const expectedCount = dto.id_products.length * dto.id_van_types.length;
-
-    if (fileNames.length !== expectedCount) {
-      throw new BadRequestException('Número de arquivos PDF gerados não corresponde ao número de produtos.');
+    if (!dto.id_request) {
+      throw new BadRequestException('Chave para buscar PDFs no cache não informada.');
     }
-  }
 
-  private async sendZipToZapier(zip: JSZip, dto: GeneratePdfsDto): Promise<void> {
-    for (const vanType of dto.id_van_types) {
-      for (const product of dto.id_products) {
-        const fileName = `relatorio_produto_${product.id}_van_${vanType}.pdf`;
-        const file = zip.files[fileName];
+    const raw = await this.redisService.get(`pdfs:${dto.id_request}`);
+    if (!raw) {
+      throw new BadRequestException('Nenhum PDF encontrado no cache para a chave informada.');
+    }
 
-        if (!file) {
-          throw new BadRequestException(`Arquivo esperado ${fileName} não encontrado no ZIP.`);
-        }
+    const cachedBuffers = this.parseCachedPdfs(raw);
 
-        const pdfBuffer = await file.async('nodebuffer');
-        await this.prepareAndSendToZapier(product.name, pdfBuffer, dto);
+    if (cachedBuffers.length === 0) {
+      throw new BadRequestException('Nenhum PDF válido encontrado no cache para a chave informada.');
+    }
+
+    if (cachedBuffers.length > 1) {
+      const zip = new JSZip();
+      cachedBuffers.forEach((buffer, i) => {
+        zip.file(`relatorio_${i + 1}.pdf`, buffer);
+      });
+      const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+      await this.emailService.sendReportEmail(dto.responsible_person_email, dto.responsible_person_name, zipBuffer, true);
+
+      for (const [index, pdfBuffer] of cachedBuffers.entries()) {
+        await this.prepareAndSendToZapier(`relatorio_${index + 1}`, pdfBuffer, dto);
       }
+    } else {
+      await this.emailService.sendReportEmail(dto.responsible_person_email, dto.responsible_person_name, cachedBuffers[0], false);
+      await this.prepareAndSendToZapier(dto.id_products[0].name, cachedBuffers[0], dto);
     }
   }
 
-  private async sendSinglePdfToZapier(buffer: Buffer, dto: GeneratePdfsDto): Promise<void> {
-    const produto = dto.id_products[0].name;
-    await this.prepareAndSendToZapier(produto, buffer, dto);
+  private parseCachedPdfs(raw: any): Buffer[] {
+    let base64Array: any[] = [];
+
+    if (typeof raw === 'string') {
+      try {
+        base64Array = JSON.parse(raw);
+      } catch {
+        base64Array = [raw];
+      }
+    } else if (Array.isArray(raw)) {
+      base64Array = raw;
+    } else {
+      throw new BadRequestException('Formato inválido do cache.');
+    }
+
+    if (!Array.isArray(base64Array) || base64Array.length === 0) {
+      throw new BadRequestException('Nenhum PDF encontrado no cache.');
+    }
+
+    if (typeof base64Array[0] === 'string') {
+      return base64Array.map(b64 => Buffer.from(b64, 'base64'));
+    }
+
+    if (typeof base64Array[0] === 'object' && base64Array[0].data && typeof base64Array[0].data === 'string') {
+      return base64Array.map((item: CachedPdf) => Buffer.from(item.data, 'base64'));
+    }
+
+    throw new BadRequestException('Formato inválido dos PDFs no cache.');
   }
 
-  private async prepareAndSendToZapier(produto: string, buffer: Buffer, dto: GeneratePdfsDto): Promise<void> {
+  private async prepareAndSendToZapier(produto: string, buffer: Buffer, dto: GenerateReportsDto): Promise<void> {
     const cnpj_sh = '11111111111111';
     const email = 'guilherme.ganassin@tecnospeed.com.br';
     const cnpj_cliente = dto.cnpj;

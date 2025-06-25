@@ -3,8 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/plugbank.svg" />
+    <link rel="preload" as="image" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="PlugBank - Gere cartas de VAN, selecione bancos, produtos e tipos de VAN de forma rápida, segura e intuitiva." />
     <title>PlugBank</title>
+    <!-- CSS crítico inline para header e botão -->
+    <style>
+      header {
+        position: fixed; top: 0; left: 0; width: 100%; background: #fff; height: 4rem; display: flex; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.07); z-index: 50;
+      }
+      .header-btn {
+        display: flex; align-items: center; justify-content: center; background: #8D44AD; color: #fff; border-radius: 9999px; height: 2.5rem; width: 2.5rem; transition: background 0.2s;
+      }
+      .header-btn:hover { background: #7d379c; }
+      .header-logo {
+        height: 3rem; cursor: pointer; object-fit: contain;
+      }
+    </style>
+    <!-- Carregamento assíncrono do CSS principal (exemplo, ajuste o href conforme seu build) -->
+    <link rel="preload" href="/dist/assets/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/dist/assets/index.css"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap">
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

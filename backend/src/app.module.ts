@@ -22,10 +22,10 @@ import * as Joi from 'joi';
   [ConfigModule.forRoot({
     isGlobal: true,
     envFilePath: '.env',
-  validationSchema: Joi.object({
-    JWT_SECRET: Joi.string().required(),
-    DATABASE_URL: Joi.string().required(),
-  }),
+    validationSchema: Joi.object({
+      JWT_SECRET: Joi.string().required(),
+      DATABASE_URL: Joi.string().required(),
+    }),
   }),
   
   AuthModule,

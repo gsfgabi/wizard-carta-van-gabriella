@@ -1,25 +1,38 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, HttpCode } from '@nestjs/common';
 import { AuthorizationService } from './authorization-letters.service';
 import { CreateAuthorizationLettersDto } from './dto/create-authorization-letters.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 
-@Controller('authorization')
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('jwt')
+@Controller('authorization-letters')
 export class AuthorizationController {
   constructor(private readonly authService: AuthorizationService) {}
 
-  @Post('authorization-letters')
+  @Post('')
   async saveAuthorizationLetters(
     @Body() createAuthorizationLettersDto: CreateAuthorizationLettersDto,
   ) {
     return await this.authService.saveAuthorizationLetters(createAuthorizationLettersDto);
   }
 
-  @Get('authorization-letters')
+  @Get('')
   async getAllAuthorizationLetters() {
     return await this.authService.getAllAuthorizationLetters();
   }
 
-  @Get('authorization-letters/:id')
+  @Get('/:id')
   async getAuthorizationLetterById(@Param('id') id: string) {
     return await this.authService.getAuthorizationLetterById(Number(id));
+  }
+
+  @Post('/validate')
+  @HttpCode(200)
+  @ApiOkResponse({ description: 'Dados válidos. (OK)' })
+  @ApiBadRequestResponse({ description: 'Dados inválidos ou mal formatados. (Bad Request)' })
+  async validate(@Body() data: CreateAuthorizationLettersDto) {
+    await this.authService.validateAuthorizationLetterData(data);
+    return { message: 'Dados válidos' };
   }
 }
