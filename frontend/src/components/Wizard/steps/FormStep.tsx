@@ -14,7 +14,7 @@ interface FormData {
   cnpj: string;
   corporate_name: string;
   responsible_person_name: string;
-  responsible_person_position: string;
+  responsible_person_title: string;
   responsible_person_cellphone: string;
   responsible_person_email: string;
   branch_number: string;
@@ -63,7 +63,7 @@ export const FormStep = memo(({
     cnpj: formData.cnpj || '',
     corporate_name: formData.corporate_name || '',
     responsible_person_name: formData.responsible_person_name || '',
-    responsible_person_position: formData.responsible_person_position || '',
+    responsible_person_title: formData.responsible_person_title || '',
     responsible_person_cellphone: formData.responsible_person_cellphone || '',
     responsible_person_email: formData.responsible_person_email || '',
     branch_number: formData.branch_number || '',
@@ -96,7 +96,7 @@ export const FormStep = memo(({
         cnpj: values.cnpj.replace(/\D/g, ''),
         corporate_name: values.corporate_name,
         responsible_person_name: values.responsible_person_name,
-        responsible_person_title: values.responsible_person_position,
+        responsible_person_title: values.responsible_person_title,
         responsible_person_cellphone: values.responsible_person_cellphone.replace(/\D/g, ''),
         responsible_person_email: values.responsible_person_email,
         manager_name: values.manager_name,
@@ -229,12 +229,12 @@ export const FormStep = memo(({
               <div className="mb-6">
                 <h3 className="font-semibold text-black mb-2">Responsável pela Empresa</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field name="responsible_person_position">
+                  <Field name="responsible_person_title">
                     {({ field }: any) => (
                       <InputField
                         label="Cargo"
                         placeholder="Inserir cargo do responsável da empresa"
-                        error={touched.responsible_person_position && errors.responsible_person_position ? errors.responsible_person_position : ''}
+                        error={touched.responsible_person_title && errors.responsible_person_title ? errors.responsible_person_title : ''}
                         {...field}
                       />
                     )}

@@ -28,6 +28,7 @@ import {
 } from "@heroicons/react/24/outline";
 import ProductSelectionSkeleton from "../Skeleton/ProductSelectionSkeleton";
 import Button from "../Button/Button";
+import Confirmation from "../Modal/Confirmation";
 
 export type WizardStep =
   | "bank"
@@ -114,6 +115,9 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const MAX_BANK_FETCH_ATTEMPTS = 3;
 
   const [pdfGenerationId, setPdfGenerationId] = useState<string | null>(null);
+
+  const [showFormBackConfirm, setShowFormBackConfirm] = useState(false);
+  const [loadingFormBack, setLoadingFormBack] = useState(false);
 
   // Carregar bancos automaticamente quando o componente montar
   useEffect(() => {
@@ -257,18 +261,22 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const handleBack = () => {
     switch (currentStep) {
       case "bank":
+        handleStartOver();
         onBackToIntro();
         break;
       case "products":
+        setSelectedProducts([]);
         setCurrentStep("bank");
         break;
       case "form":
-        setCurrentStep("products");
+        setShowFormBackConfirm(true);
         break;
       case "van-type":
+        setSelectedVanTypes([]);
         setCurrentStep("form");
         break;
       case "validation":
+        setGeneratedLetterContents([]);
         const availableVanTypes = vanTypes.filter(
           (vanType) => vanType.available
         );
@@ -340,7 +348,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
         id_request: pdfGenerationId || '',
         corporate_name: formData.corporate_name || '',
         responsible_person_name: formData.responsible_person_name || '',
-        responsible_person_title: formData.responsible_person_position || '',
+        responsible_person_title: formData.responsible_person_title || '',
         responsible_person_cellphone: formData.responsible_person_cellphone?.replace(/\D/g, '') || '',
         responsible_person_email: formData.responsible_person_email || '',
         manager_name: formData.manager_name || '',
@@ -606,6 +614,20 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     }
   };
 
+  const handleConfirmFormBack = () => {
+    setLoadingFormBack(true);
+    setTimeout(() => {
+      setFormData({});
+      setCurrentStep("products");
+      setShowFormBackConfirm(false);
+      setLoadingFormBack(false);
+    }, 300); // Simula carregamento
+  };
+
+  const handleCancelFormBack = () => {
+    setShowFormBackConfirm(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2 sm:px-4">
       <Stepper
@@ -767,6 +789,17 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      <Modal isOpen={showFormBackConfirm} onClose={handleCancelFormBack}>
+        <Confirmation
+          onConfirm={handleConfirmFormBack}
+          onCancel={handleCancelFormBack}
+          loading={loadingFormBack}
+          title="Tem certeza que deseja voltar?"
+          message="Ao voltar, todos os dados preenchidos no formulário serão perdidos. Deseja continuar?"
+          confirmButtonText="Continuar"
+        />
       </Modal>
     </div>
   );

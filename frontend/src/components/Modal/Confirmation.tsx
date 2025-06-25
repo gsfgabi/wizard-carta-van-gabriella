@@ -7,9 +7,10 @@ interface ConfirmationProps {
   title?: string;
   message?: string;
   loading: boolean;
+  confirmButtonText?: string;
 }
 
-function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?", message = "Esta ação é irreversível.", loading }: ConfirmationProps) {
+function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?", message = "Esta ação é irreversível.", loading, confirmButtonText }: ConfirmationProps) {
     return (
         <div className="flex flex-col items-center text-center">
             <h1 className="text-2xl font-bold mb-4">{title}</h1>
@@ -29,7 +30,7 @@ function Confirmation({ onConfirm, onCancel, title = "Confirmar e Enviar Carta?"
                     onClick={onConfirm}
                     disabled={loading}
                 >
-                    {loading ? 'Enviando...' : 'Confirmar e Enviar Carta'}
+                    {loading ? 'Enviando...' : (confirmButtonText || 'Confirmar e Enviar Carta')}
                 </Button>
             </div>
         </div>
