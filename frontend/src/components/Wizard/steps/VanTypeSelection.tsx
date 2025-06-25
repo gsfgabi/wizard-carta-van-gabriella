@@ -62,9 +62,9 @@ export const VanTypeSelection = memo(({
   if (vanTypes.length === 0 || allVanTypesUnavailable) {
     return (
       <>
-        <h2 className="text-2xl font-semibold text-black mb-1">
+        {/* <h2 className="text-2xl font-semibold text-black mb-1">
           4. Selecionar tipo de VAN
-        </h2>
+        </h2> */}
         <p className="text-base text-gray-700 mb-6">
           Selecione qual(is) tipo(s) de VAN você deseja gerar a carta.
         </p>
@@ -103,9 +103,9 @@ export const VanTypeSelection = memo(({
 
   return (
     <>
-      <h2 className="text-2xl font-semibold text-black mb-1">
+      {/* <h2 className="text-2xl font-semibold text-black mb-1">
         4. Selecionar tipo de VAN
-      </h2>
+      </h2> */}
       <p className="text-base text-gray-700 mb-6">
         Selecione qual(is) tipo(s) de VAN você deseja gerar a carta.
       </p>
