@@ -105,6 +105,9 @@ export class GeneratePdfsService {
     // carregar todos os produtos
     const products = await this.prisma.products.findMany();
 
+    const selectedProductNames = products.filter(p => dto.id_products.includes(p.id)).map(p => p.name);
+
+
     // carregar todas as vans
     const vans = await this.prisma.van_types.findMany();
 

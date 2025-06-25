@@ -51,8 +51,8 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
 
       {
         columns: [
-          { text: [{ text: `Cidade: ${bank_city}}`, bold: true }, '__________________'], margin: [0, 0, 10, 0] },
-          { text: [{ text: `UF: ${bank_state}`, bold: true }, '____'] }
+          { text: [{ text: `Cidade:`, bold: true }, `${bank_city || "São Paulo"}`], margin: [0, 0, 10, 0] },
+          { text: [{ text: `UF:`, bold: true }, `${bank_state || "SP"}`] }
         ],
         margin: [0, 0, 0, 10]
       },
@@ -74,7 +74,7 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
       { text: [{ text: 'E-mail: ', bold: true }, manager_email], margin: [0, 0, 0, 10] },
 
       {
-        text: 'Preferência por contato: ( ) E-mail    ( ) Telefone    ( ) Whatsapp    Outro: _______',
+        text: 'Preferência por contato: (x) E-mail    ( ) Telefone    (x) Whatsapp    Outro: _______',
         margin: [0, 5, 0, 10]
       },
 
@@ -116,9 +116,9 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
               { text: 'Serviço no Banco', bold: true, alignment: 'center' }
             ],
             [
-              { text: '[SERVIÇO 1]', alignment: 'center' },
-              { text: '[SERVIÇO 2]', alignment: 'center' },
-              { text: '[SERVIÇO 3]', alignment: 'center' }
+              { text: 'DDA', alignment: 'center' },
+              { text: 'Extrato', alignment: 'center' },
+              { text: 'Pagamento', alignment: 'center' }
             ]
           ]
         },

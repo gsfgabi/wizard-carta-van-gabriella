@@ -28,7 +28,7 @@ model authorization_letters {
   id_cnabs                        Int                               @db.SmallInt
   created_at                      DateTime                          @db.Timestamptz(6)
   id_users                        Int?                              @db.SmallInt
-  id_general_settings             Int?
+  id_general_settings             Int?                              @db.SmallInt
   banks                           banks                             @relation(fields: [id_banks], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cnabs                           cnabs                             @relation(fields: [id_cnabs], references: [id], onDelete: NoAction, onUpdate: NoAction)
   general_settings                general_settings?                 @relation(fields: [id_general_settings], references: [id], onDelete: NoAction, onUpdate: NoAction)

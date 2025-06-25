@@ -89,6 +89,9 @@ export class GeneratePdfsDto {
   // @ApiProperty({ type: [ProductDto] })
   id_products: number[];
 
+  @ApiProperty()
+  name_product: string[];
+
   @IsArray()
   @IsInt({ each: true })
   @ApiProperty()
@@ -105,4 +108,7 @@ export class GeneratePdfsDto {
 
   @ApiProperty()
   name_bank: string;
+
+  @ApiProperty()
+  id_bank: number;
 }
