@@ -68,7 +68,7 @@ export class AuthorizationService {
       });
 
       return {
-        id_request: String(carta.id),
+        id_request: data.id_request,
         cnpj: carta.cnpj,
         responsible_person_name: carta.responsible_person_name,
         responsible_person_email: carta.responsible_person_email,
