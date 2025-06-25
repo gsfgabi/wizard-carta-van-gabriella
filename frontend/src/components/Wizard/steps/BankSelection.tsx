@@ -86,9 +86,9 @@ export const BankSelection = memo(({
   if (!loading && !error) {
     return (
       <div className="w-full max-w-5xl mx-auto px-2">
-        <h2 className="text-2xl font-bold mb-2 text-black text-left">
+        {/* <h2 className="text-2xl font-bold mb-2 text-black text-left">
           1. Selecionar um Banco (Instituição Bancária)
-        </h2>
+        </h2> */}
         <p className="text-base text-black mb-6 text-left">
           Selecione um banco para criar uma nova carta de VAN
         </p>

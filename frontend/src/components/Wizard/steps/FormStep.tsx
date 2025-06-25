@@ -128,9 +128,9 @@ export const FormStep = memo(({
 
   return (
     <>
-      <h2 className="text-2xl font-semibold text-black mb-1">
+      {/* <h2 className="text-2xl font-semibold text-black mb-1">
         3. Preencher dados da empresa e conta
-      </h2>
+      </h2> */}
       <p className="text-base text-gray-700 mb-6">
         A seguir precisamos coletar alguns dados que utilizaremos para elaborar a carta de VAN para o banco desejado.
       </p>

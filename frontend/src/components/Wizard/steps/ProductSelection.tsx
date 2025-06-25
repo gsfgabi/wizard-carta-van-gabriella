@@ -58,9 +58,9 @@ export const ProductSelection = memo(({
   return (
     <Card className="shadow-none p-0">
       <div className="w-full h-full px-0 py-0">
-        <h2 className="text-2xl font-semibold mb-2 text-black text-left">
+        {/* <h2 className="text-2xl font-semibold mb-2 text-black text-left">
           2. Selecionar um ou mais produtos
-        </h2>
+        </h2> */}
         <p className="text-base text-black mb-8 text-left">
           Selecione quais produtos deseja utilizar a transferência de arquivos por VAN
         </p>

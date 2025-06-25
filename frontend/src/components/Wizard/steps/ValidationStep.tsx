@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo } from "react";
+import React, { useState, useEffect, memo, useMemo, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import toast from "react-hot-toast";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -10,66 +10,73 @@ import { FinnetLetterDisplay } from "../letters/FinnetLetterDisplay";
 import { NexxeraLetterDisplay } from "../letters/NexxeraLetterDisplay";
 import ValidationStepSkeleton from "../../Skeleton/ValidationStepSkeleton";
 import { getPDFStatus } from '../../../services/api';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min?url';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import Card from "../../Card/Card";
 
 // Configuração do worker do PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 // Componente otimizado para visualização de PDF
 const PDFViewer = memo(({ blob, filename }: { blob: Blob; filename: string }) => {
-  const [url, setUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(320);
 
   useEffect(() => {
-    if (blob) {
-      const objectUrl = URL.createObjectURL(blob);
-      setUrl(objectUrl);
-      setLoading(false);
-
-      // Cleanup function
-      return () => {
-        URL.revokeObjectURL(objectUrl);
-      };
+    function updateWidth() {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
     }
-  }, [blob]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8D44AD]"></div>
-        <span className="ml-2 text-gray-600">Carregando PDF...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-8 text-red-600">
-        <p>Erro ao carregar PDF: {error}</p>
-      </div>
-    );
-  }
-
-  if (!url) {
-    return (
-      <div className="text-center p-8 text-gray-600">
-        <p>PDF não disponível</p>
-      </div>
-    );
-  }
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   return (
-    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
-      <iframe
-        src={url}
-        className="w-full h-96"
-        title={filename}
-        onLoad={() => setLoading(false)}
-        onError={() => {
-          setError('Erro ao carregar PDF');
-          setLoading(false);
-        }}
-      />
+    <div className="flex flex-col items-center w-full">
+      <div
+        ref={containerRef}
+        className="w-full flex justify-center bg-[#f8f7fa] rounded-lg p-2 sm:p-4 mb-4 overflow-x-auto"
+        style={{ minHeight: 320 }}
+      >
+        <Document
+          file={blob}
+          onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+          loading={<div className="p-8 text-gray-600">Carregando PDF...</div>}
+          error={<div className="p-8 text-red-600">Erro ao carregar PDF</div>}
+          className="w-full flex justify-center"
+        >
+          <Page
+            pageNumber={pageNumber}
+            width={Math.min(800, containerWidth - 16)}
+          />
+        </Document>
+      </div>
+      {numPages && numPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-2 mb-4">
+          <button
+            onClick={() => setPageNumber((p) => Math.max(p - 1, 1))}
+            disabled={pageNumber <= 1}
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 font-medium"
+          >
+            Anterior
+          </button>
+          <span className="text-base text-gray-700 font-semibold">
+            Página {pageNumber} de {numPages}
+          </span>
+          <button
+            onClick={() => setPageNumber((p) => Math.min(p + 1, numPages))}
+            disabled={pageNumber >= numPages}
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 font-medium"
+          >
+            Próxima
+          </button>
+        </div>
+      )}
     </div>
   );
 });
@@ -322,9 +329,9 @@ export const ValidationStep = memo(
 
     return (
       <>
-        <h2 className="text-2xl font-semibold text-black mb-1">
+        {/* <h2 className="text-2xl font-semibold text-black mb-1">
           5. Revisar e Validar
-        </h2>
+        </h2> */}
         <p className="text-base text-gray-700 mb-6">
           Revise os dados preenchidos e o conteúdo da carta gerada antes de
           finalizar.
