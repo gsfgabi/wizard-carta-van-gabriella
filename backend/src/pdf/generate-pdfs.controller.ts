@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Param, BadRequestException, UseGuards, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, UseGuards, Body, HttpCode } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiOkResponse, ApiUnauthorizedResponse, ApiInternalServerErrorResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { RedisService } from '../redis/redis.service';
 import { GeneratePdfsService } from './generate-pdfs.service';
-import { GeneratePdfsDto } from './dto/generate-pdfs';
 import { randomUUID } from 'crypto';
 import { CreateAuthorizationLettersDto } from 'src/authorization-letters/dto/create-authorization-letters.dto';
 
@@ -21,6 +20,17 @@ export class GeneratePdfsController {
   ) {}
 
   @Post('generate')
+  @ApiOperation({ summary: 'Colocar em fila para gerar PDF' })
+  @ApiOkResponse({ description: '(OK)' })
+  @ApiUnauthorizedResponse({
+    description: 'Usuario não autenticado. (Unauthorized)',
+  })
+  @ApiBadRequestResponse({
+    description: 'Requisição malformada. (Bad Request).',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
+  })
   async generate(@Body() dto: CreateAuthorizationLettersDto) {
 
     const requestId = randomUUID();
@@ -38,6 +48,14 @@ export class GeneratePdfsController {
   }  
 
   @Get('status/:id')
+  @ApiOperation({ summary: 'Buscar status do PDF e o PDF gerado' })
+  @ApiOkResponse({ description: '(OK)' })
+  @ApiUnauthorizedResponse({
+    description: 'Usuario não autenticado. (Unauthorized)',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
+  })
   async getStatus(@Param('id') id: string) {
 
     const cachedPdfs = await this.redisService.get(`pdfs:${id}`);
