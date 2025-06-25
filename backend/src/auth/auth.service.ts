@@ -42,9 +42,11 @@ export class AuthService {
     if (!user) {
       throw new Error('Usuário não encontrado');
     }
+
+    const payload = { cnpj }
   
     return {
-      access_token: this.jwtService.sign(cnpj),
+      access_token: this.jwtService.sign(payload),
       name: user.name,
       name_company: user.company_name,
       url_logo: user.url_logo,
