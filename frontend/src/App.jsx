@@ -4,6 +4,7 @@ import { Wizard } from './components/Wizard/Wizard';
 import WizardIntro from './pages/WizardIntro';
 import Login from './pages/Login';
 import { isTokenExpired } from './utils/validation';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -31,6 +32,11 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('cnpj');
     localStorage.removeItem('selectedBank');
+    localStorage.removeItem('company_name');
+    localStorage.removeItem('user_name');
+    localStorage.removeItem('pdfGenerationId');
+    localStorage.removeItem('wizardData');
+    localStorage.removeItem('wizardStep');
   };
 
   const handleBackToIntro = () => {
@@ -58,6 +64,7 @@ function App() {
           </>
         )}
       </main>
+      <Toaster position="top-right" />
     </div>
   );
 }

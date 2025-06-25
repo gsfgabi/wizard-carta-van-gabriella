@@ -121,6 +121,70 @@ interface LetterDisplayProps {
   };
 }
 
+// Componente para exibir carta ou PDF com fade
+interface LetterContentProps {
+  loadingPdf: boolean;
+  currentPdf: { filename: string; blob: Blob } | undefined;
+  currentLetter: any;
+  filteredPdfs: Array<{ filename: string; blob: Blob }>;
+  filteredLetters: any[];
+  safeCurrentLetterIndex: number;
+  isFading: boolean;
+}
+
+const LetterContent = React.memo(({
+  loadingPdf,
+  currentPdf,
+  currentLetter,
+  filteredPdfs,
+  filteredLetters,
+  safeCurrentLetterIndex,
+  isFading
+}: LetterContentProps) => (
+  <div
+    className={`flex-grow max-w-full px-2 xs:px-4 py-2 xs:py-4 transition-opacity duration-200 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+  >
+    {loadingPdf ? (
+      <div className="flex items-center justify-center p-6 xs:p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8D44AD]"></div>
+        <span className="ml-2 text-gray-600 text-sm xs:text-base">Verificando status dos PDFs...</span>
+      </div>
+    ) : currentPdf ? (
+      <div>
+        <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">
+          PDF: {currentPdf.filename}
+          {(filteredPdfs.length > 1) &&
+            ` (${safeCurrentLetterIndex + 1} de ${filteredPdfs.length})`}
+        </h4>
+        <PDFViewer blob={currentPdf.blob} filename={currentPdf.filename} />
+      </div>
+    ) : currentLetter ? (
+      <div>
+        <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">
+          Carta: {currentLetter.type} - {currentLetter.productName}
+          {filteredLetters.length > 1 &&
+            ` (${safeCurrentLetterIndex + 1} de ${filteredLetters.length})`}
+        </h4>
+        {currentLetter.type === "Finnet" && (
+          <FinnetLetterDisplay data={currentLetter} />
+        )}
+        {currentLetter.type === "Nexxera" && (
+          <NexxeraLetterDisplay data={currentLetter} />
+        )}
+        {!["Finnet", "Nexxera"].includes(currentLetter.type) && (
+          <div className="whitespace-pre-wrap text-xs xs:text-sm text-gray-800">
+            {currentLetter.content}
+          </div>
+        )}
+      </div>
+    ) : (
+      <div className="text-center p-6 xs:p-8 text-gray-600 text-sm xs:text-base">
+        Nenhum documento disponível para visualização.
+      </div>
+    )}
+  </div>
+));
+
 export const ValidationStep = memo(
   ({
     selectedProducts,
@@ -151,6 +215,8 @@ export const ValidationStep = memo(
     const [pdfStatus, setPdfStatus] = useState<string>('pending');
     const [pdfBlobs, setPdfBlobs] = useState<Array<{ filename: string; blob: Blob }>>([]);
     const [statusError, setStatusError] = useState<string | null>(null);
+    const [displayedIndex, setDisplayedIndex] = useState(0);
+    const [isFading, setIsFading] = useState(false);
 
     // Recuperar o ID do localStorage e iniciar polling
     useEffect(() => {
@@ -196,7 +262,6 @@ export const ValidationStep = memo(
           console.log('Blobs criados:', blobs);
           setPdfBlobs(blobs);
           setLoadingPdf(false);
-          toast.success('PDFs prontos para visualização!');
         } else if (response.status === 'pending' || response.status === 'processing') {
           console.log('Status ainda pendente/processando, continuando polling...');
           // Continuar polling
@@ -260,6 +325,17 @@ export const ValidationStep = memo(
     const currentLetter = filteredLetters[safeCurrentLetterIndex];
     const currentPdf = filteredPdfs[safeCurrentLetterIndex];
 
+    useEffect(() => {
+      if (safeCurrentLetterIndex !== displayedIndex) {
+        setIsFading(true);
+        const timeout = setTimeout(() => {
+          setDisplayedIndex(safeCurrentLetterIndex);
+          setIsFading(false);
+        }, 200); // duração do fade
+        return () => clearTimeout(timeout);
+      }
+    }, [safeCurrentLetterIndex, displayedIndex]);
+
     const handleCancel = () => {
       setIsModalOpen(false);
     };
@@ -270,7 +346,7 @@ export const ValidationStep = memo(
         await onConfirmAndSend(); 
       } catch (error) {
         console.error("Erro ao enviar carta:", error);
-        toast.error("Erro ao enviar a carta. Tente novamente.");
+        
       }
     };
 
@@ -297,10 +373,8 @@ export const ValidationStep = memo(
         // Simulação temporária
         await new Promise((resolve) => setTimeout(resolve, 2000));
         setPdfUrl("/sample.pdf");
-        toast.success("PDF gerado com sucesso!");
       } catch (error) {
         console.error("Erro ao buscar bancos:", error);
-        toast.error("Erro ao gerar o PDF. Tente novamente.");
       } finally {
         setLoadingPdf(false);
       }
@@ -320,8 +394,13 @@ export const ValidationStep = memo(
       }
     };
 
-    // Renderiza o esqueleto se estiver carregando dados
-    if (!products.length && !vanTypes.length) {
+    // Adicionar lógica de loading para cartas/PDFs
+    const isLoadingLetters =
+      (pdfGenerationId && pdfStatus !== 'done') ||
+      (!pdfGenerationId && (!generatedLetterContents || generatedLetterContents.length === 0));
+
+    // Renderiza o skeleton enquanto carrega as cartas/PDFs
+    if (isLoadingLetters) {
       return <ValidationStepSkeleton />;
     }
 
@@ -415,46 +494,16 @@ export const ValidationStep = memo(
           )}
 
           {/* Exibir PDF se disponível, senão exibir carta tradicional */}
-          <div className="flex-grow max-w-full px-2 xs:px-4 py-2 xs:py-4">
-            {loadingPdf ? (
-              <div className="flex items-center justify-center p-6 xs:p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8D44AD]"></div>
-                <span className="ml-2 text-gray-600 text-sm xs:text-base">Verificando status dos PDFs...</span>
-              </div>
-            ) : currentPdf ? (
-              <div>
-                <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">
-                  PDF: {currentPdf.filename}
-                  {(filteredPdfs.length > 1) &&
-                    ` (${safeCurrentLetterIndex + 1} de ${filteredPdfs.length})`}
-                </h4>
-                <PDFViewer blob={currentPdf.blob} filename={currentPdf.filename} />
-              </div>
-            ) : currentLetter ? (
-              <div>
-                <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">
-                  Carta: {currentLetter.type} - {currentLetter.productName}
-                  {filteredLetters.length > 1 &&
-                    ` (${safeCurrentLetterIndex + 1} de ${filteredLetters.length})`}
-                </h4>
-                {currentLetter.type === "Finnet" && (
-                  <FinnetLetterDisplay data={currentLetter} />
-                )}
-                {currentLetter.type === "Nexxera" && (
-                  <NexxeraLetterDisplay data={currentLetter} />
-                )}
-                {!["Finnet", "Nexxera"].includes(currentLetter.type) && (
-                  <div className="whitespace-pre-wrap text-xs xs:text-sm text-gray-800">
-                    {currentLetter.content}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center p-6 xs:p-8 text-gray-600 text-sm xs:text-base">
-                Nenhum documento disponível para visualização.
-              </div>
-            )}
-          </div>
+          <LetterContent
+            loadingPdf={loadingPdf}
+            currentPdf={currentPdf}
+            currentLetter={currentLetter}
+            filteredPdfs={filteredPdfs}
+            filteredLetters={filteredLetters}
+            safeCurrentLetterIndex={displayedIndex}
+            isFading={isFading}
+            key={currentPdf ? currentPdf.filename : currentLetter ? currentLetter.productName : 'empty'}
+          />
 
           {/* Botão de Navegação Próximo */}
           {shouldShowNavigation && (

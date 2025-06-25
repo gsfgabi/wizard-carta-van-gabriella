@@ -116,11 +116,9 @@ export const FormStep = memo(({
       // Apenas validação!
       await validateAuthorizationLetter(authorizationData);
       onUpdate(values);
-      toast.success('Dados validados com sucesso!');
       onNext();
     } catch (error) {
-      console.error('Erro ao validar dados:', error);
-      toast.error('Erro ao validar dados. Corrija o formulário.');
+
     } finally {
       setIsSubmitting(false);
     }
@@ -165,6 +163,14 @@ export const FormStep = memo(({
       <Formik
         initialValues={initialValues}
         validationSchema={formValidationSchema}
+        validate={values => {
+          // Validação customizada para pelo menos um contato
+          const errors: any = {};
+          if (!values.contact_preference_email && !values.contact_preference_phone && !values.contact_preference_whatsapp && !values.contact_preference_other?.trim()) {
+            errors.contact_preference_group = 'Selecione pelo menos uma preferência de contato ou preencha o campo "Outro".';
+          }
+          return errors;
+        }}
         onSubmit={handleSubmit}
         validateOnMount={true}
         validateOnChange={true}
@@ -272,6 +278,7 @@ export const FormStep = memo(({
                         label="Telefone"
                         placeholder="Inserir telefone do responsável pela empresa"
                         error={touched.responsible_person_cellphone && errors.responsible_person_cellphone ? errors.responsible_person_cellphone : ''}
+                        maxLength={15}
                         {...field}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const maskedValue = maskPhone(e.target.value);
@@ -481,6 +488,7 @@ export const FormStep = memo(({
                         label="Telefone"
                         placeholder="Inserir telefone do gerente da conta bancária"
                         error={touched.manager_cellphone && errors.manager_cellphone ? errors.manager_cellphone : ''}
+                        maxLength={15}
                         {...field}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const maskedValue = maskPhone(e.target.value);
@@ -517,7 +525,6 @@ export const FormStep = memo(({
                     </Field>
                     <label className="text-gray-700">E-mail</label>
                   </div>
-                  
                   <div className="flex items-center gap-3">
                     <Field name="contact_preference_phone">
                       {({ field }: any) => (
@@ -531,7 +538,6 @@ export const FormStep = memo(({
                     </Field>
                     <label className="text-gray-700">Telefone</label>
                   </div>
-                  
                   <div className="flex items-center gap-3">
                     <Field name="contact_preference_whatsapp">
                       {({ field }: any) => (
@@ -545,7 +551,6 @@ export const FormStep = memo(({
                     </Field>
                     <label className="text-gray-700">WhatsApp</label>
                   </div>
-                  
                   <div className="flex items-center gap-3">
                     <label className="text-gray-700">Outro:</label>
                     <Field name="contact_preference_other">
@@ -554,12 +559,15 @@ export const FormStep = memo(({
                           type="text"
                           {...field}
                           placeholder="Especificar outro meio de contato"
-                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#8D44AD] focus:border-[#8D44AD] focus:outline-none"
+                          className="w-40 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#8D44AD] focus:border-[#8D44AD] focus:outline-none"
                         />
                       )}
                     </Field>
                   </div>
                 </div>
+                { (errors as any).contact_preference_group && (
+                  <div className="text-red-600 text-xs mt-2">{(errors as any).contact_preference_group}</div>
+                )}
               </div>
 
               <div className="flex flex-row justify-between items-center gap-3 mt-8">

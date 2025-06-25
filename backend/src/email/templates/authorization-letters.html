@@ -5,118 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sua Carta de VAN Bancária</title>
   <style>
-    body, table, td, p, a, li, blockquote {
-      -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
+    body {
+      background: #f5f3ff;
+      font-family: 'Segoe UI', Arial, 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
     }
-    
-    @media (prefers-color-scheme: dark) {
-      .body-bg { background-color: #1a1a1a !important; }
-      .email-container { background-color: #2a2a2a !important; border-color: #444444 !important; }
-      .header-bg { background: #2a2a2a !important; border-color: #444444 !important; }
-      .content-bg { background-color: #2a2a2a !important; }
-      .links-bg { background-color: #222222 !important; border-color: #444444 !important; }
-      .main-text, .secondary-text { color: #eeeeee !important; }
-      .brand-text, .brand-link { color: #C77DFF !important; }
-      .footer-bg { background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%) !important; }
-      .footer-text, .footer-subtext { color: #bbbbbb !important; }
-
-      .light-logo { display: none !important; } 
-      .dark-logo { display: block !important; } 
+    .container {
+      max-width: 520px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(80, 36, 143, 0.10);
+      overflow: hidden;
+      border: 1.5px solid #c77dff22;
     }
-    
-    @media only screen and (max-width: 600px) {
-      .email-container-mobile {
-        width: 100% !important;
-        margin: 10px 0 !important;
-        max-width: 100% !important;
-      }
-      .content-padding { padding: 25px 20px 30px 20px !important; }
-      .footer-padding { padding: 25px 20px 25px 20px !important; }
-      .title-text { font-size: 22px !important; }
-      .body-text { font-size: 15px !important; line-height: 22px !important; }
+    .header {
+      background: linear-gradient(90deg, #c77dff 0%, #8d44ad 100%);
+      padding: 32px 0 18px 0;
+      text-align: center;
+    }
+    .header img {
+      width: 120px;
+      margin-bottom: 10px;
+    }
+    .header .brand {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-top: 6px;
+    }
+    .content {
+      padding: 36px 32px 28px 32px;
+      text-align: center;
+    }
+    .content h1 {
+      font-size: 26px;
+      color: #8d44ad;
+      margin: 0 0 12px 0;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .content p {
+      color: #22223b;
+      font-size: 17px;
+      line-height: 1.7;
+      margin: 0 0 18px 0;
+    }
+    .content .file-info {
+      color: #c77dff;
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 18px;
+    }
+    .actions {
+      margin: 28px 0 18px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #c77dff 0%, #8d44ad 100%);
+      color: #fff !important;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 12px 32px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px #c77dff22;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #8d44ad 0%, #c77dff 100%);
+    }
+    .footer {
+      background: #f3e8ff;
+      color: #8d44ad;
+      text-align: center;
+      padding: 18px 16px 12px 16px;
+      font-size: 13px;
+      border-top: 1px solid #e9d5ff;
+    }
+    .footer .brand {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .container { max-width: 98vw; margin: 10px 1vw; }
+      .content { padding: 22px 8vw 18px 8vw; }
     }
   </style>
 </head>
-<body class="body-bg" style="margin: 0; padding: 0; background-color: #E5E5E5; font-family: 'Segoe UI', Arial, 'Helvetica Neue', sans-serif;">
-  <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-    Sua Carta de VAN Bancária está pronta. Documento gerado com segurança pela PlugBank.
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://wizard-carta-van-gabriella.vercel.app/logo.png" alt="Logo Plugbank" />
+      <div class="brand">DOCUMENTO SEGURO • GERADO EM {{generationDate}}</div>
+    </div>
+    <div class="content">
+      <h1>Olá, {{recipientName}} 👋</h1>
+      <p>Conforme solicitado, estamos enviando em anexo a sua <span style="color:#c77dff;font-weight:600">Carta de VAN Bancária</span>.</p>
+      <div class="file-info">📎 O arquivo está anexado a este e-mail em formato <span>{{fileFormat}}</span>.</div>
+      <div class="actions">
+        <a href="https://clientes-novo.tecnospeed.com.br/" class="btn">Portal do Cliente</a>
+        <a href="https://mkt.casadodesenvolvedor.com.br/plugbank" class="btn">FAQ</a>
+        <a href="https://tecnospeed.com.br/plugbank/" class="btn">Contato</a>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="brand">PlugBank TecnoSpeed</span>
+      Feito com ❤️ e ☕<br>
+      <span style="font-size:11px;opacity:0.7;">2025 © Todos os direitos reservados.<br>Mensagem automática. Não responda.<br>🔒 LGPD: Seus dados estão protegidos.</span>
+    </div>
   </div>
-
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-container email-container-mobile" style="max-width: 800px; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; border: 1px solid #B39DDB; box-shadow: 0 4px 20px rgba(0,0,0,0.12); border-radius: 8px; overflow: hidden;">
-    
-    <tr>
-      <td align="center" class="header-bg" style="background: linear-gradient(135deg, #FFFFFF 0%, #F8F8F8 100%); padding: 30px 0 25px 0; border-bottom: 1px solid #E0E0E0;">
-        
-        <img src="https://wizard-carta-van-gabriella.vercel.app/logo.png" alt="Logo Plugbank" width="180" style="display: block;" class="light-logo" />
-        
-        <img src="https://d335luupugsy2.cloudfront.net/cms/files/16923/1643906120/$pb2rtl9clp" alt="Logo Plugbank" width="180" style="display: none;" class="dark-logo" />
-
-        <div class="brand-text" style="margin-top: 10px; font-size: 12px; color: #8D44AD; font-weight: 500; letter-spacing: 0.5px;">
-          DOCUMENTO SEGURO • GERADO EM {{generationDate}}
-        </div>
-      </td>
-    </tr>
-    
-    <tr>
-      <td bgcolor="#FFFFFF" class="content-padding content-bg" style="padding: 30px 40px 40px 40px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-          <tr>
-            <td class="title-text main-text" style="color: #22223B; font-family: 'Segoe UI', Arial, sans-serif; font-size: 26px; font-weight: 600; line-height: 32px;">
-              <span style="font-size: 20px; margin-right: 8px;">👋</span>
-              Olá, {{recipientName}},
-            </td>
-          </tr>
-          <tr>
-            <td class="body-text secondary-text" style="padding: 25px 0 30px 0; color: #333; font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; line-height: 26px;">
-              Conforme solicitado, estamos enviando em anexo a sua <strong class="brand-text" style="color: #8D44AD;">Carta de VAN Bancária</strong>.
-              <br><br>
-              <span style="display: inline-block; margin: 8px 0;">📎</span> O arquivo está anexado a este e-mail em formato <strong class="brand-text" style="color: #8D44AD;">{{fileFormat}}</strong>.
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    
-    <tr>
-      <td bgcolor="#FAFAFA" class="links-bg" style="padding: 25px 40px; border-top: 1px solid #E0E0E0;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-          <tr>
-            <td align="center" style="color: #666; font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 20px;">
-              <strong class="brand-text" style="color: #8D44AD; margin-bottom: 10px; display: block;">Links Úteis</strong>
-              <a href="https://clientes-novo.tecnospeed.com.br/" class="brand-link" style="color: #8D44AD; text-decoration: none; margin: 0 15px;">🏠 Portal do Cliente</a> •
-              <a href="https://mkt.casadodesenvolvedor.com.br/plugbank" class="brand-link" style="color: #8D44AD; text-decoration: none; margin: 0 15px;">❓ FAQ</a> •
-              <a href="https://tecnospeed.com.br/plugbank/" class="brand-link" style="color: #8D44AD; text-decoration: none; margin: 0 15px;">📞 Contato</a>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    
-    <tr>
-      <td class="footer-bg" style="background: linear-gradient(135deg, #8D44AD 0%, #7B3F9D 100%); padding: 30px 40px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-          <tr>
-            <td align="center" style="color: #FFFFFF; font-family: 'Segoe UI', Arial, sans-serif;">
-              <div class="footer-text" style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #FFFFFF;">
-                Feito com ❤️ e ☕ pelo PlugBank da TecnoSpeed
-              </div>
-              <div class="footer-subtext" style="font-size: 13px; opacity: 0.9; margin-bottom: 15px; color: #FFFFFF;">
-                2025 © Todos os direitos reservados.
-              </div>
-              <div class="footer-subtext" style="font-size: 11px; opacity: 0.8; line-height: 16px; max-width: 500px; color: #FFFFFF;">
-                Esta é uma mensagem automática gerada pelo sistema PlugBank.<br>
-                Por favor, não responda diretamente a este e-mail.
-                <br><br>
-                🔒 Seus dados estão protegidos pela Lei Geral de Proteção de Dados (LGPD)
-              </div>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    
-  </table>
   <img src="URL_TRACKING_PIXEL" width="1" height="1" style="display: none;" alt="" />
 </body>
 </html>

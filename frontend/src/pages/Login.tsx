@@ -44,10 +44,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         cnpj: cnpj.replace(/\D/g, ''),
         token
       });
-      const jwtToken = response.data.access_token;
-      if (jwtToken) {
-        localStorage.setItem('token', jwtToken);
-        localStorage.setItem('cnpj', cnpj.replace(/\D/g, ''));
+      const { access_token, name, company_name, name_company } = response.data;
+      if (access_token) {
+        localStorage.setItem('token', access_token);
+        if (name) localStorage.setItem('user_name', name);
+        if (company_name) {
+          localStorage.setItem('company_name', company_name);
+        } else if (name_company) {
+          localStorage.setItem('company_name', name_company);
+        }
         setLoading(false);
         onLoginSuccess();
       } else {
@@ -130,15 +135,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             label={loading ? "Acessando..." : "Acessar"}
             type="submit"
             className={`mt-5 xs:mt-6 sm:mt-7 w-full bg-[#8e44ad] hover:bg-[#7d379c] text-white text-base xs:text-lg font-medium rounded-full py-2 xs:py-3 shadow-lg transition-colors duration-200 ${(!formValid || loading) ? 'opacity-60 cursor-not-allowed' : ''}`}
-            disabled={!formValid || loading}
           />
-          {error && (
-            <div className="mt-3 xs:mt-4 text-center text-red-600 text-xs xs:text-sm font-medium">{error}</div>
-          )}
         </form>
       </div>
     </div>
   );
 }
-
-
