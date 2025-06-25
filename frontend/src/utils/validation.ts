@@ -81,7 +81,7 @@ export const formValidationSchema = Yup.object().shape({
     .required('Nome do responsável é obrigatório')
     .min(9, 'Nome deve ter no mínimo 8 dígitos')
     .matches(/^\S+\s+\S+/, 'Informe pelo menos nome e sobrenome'),
-  responsible_person_position: Yup.string()
+  responsible_person_title: Yup.string()
     .required('Cargo do responsável é obrigatório')
     .min(5, 'Cargo do responsável deve ter no mínimo 5 digitos'),
   responsible_person_cellphone: Yup.string()

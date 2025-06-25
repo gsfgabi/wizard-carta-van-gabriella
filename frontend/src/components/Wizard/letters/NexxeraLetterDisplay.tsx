@@ -28,7 +28,7 @@ export const NexxeraLetterDisplay = memo(({
   const razaoSocialContratante = formData.corporate_name || '[NOME EMPRESA]';
   const cnpjContratante = formData.cnpj || '[CNPJ EMPRESA]';
   const nomeRespEmpresa = formData.responsible_person_name || '[NOME RESP EMPRESA]';
-  const cargoRespEmpresa = formData.responsible_person_position || '[CARGO RESP. EMPRESA]';
+  const cargoRespEmpresa = formData.responsible_person_title || '[CARGO RESP. EMPRESA]';
   const telefoneEmpresa = formData.responsible_person_cellphone || '[TELEFONE EMPRESA]';
   const emailRespEmpresa = formData.responsible_person_email || '[E-MAIL RESP EMPRESA]';
 
