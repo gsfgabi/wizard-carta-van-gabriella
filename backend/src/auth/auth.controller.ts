@@ -20,6 +20,7 @@ export class AuthController {
   @ApiBadRequestResponse({
     description: 'Requisição malformada. (Bad Request).',
   })
+
   async login(@Body() body: LoginDto) {
     const isValid = await this.authService.validateLogin(body.cnpj, body.token);
 
