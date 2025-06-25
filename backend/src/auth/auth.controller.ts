@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UnauthorizedException, HttpCode } from '@nestjs/common';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
-import { ApiOkResponse, ApiOperation, ApiUnauthorizedResponse, ApiBadRequestResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +19,9 @@ export class AuthController {
   })
   @ApiBadRequestResponse({
     description: 'Requisição malformada. (Bad Request).',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
   })
 
   async login(@Body() body: LoginDto) {
