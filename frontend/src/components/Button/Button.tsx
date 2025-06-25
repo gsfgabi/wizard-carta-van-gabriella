@@ -10,7 +10,7 @@ const Button: React.FC<ButtonProps> = ({ variant = 'primary', children, classNam
   const variantClass = `button-${variant}`;
 
   // Mantém o botão 100% da largura em telas pequenas e auto em telas médias pra cima
-  const responsiveClass = 'w-full md:w-auto';
+  const responsiveClass = 'w-full sm:w-auto text-sm xs:text-base py-2 xs:py-3 px-4 xs:px-6';
 
   return (
     <button className={`${base} ${variantClass} ${responsiveClass} ${className}`} {...props}>

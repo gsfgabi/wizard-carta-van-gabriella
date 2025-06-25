@@ -6,8 +6,10 @@ export const showSuccess = (message: string) =>
     style: {
       background: colors.primary,
       color: colors.white,
-      maxWidth: '90vw', 
+      maxWidth: 'calc(100vw - 2rem)', 
       wordBreak: 'break-word',
+      fontSize: '14px',
+      padding: '12px 16px',
     },
     iconTheme: {
       primary: colors.white,
@@ -20,8 +22,10 @@ export const showError = (message: string) =>
     style: {
       background: colors.error,
       color: colors.white,
-      maxWidth: '90vw', 
+      maxWidth: 'calc(100vw - 2rem)', 
       wordBreak: 'break-word',
+      fontSize: '14px',
+      padding: '12px 16px',
     },
     iconTheme: {
       primary: colors.white,
@@ -36,8 +40,10 @@ export const CustomToaster = () => (
       style: {
         fontWeight: 500,
         borderRadius: 8,
-        maxWidth: '90vw', 
+        maxWidth: 'calc(100vw - 2rem)', 
         wordBreak: 'break-word',
+        fontSize: '14px',
+        padding: '12px 16px',
       },
     }}
   >

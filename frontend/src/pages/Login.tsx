@@ -66,11 +66,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-6 sm:px-12"
+      className="min-h-screen flex items-center justify-center px-4 xs:px-6 sm:px-12"
       style={{ background: '#8e44ad' }}
     >
       <div
-        className="bg-white px-4 sm:px-8 py-8 sm:py-10 rounded-2xl shadow-lg w-full max-w-md flex flex-col items-center border border-[#d1b3e0]"
+        className="bg-white px-4 xs:px-6 sm:px-8 py-6 xs:py-8 sm:py-10 rounded-2xl shadow-lg w-full max-w-sm xs:max-w-md flex flex-col items-center border border-[#d1b3e0]"
         style={{ boxShadow: '0 4px 24px 0 rgba(52, 0, 92, 0.10)' }}
       >
         <img
@@ -78,14 +78,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           alt="plugbank"
           width={120}
           height={48}
-          className="h-16 mb-7 mt-2 w-auto"
+          className="h-12 xs:h-14 sm:h-16 mb-5 xs:mb-6 sm:mb-7 mt-2 w-auto"
         />
-        <h2 className="text-center font-bold text-xl mb-2 text-black">Seja bem vindo!</h2>
-        <p className="text-center text-base mb-7 text-black">
+        <h2 className="text-center font-bold text-lg xs:text-xl mb-2 text-black">Seja bem vindo!</h2>
+        <p className="text-center text-sm xs:text-base mb-5 xs:mb-6 sm:mb-7 text-black">
           Acesse para criar uma nova Carta de VAN
         </p>
         <form onSubmit={handleSubmit} className="w-full">
-          <div className="mb-4">
+          <div className="mb-3 xs:mb-4">
             <InputField
               label="CNPJ"
               type="text"
@@ -117,9 +117,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               aria-label={showToken ? 'Ocultar token' : 'Mostrar token'}
             >
               {showToken ? (
-                <EyeSlashIcon className="h-5 w-5 text-gray-500" />
+                <EyeSlashIcon className="h-4 w-4 xs:h-5 xs:w-5 text-gray-500" />
               ) : (
-                <EyeIcon className="h-5 w-5 text-gray-500" />
+                <EyeIcon className="h-4 w-4 xs:h-5 xs:w-5 text-gray-500" />
               )}
             </button>
             {!tokenValid && token.length > 0 && (
@@ -129,11 +129,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <Button
             label={loading ? "Acessando..." : "Acessar"}
             type="submit"
-            className={`mt-7 w-full bg-[#8e44ad] hover:bg-[#7d379c] text-white text-lg font-medium rounded-full py-3 shadow-lg transition-colors duration-200 ${(!formValid || loading) ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`mt-5 xs:mt-6 sm:mt-7 w-full bg-[#8e44ad] hover:bg-[#7d379c] text-white text-base xs:text-lg font-medium rounded-full py-2 xs:py-3 shadow-lg transition-colors duration-200 ${(!formValid || loading) ? 'opacity-60 cursor-not-allowed' : ''}`}
             disabled={!formValid || loading}
           />
           {error && (
-            <div className="mt-4 text-center text-red-600 text-sm font-medium">{error}</div>
+            <div className="mt-3 xs:mt-4 text-center text-red-600 text-xs xs:text-sm font-medium">{error}</div>
           )}
         </form>
       </div>
