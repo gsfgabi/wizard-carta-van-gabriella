@@ -154,8 +154,8 @@ export class GeneratePdfsService {
     const buffers = await this.generateMultipleFromDto(dto);
 
     const pdfs = buffers.map(({ filename, buffer }) => ({
-      id_products: [dto.id_products],
-      id_van_types: [dto.id_van_types],
+      // id_products: [dto.id_products],
+      // id_van_types: [dto.id_van_types],
       filename,
       data: buffer.toString('base64'),
     }));
