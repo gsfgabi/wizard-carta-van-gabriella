@@ -53,14 +53,32 @@ export class AuthorizationService {
         include: {
           banks: true,
           cnabs: true,
-          authorization_letters_products: true,
+          authorization_letters_products: {
+            include: {
+              products: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },                    
           authorization_letters_van_types: true,
         },
       });
 
-      return carta;
+      return {
+        id_request: String(carta.id),
+        cnpj: carta.cnpj,
+        responsible_person_name: carta.responsible_person_name,
+        responsible_person_email: carta.responsible_person_email,
+        id_products: carta.authorization_letters_products.map((rel) => ({
+          id: rel.products.id,
+          name: rel.products.name,
+        })),
+      };
     } catch (error) {
-      console.error('Erro ao salvar carta de autorização:', error);
+      console.error('Erro ao salvar carta de van:', error);
       throw new InternalServerErrorException('Erro ao salvar os dados.');
     }
   }
