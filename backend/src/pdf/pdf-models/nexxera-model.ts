@@ -15,7 +15,13 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
     responsible_person_name,
     responsible_person_email,
     responsible_person_cellphone,
-    responsible_person_title
+    responsible_person_title,
+    name_responsible_person_tecnospeed,
+    email_responsible_person_tecnospeed,
+    url_logo,
+    bank_city,
+    bank_state,
+    contact_preference
   } = data;
 
   const docDefinition = {
@@ -45,8 +51,8 @@ export async function generatePdfBufferNexxera(data: any): Promise<Buffer> {
 
       {
         columns: [
-          { text: [{ text: 'Cidade: ', bold: true }, '__________________'], margin: [0, 0, 10, 0] },
-          { text: [{ text: 'UF: ', bold: true }, '____'] }
+          { text: [{ text: `Cidade: ${bank_city}}`, bold: true }, '__________________'], margin: [0, 0, 10, 0] },
+          { text: [{ text: `UF: ${bank_state}`, bold: true }, '____'] }
         ],
         margin: [0, 0, 0, 10]
       },
@@ -147,8 +153,8 @@ Atenciosamente,`,
               { text: [{ text: 'E-MAIL: ', bold: true }, responsible_person_email] }
             ],
             [
-              { text: [{ text: 'RESPONSÁVEL: ', bold: true }, '[RESP TECNOSPEED]'] },
-              { text: [{ text: 'E-MAIL RESP: ', bold: true }, '[RESP. TECNOSPEED]'] }
+              { text: [{ text: 'RESPONSÁVEL: ', bold: true }, `${name_responsible_person_tecnospeed}`] },
+              { text: [{ text: 'E-MAIL RESP: ', bold: true }, `${email_responsible_person_tecnospeed}`] }
             ]
           ]
         },

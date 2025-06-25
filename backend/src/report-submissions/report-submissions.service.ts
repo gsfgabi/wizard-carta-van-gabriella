@@ -4,6 +4,7 @@ import { ZapierService } from 'src/zapier/zapier.service';
 import { GenerateReportsDto } from './dto/generate-reports.dto';
 import * as JSZip from 'jszip';
 import { RedisService } from 'src/redis/redis.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 interface CachedPdf {
   filename?: string;
@@ -16,6 +17,7 @@ export class ReportSubmissionsService {
     private readonly emailService: EmailService,
     private readonly zapierService: ZapierService,
     private readonly redisService: RedisService,
+    private prisma: PrismaService,
   ) {}
 
   async generateSendAndNotify(dto: GenerateReportsDto): Promise<void> {
@@ -49,10 +51,11 @@ export class ReportSubmissionsService {
       await this.emailService.sendReportEmail(dto.responsible_person_email, dto.responsible_person_name, zipBuffer, true);
 
       for (const [index, pdfBuffer] of cachedBuffers.entries()) {
-        await this.prepareAndSendToZapier(`relatorio_${index + 1}`, pdfBuffer, dto);
+        await this.prepareAndSendToZapier(dto.id_products[0].name, pdfBuffer, dto);
       }
     } else {
       await this.emailService.sendReportEmail(dto.responsible_person_email, dto.responsible_person_name, cachedBuffers[0], false);
+      console.log('produto', dto.id_products[0].name);
       await this.prepareAndSendToZapier(dto.id_products[0].name, cachedBuffers[0], dto);
     }
   }
@@ -88,8 +91,15 @@ export class ReportSubmissionsService {
   }
 
   private async prepareAndSendToZapier(produto: string, buffer: Buffer, dto: GenerateReportsDto): Promise<void> {
-    const cnpj_sh = process.env.CNPJ_SH || '';;
-    const email = process.env.ZAPIER_EMAIL || '';
+    const [settings] = await this.prisma.general_settings.findMany( {
+      select: { 
+        email_responsible_person_tecnospeed: true,
+        cnpj_tecnospeed: true
+      },
+    });
+
+    const cnpj_sh = settings.cnpj_tecnospeed ?? "";
+    const email = settings.email_responsible_person_tecnospeed ?? "";
     const cnpj_cliente = dto.cnpj;
     const arquivoBase64 = buffer.toString('base64');
 

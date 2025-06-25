@@ -47,16 +47,26 @@ export class GeneratePdfsService {
   private async generateZip(dto: GeneratePdfsDto): Promise<Buffer> {
     const zip = new JSZip();
 
-    // carregar todos os produtos
     const products = await this.prisma.products.findMany();
-
-    // carregar todas as vans
     const vans = await this.prisma.van_types.findMany();
+    const [tecnospeed] = await this.prisma.general_settings.findMany({
+      select : {
+        email_responsible_person_tecnospeed: true,
+        name_responsible_person_tecnospeed: true
+      }
+    });
+
+    console.log('tecnospeed', tecnospeed);
 
     for (const product_id of dto.id_products) {
       for (const van_type_id of dto.id_van_types) {
+        console.log(tecnospeed.email_responsible_person_tecnospeed);
+        console.log(tecnospeed.name_responsible_person_tecnospeed);
+
         const data: GeneratePdfsDto = {
           ...dto,
+          email_responsible_person_tecnospeed: tecnospeed.email_responsible_person_tecnospeed,
+          name_responsible_person_tecnospeed: tecnospeed.name_responsible_person_tecnospeed,
           id_products: [product_id],
           id_van_types: [van_type_id],
         };
@@ -98,12 +108,27 @@ export class GeneratePdfsService {
     // carregar todas as vans
     const vans = await this.prisma.van_types.findMany();
 
+    const tecnospeed = await this.prisma.general_settings.findFirst({
+      select : {
+        email_responsible_person_tecnospeed: true,
+        name_responsible_person_tecnospeed: true
+      }
+    });
+
+    if (!tecnospeed) {
+      throw new BadRequestException('Dados da Tecnospeed não encontrados.');
+    }
+
+    console.log('tecnospeed', tecnospeed);
+
     for (const product_id of dto.id_products) {
       for (const van_type_id of dto.id_van_types) {
         const localDto: GeneratePdfsDto = {
           ...dto,
           id_products: [product_id],
           id_van_types: [van_type_id],
+          email_responsible_person_tecnospeed: tecnospeed.email_responsible_person_tecnospeed,
+          name_responsible_person_tecnospeed: tecnospeed.name_responsible_person_tecnospeed
         };
 
         const selectedProduct = products.filter((p) => p.id === product_id);
@@ -126,6 +151,8 @@ export class GeneratePdfsService {
     const buffers = await this.generateMultipleFromDto(dto);
 
     const pdfs = buffers.map(({ filename, buffer }) => ({
+      id_products: [dto.id_products],
+      id_van_types: [dto.id_van_types],
       filename,
       data: buffer.toString('base64'),
     }));
