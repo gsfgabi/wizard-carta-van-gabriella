@@ -25,13 +25,15 @@ export class ReportSubmissionsService {
     if (!dto.id_request) {
       throw new BadRequestException('Chave para buscar PDFs no cache não informada.');
     }
-
+    console.log("dto ", dto.id_request);
     const raw = await this.redisService.get(`pdfs:${dto.id_request}`);
     if (!raw) {
       throw new BadRequestException('Nenhum PDF encontrado no cache para a chave informada.');
     }
 
+    console.log("raw ", raw);
     const cachedBuffers = this.parseCachedPdfs(raw);
+    console.log("cache ",cachedBuffers);
 
     if (cachedBuffers.length === 0) {
       throw new BadRequestException('Nenhum PDF válido encontrado no cache para a chave informada.');
