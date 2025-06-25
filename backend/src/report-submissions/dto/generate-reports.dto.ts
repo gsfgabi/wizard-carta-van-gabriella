@@ -1,7 +1,17 @@
 import { IsArray, IsEmail, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ProductsDto } from 'src/products/dto/select-products.dto';
+
+export class ProductDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  id: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
 
 export class GenerateReportsDto {
   @ApiProperty()
@@ -9,11 +19,11 @@ export class GenerateReportsDto {
   @IsNotEmpty()
   id_request: string;
 
-  @ApiProperty({ type: [ProductsDto] })
+  @ApiProperty({ type: [ProductDto] })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ProductsDto)
-  id_products: ProductsDto[];
+  @Type(() => ProductDto)
+  id_products: ProductDto[];
 
   @ApiProperty()
   @IsString()
@@ -28,8 +38,4 @@ export class GenerateReportsDto {
   @ApiProperty()
   @IsEmail()
   responsible_person_email: string;
-
-  @ApiProperty()
-  @IsString()
-  responsible_person_title: string;
 }

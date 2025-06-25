@@ -26,6 +26,16 @@ async function bootstrap() {
     .setTitle('API de Carta de Van Bancária')
     .setDescription('Documentação da API de carta de van bancária')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        in: 'header',
+      },
+      'jwt',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

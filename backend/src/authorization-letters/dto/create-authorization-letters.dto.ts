@@ -14,6 +14,9 @@ export class CreateAuthorizationLettersDto {
   @ApiProperty()
   cnpj: string;
 
+  @ApiProperty()
+  id_request: string;
+
   @IsNotEmpty()
   @ApiProperty()
   corporate_name: string;

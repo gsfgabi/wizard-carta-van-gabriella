@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Param, UseGuards, HttpCode } from '@nestjs
 import { AuthorizationService } from './authorization-letters.service';
 import { CreateAuthorizationLettersDto } from './dto/create-authorization-letters.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
+import { GenerateReportsDto } from 'src/report-submissions/dto/generate-reports.dto';
+import { ApiBearerAuth, ApiOkResponse, ApiBadRequestResponse, ApiOperation, ApiUnauthorizedResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('jwt')
@@ -10,19 +11,55 @@ import { ApiBearerAuth, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swa
 export class AuthorizationController {
   constructor(private readonly authService: AuthorizationService) {}
 
-  @Post('')
+  @Post()
+  @ApiOperation({ summary: 'Salvar dados da Carta de Van no banco de dados' })
+  @ApiOkResponse({
+    description: '(OK)',
+    type: GenerateReportsDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Usuario não autenticado. (Unauthorized)',
+  })
+  @ApiBadRequestResponse({
+    description: 'Requisição malformada. (Bad Request).',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
+  })
   async saveAuthorizationLetters(
     @Body() createAuthorizationLettersDto: CreateAuthorizationLettersDto,
   ) {
     return await this.authService.saveAuthorizationLetters(createAuthorizationLettersDto);
   }
 
-  @Get('')
+  @Get()
+  @ApiOperation({ summary: 'Buscar todas as Cartas de Van' })
+  @ApiOkResponse({
+    description: '(OK)',
+    type: CreateAuthorizationLettersDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Usuario não autenticado. (Unauthorized)',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
+  })
   async getAllAuthorizationLetters() {
     return await this.authService.getAllAuthorizationLetters();
   }
 
   @Get('/:id')
+  @ApiOperation({ summary: 'Buscar Carta de Van por Id' })
+  @ApiOkResponse({
+    description: '(OK)',
+    type: CreateAuthorizationLettersDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Usuario não autenticado. (Unauthorized)',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
+  })
   async getAuthorizationLetterById(@Param('id') id: string) {
     return await this.authService.getAuthorizationLetterById(Number(id));
   }
@@ -30,7 +67,16 @@ export class AuthorizationController {
   @Post('/validate')
   @HttpCode(200)
   @ApiOkResponse({ description: 'Dados válidos. (OK)' })
-  @ApiBadRequestResponse({ description: 'Dados inválidos ou mal formatados. (Bad Request)' })
+  @ApiOperation({ summary: 'Validar dados da Carta de Van' })
+  @ApiUnauthorizedResponse({
+    description: 'Usuario não autenticado. (Unauthorized)',
+  })
+  @ApiBadRequestResponse({
+    description: 'Requisição malformada. (Bad Request).',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno no servidor. (Internal Server Error)',
+  })
   async validate(@Body() data: CreateAuthorizationLettersDto) {
     await this.authService.validateAuthorizationLetterData(data);
     return { message: 'Dados válidos' };
