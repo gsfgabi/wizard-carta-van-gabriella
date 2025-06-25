@@ -511,7 +511,7 @@ export const FormStep = memo(({
                           type="checkbox"
                           {...field}
                           checked={field.value}
-                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD] accent-[#8D44AD]"
                         />
                       )}
                     </Field>
@@ -525,7 +525,7 @@ export const FormStep = memo(({
                           type="checkbox"
                           {...field}
                           checked={field.value}
-                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD] accent-[#8D44AD]"
                         />
                       )}
                     </Field>
@@ -539,7 +539,7 @@ export const FormStep = memo(({
                           type="checkbox"
                           {...field}
                           checked={field.value}
-                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD]"
+                          className="w-4 h-4 text-[#8D44AD] border-gray-300 rounded focus:ring-[#8D44AD] accent-[#8D44AD]"
                         />
                       )}
                     </Field>
@@ -562,10 +562,10 @@ export const FormStep = memo(({
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mt-8">
+              <div className="flex flex-row justify-between items-center gap-3 mt-8">
                 <Button
                   type="button"
-                  className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+                  className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full min-w-[120px] px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
                   onClick={onBack}
                   disabled={isSubmitting}
                 >
@@ -573,7 +573,7 @@ export const FormStep = memo(({
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
+                  className="bg-[#8D44AD] text-white rounded-full min-w-[120px] px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
                   disabled={!isValid || isSubmitting}
                   onClick={() => {
                     console.log('Botão Revisar clicado');

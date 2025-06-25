@@ -12,6 +12,7 @@ import {
   getAllBankData,
   generatePDFs,
   getPDFStatus,
+  submitReport,
   type BankData,
   type ProductData,
   type CNABData,
@@ -197,6 +198,25 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
     const triggeredStepIndex = stepMap[triggeredByStep];
     const nextStepIndex = triggeredStepIndex + 1;
 
+    // Validação específica para o passo de seleção de banco
+    if (triggeredByStep === "bank") {
+      // Verificar se há produtos disponíveis para o banco selecionado
+      const availableProducts = products.filter(product => product.available !== false);
+      const availableVanTypes = vanTypes.filter(vanType => vanType.available !== false);
+      
+      if (availableProducts.length === 0) {
+        toast.error("Este banco não possui produtos disponíveis. Selecione outro banco.");
+        return;
+      }
+      
+      if (availableVanTypes.length === 0) {
+        toast.error("Este banco não possui tipos de VAN disponíveis. Selecione outro banco.");
+        return;
+      }
+      
+      console.log(`Banco validado: ${availableProducts.length} produtos e ${availableVanTypes.length} tipos de VAN disponíveis`);
+    }
+
     if (triggeredByStep === "form") {
       console.log("Checking VAN types for form step...");
       const availableVanTypes = vanTypes.filter((vanType) => vanType.available);
@@ -306,9 +326,42 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   const handleConfirmAndSend = async () => {
     setLoadingConfirmAndSend(true);
     try {
-      // TODO: Implementar chamada à API para criar ticket no Zendesk
-      // TODO: Implementar envio de e-mail
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Encontrar o banco e CNAB selecionados
+      const selectedBankData = banks.find(bank => bank.id === selectedBank);
+      const selectedCNAB = cnabs.find(cnab => cnab.name === formData.cnab);
+      
+      if (!selectedBankData || !selectedCNAB) {
+        throw new Error('Dados do banco ou CNAB não encontrados');
+      }
+
+      // Montar os dados do formulário para enviar no formato correto
+      const formDataToSend = {
+        cnpj: formData.cnpj?.replace(/\D/g, '') || '',
+        id_request: pdfGenerationId || '',
+        corporate_name: formData.corporate_name || '',
+        responsible_person_name: formData.responsible_person_name || '',
+        responsible_person_title: formData.responsible_person_position || '',
+        responsible_person_cellphone: formData.responsible_person_cellphone?.replace(/\D/g, '') || '',
+        responsible_person_email: formData.responsible_person_email || '',
+        manager_name: formData.manager_name || '',
+        manager_cellphone: formData.manager_cellphone?.replace(/\D/g, '') || '',
+        manager_email: formData.manager_email || '',
+        branch_number: formData.branch_number?.replace(/\D/g, '') || '',
+        branch_dv: formData.branch_dv || '',
+        account_number: formData.account_number?.replace(/\D/g, '') || '',
+        account_dv: formData.account_dv || '',
+        agreement_number: formData.agreement_number?.replace(/\D/g, '') || '',
+        id_banks: selectedBankData.id.toString(),
+        id_cnabs: selectedCNAB.id.toString(),
+        id_products: selectedProducts.map(id => parseInt(id)),
+        id_van_types: selectedVanTypes.map(id => parseInt(id)),
+      };
+      
+      // Debug: log dos dados sendo enviados
+      console.log('Dados sendo enviados para /report-submissions:', formDataToSend);
+      console.log('ID da requisição (pdfGenerationId):', pdfGenerationId);
+      
+      await submitReport(formDataToSend);
       toast.success("Carta enviada com sucesso!");
       setTicketDetails({
         number: "456981",
@@ -428,6 +481,9 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             error={errorBanks}
             onRetryFetchBanks={fetchBanks}
             bankFetchAttempts={bankFetchAttempts}
+            products={products}
+            vanTypes={vanTypes}
+            loadingProducts={loadingProducts}
           />
         );
       case "products":
@@ -488,6 +544,8 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
             vanTypes={vanTypes}
             cnabs={cnabs}
             banks={banks}
+            formData={formData}
+            pdfGenerationId={pdfGenerationId}
           />
         );
       case "completion":
@@ -549,7 +607,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2">
+    <div className="min-h-screen bg-[#8D44AD] flex flex-col items-center justify-start px-2 sm:px-4">
       <Stepper
         currentStep={currentStepIndex}
         steps={steps}
@@ -564,7 +622,7 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
         }}
       />
 
-      <div className="w-full mt-6">
+      <div className="w-full mt-4 sm:mt-6">
         {orderedSteps.map((step, index) => {
           const stepName = step.key;
           const isCurrent = stepName === currentStep;
@@ -577,19 +635,21 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
           return (
             <Card
               key={stepName}
-              className="mb-4 w-full max-w-full sm:max-w-2xl md:max-w-3xl"
+              className={`mb-3 sm:mb-4 w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl transition-all duration-300 ${
+                isCompleted && !isCurrent && !isExpanded ? "opacity-80 bg-gray-50" : ""
+              }`}
             >
               <div
-                className={`px-2 sm:px-6 md:px-8 py-1 flex items-center justify-between cursor-pointer ${
+                className={`px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between cursor-pointer ${
                   !isCompleted && !isCurrent
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
                 onClick={() => handleStepHeaderClick(stepName)}
               >
-                <div className="flex items-center">
+                <div className="flex items-center flex-1 min-w-0">
                   <div
-                    className={`rounded-full border-2 w-6 h-6 flex items-center justify-center mr-4 text-xs font-bold 
+                    className={`rounded-full border-2 w-5 h-5 xs:w-6 xs:h-6 flex items-center justify-center mr-2 sm:mr-4 text-xs font-bold flex-shrink-0
                           ${
                             isCompleted
                               ? "bg-white border-[#8D44AD] text-[#8D44AD]"
@@ -600,56 +660,66 @@ export const Wizard: React.FC<WizardProps> = ({ onBackToIntro }) => {
                         `}
                   >
                     {isCompleted ? (
-                      <CheckIcon className="h-4 w-4" strokeWidth={3} />
+                      <CheckIcon className="h-3 w-3 xs:h-4 xs:w-4" strokeWidth={3} />
                     ) : (
                       index + 1
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-black mr-2">
-                    {step.name}
-                  </h3>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-sm xs:text-base sm:text-lg font-semibold mr-2 transition-colors duration-300 truncate ${
+                      isCompleted && !isCurrent && !isExpanded ? "text-gray-600" : "text-black"
+                    }`}>
+                      {step.name}
+                    </h3>
 
-                  {isCompleted && !isCurrent && !isExpanded && (
-                    <span className="text-gray-800 text-lg ml-1">
-                      {stepName === "bank" &&
-                        selectedBank &&
-                        `${
-                          banks.find((b) => b.id === selectedBank)?.name ||
-                          "Nenhum"
-                        }`}
-                      {stepName === "products" &&
-                        selectedProducts.length > 0 &&
-                        `${
-                          products
-                            .filter((p) =>
-                              selectedProducts.includes(p.id.toString())
-                            )
-                            .map((p) => p.name)
-                            .join(", ") || "Nenhum"
-                        }`}
-                      {stepName === "van-type" &&
-                        selectedVanTypes.length > 0 &&
-                        `${
-                          vanTypes
-                            .filter((v) =>
-                              selectedVanTypes.includes(v.id.toString())
-                            )
-                            .map((v) => v.type)
-                            .join(", ") || "Nenhum"
-                        }`}
-                    </span>
-                  )}
+                    {isCompleted && !isCurrent && !isExpanded && (
+                      <span className={`text-xs xs:text-sm sm:text-base ml-1 transition-colors duration-300 truncate block ${
+                        isCompleted && !isCurrent && !isExpanded ? "text-gray-500" : "text-gray-800"
+                      }`}>
+                        {stepName === "bank" &&
+                          selectedBank &&
+                          `${
+                            banks.find((b) => b.id === selectedBank)?.name ||
+                            "Nenhum"
+                          }`}
+                        {stepName === "products" &&
+                          selectedProducts.length > 0 &&
+                          `${
+                            products
+                              .filter((p) =>
+                                selectedProducts.includes(p.id.toString())
+                              )
+                              .map((p) => p.name)
+                              .join(", ") || "Nenhum"
+                          }`}
+                        {stepName === "van-type" &&
+                          selectedVanTypes.length > 0 &&
+                          `${
+                            vanTypes
+                              .filter((v) =>
+                                selectedVanTypes.includes(v.id.toString())
+                              )
+                              .map((v) => v.type)
+                              .join(", ") || "Nenhum"
+                          }`}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {(isCompleted || isCurrent) &&
                   (isExpanded ? (
-                    <ChevronUpIcon className="h-6 w-6 text-[#8D44AD]" />
+                    <ChevronUpIcon className={`h-5 w-5 xs:h-6 xs:w-6 transition-colors duration-300 flex-shrink-0 ${
+                      isCompleted && !isCurrent && !isExpanded ? "text-gray-400" : "text-[#8D44AD]"
+                    }`} />
                   ) : (
-                    <ChevronDownIcon className="h-6 w-6 text-[#8D44AD]" />
+                    <ChevronDownIcon className={`h-5 w-5 xs:h-6 xs:w-6 transition-colors duration-300 flex-shrink-0 ${
+                      isCompleted && !isCurrent && !isExpanded ? "text-gray-400" : "text-[#8D44AD]"
+                    }`} />
                   ))}
               </div>
 
               {(isCurrent || isExpanded) && (
-                <div className="px-2 sm:px-6 md:px-8 py-2 border-t border-gray-200">
+                <div className="px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 border-t border-gray-200">
                   {renderStepContent(stepName)}
                 </div>
               )}

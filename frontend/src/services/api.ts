@@ -428,4 +428,16 @@ export const getPDFStatus = async (pdfId: string): Promise<{ status: string; pdf
   }
 };
 
+export const submitReport = async (data: AuthorizationLetterData): Promise<{ message: string }> => {
+  try {
+    return await retryRequest(async () => {
+      const response = await api.post('/report-submissions', data);
+      return response.data;
+    });
+  } catch (error) {
+    console.error('Erro ao enviar relatório:', error);
+    throw error;
+  }
+};
+
 export { api }; 

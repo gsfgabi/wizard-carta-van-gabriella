@@ -61,10 +61,10 @@ export const ProductSelection = memo(({
         {/* <h2 className="text-2xl font-semibold mb-2 text-black text-left">
           2. Selecionar um ou mais produtos
         </h2> */}
-        <p className="text-base text-black mb-8 text-left">
+        <p className="text-sm xs:text-base text-black mb-4 xs:mb-8 text-left">
           Selecione quais produtos deseja utilizar a transferência de arquivos por VAN
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-4 lg:gap-6 mb-8 xs:mb-12">
           {allProductsWithAvailability.map((product) => {
             const selected = selectedProducts.includes(product.id.toString());
             const isDisabled = !product.available;
@@ -76,7 +76,7 @@ export const ProductSelection = memo(({
                 type="button"
                 disabled={isDisabled}
                 className={`
-                  flex flex-col items-center justify-center rounded-xl border-2 px-4 py-10 transition min-h-[160px] h-full
+                  flex flex-col items-center justify-center rounded-xl border-2 px-3 xs:px-4 py-6 xs:py-8 transition min-h-[120px] xs:min-h-[140px] sm:min-h-[160px] h-full
                   ${selected
                     ? 'border-[#8D44AD] bg-[#8D44AD] text-white'
                     : isDisabled
@@ -87,17 +87,20 @@ export const ProductSelection = memo(({
                 style={{ boxShadow: 'none' }}
                 onClick={() => !isDisabled && handleProductToggle(product.id)}
               >
-                <span className="mb-3">
+                <span className="mb-2 xs:mb-3">
                   {Icon && (
                     <Icon
-                      size={38}
+                      size={28}
+                      className="xs:w-9 xs:h-9 sm:w-10 sm:h-10"
                       color={selected ? 'white' : isDisabled ? '#9CA3AF' : '#8D44AD'}
                     />
                   )}
                 </span>
-                <span className="text-2xl font-bold mb-2">{product.name}</span>
+                <span className="text-base xs:text-xl font-bold mb-1 xs:mb-2 text-center">
+                  {product.name}
+                </span>
                 {isDisabled && (
-                  <span className="text-sm text-gray-500 mt-2">
+                  <span className="text-xs xs:text-sm text-gray-500 mt-1 xs:mt-2">
                     Indisponível
                   </span>
                 )}
@@ -105,17 +108,17 @@ export const ProductSelection = memo(({
             );
           })}
         </div>
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
+        <div className="flex flex-row justify-between items-center mt-6 gap-3">
           <Button
             type="button"
-            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full min-w-[120px] px-6 xs:px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
             onClick={onBack}
           >
             Voltar
           </Button>
           <Button
             type="button"
-            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
+            className="bg-[#8D44AD] text-white rounded-full min-w-[120px] px-6 xs:px-10 py-2 font-semibold shadow-none hover:bg-[#7d379c] transition disabled:opacity-50"
             onClick={onNext}
             disabled={selectedProducts.length === 0}
           >

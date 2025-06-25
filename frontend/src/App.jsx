@@ -46,7 +46,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-primary flex flex-col pt-12">
+    <div className="min-h-screen bg-primary flex flex-col pt-14 sm:pt-16">
       <Header onLogout={handleLogout} onLogoClick={() => setShowIntro(true)} />
       <main className="flex-1 flex flex-col">
         {showIntro ? (

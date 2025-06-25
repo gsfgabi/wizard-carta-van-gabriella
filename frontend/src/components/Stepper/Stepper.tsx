@@ -7,8 +7,8 @@ const Stepper: React.FC<{ steps: string[] }> = ({ steps }) => {
   const lineLenght = 64; //Comprimento da linha
 
   return (
-    <nav className="w-full flex justify-center py-4 sm:py-6 bg-transparent overflow-x-auto">
-      <div className="relative w-full max-w-full sm:max-w-3xl md:max-w-5xl mx-auto flex flex-col items-center">
+    <nav className="w-full flex justify-center py-3 sm:py-4 md:py-6 bg-transparent overflow-x-auto">
+      <div className="relative w-full max-w-full sm:max-w-3xl md:max-w-5xl mx-auto flex flex-col items-center px-2 sm:px-4">
         {/* Linha horizontal */}
         <div
           className="absolute h-0.5 z-0 rounded-full bg-purple-700"
@@ -21,18 +21,18 @@ const Stepper: React.FC<{ steps: string[] }> = ({ steps }) => {
         />
 
         {/* Etapas */}
-        <ol className="relative flex w-full justify-between z-10 gap-2 sm:gap-0">
+        <ol className="relative flex w-full justify-between z-10 gap-1 xs:gap-2 sm:gap-0">
           {steps.map((step, idx) => (
             <li
               key={step}
-              className="flex flex-col items-center flex-1 min-w-[48px] sm:min-w-[32px]"
+              className="flex flex-col items-center flex-1 min-w-[40px] xs:min-w-[48px] sm:min-w-[32px]"
             >
               <div
-                className="flex items-center justify-center rounded-full transition-all text-white font-medium text-lg sm:text-base"
+                className="flex items-center justify-center rounded-full transition-all text-white font-medium text-base xs:text-lg sm:text-base"
                 style={{
                   width: circleSize,
                   height: circleSize,
-                  marginBottom: 8,
+                  marginBottom: 6,
                   backgroundColor: "#8D44AD",
                   border: `2px solid #8D44AD`,
                   zIndex: 1,
@@ -41,8 +41,8 @@ const Stepper: React.FC<{ steps: string[] }> = ({ steps }) => {
                 {idx + 1}
               </div>
               <span
-                className="mt-1 text-center text-purple-700 font-normal text-[13px] sm:text-sm leading-[16px]"
-                style={{ maxWidth: 80 }}
+                className="mt-1 text-center text-purple-700 font-normal text-xs xs:text-[13px] sm:text-sm leading-[14px] xs:leading-[16px]"
+                style={{ maxWidth: 70 }}
               >
                 {step}
               </span>

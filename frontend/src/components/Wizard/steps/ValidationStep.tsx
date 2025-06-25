@@ -9,7 +9,7 @@ import type { VanTypeData, ProductData, CNABData, BankData } from "../../../serv
 import { FinnetLetterDisplay } from "../letters/FinnetLetterDisplay";
 import { NexxeraLetterDisplay } from "../letters/NexxeraLetterDisplay";
 import ValidationStepSkeleton from "../../Skeleton/ValidationStepSkeleton";
-import { getPDFStatus } from '../../../services/api';
+import { getPDFStatus, submitReport } from '../../../services/api';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min?url';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -104,6 +104,8 @@ interface ValidationStepProps {
   vanTypes: VanTypeData[];
   cnabs: CNABData[];
   banks: BankData[];
+  formData: any;
+  pdfGenerationId: string | null;
 }
 
 interface LetterDisplayProps {
@@ -134,6 +136,8 @@ export const ValidationStep = memo(
     vanTypes,
     cnabs,
     banks,
+    formData,
+    pdfGenerationId,
   }: ValidationStepProps) => {
     const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
     const [loadingPdf, setLoadingPdf] = useState(false);
@@ -144,19 +148,16 @@ export const ValidationStep = memo(
       useState(false);
     
     // Novos estados para o fluxo de PDF
-    const [pdfGenerationId, setPdfGenerationId] = useState<string | null>(null);
     const [pdfStatus, setPdfStatus] = useState<string>('pending');
     const [pdfBlobs, setPdfBlobs] = useState<Array<{ filename: string; blob: Blob }>>([]);
     const [statusError, setStatusError] = useState<string | null>(null);
 
     // Recuperar o ID do localStorage e iniciar polling
     useEffect(() => {
-      const savedId = localStorage.getItem('pdfGenerationId');
-      if (savedId) {
-        setPdfGenerationId(savedId);
-        checkPDFStatus(savedId);
+      if (pdfGenerationId) {
+        checkPDFStatus(pdfGenerationId);
       }
-    }, []);
+    }, [pdfGenerationId]);
 
     // Função para verificar o status dos PDFs
     const checkPDFStatus = async (id: string) => {
@@ -215,6 +216,8 @@ export const ValidationStep = memo(
     // Filtrar PDFs baseado no produto selecionado
     const filteredPdfs = pdfBlobs.filter((pdf) => {
       const filename = pdf.filename.toLowerCase();
+      
+      // Se não há produto selecionado, mostrar todos os PDFs
       if (!selectedProduct) return true;
       
       // Extrair o ID do produto do nome do arquivo
@@ -223,17 +226,39 @@ export const ValidationStep = memo(
         const productId = productMatch[1];
         return productId === selectedProduct;
       }
+      
+      // Se não conseguir extrair o ID do produto, incluir o PDF
+      // (pode ser um PDF geral ou com formato diferente)
       return true;
     });
 
-    console.log('PDFs filtrados:', filteredPdfs);
-    console.log('PDF atual:', filteredPdfs[currentLetterIndex]);
-    console.log('Status atual:', pdfStatus);
-    console.log('Loading PDF:', loadingPdf);
+    console.log('Todos os PDFs:', pdfBlobs);
+    console.log('PDFs filtrados para produto', selectedProduct, ':', filteredPdfs);
 
     const filteredLetters = generatedLetterContents.filter((letter) =>
       letter.productInfo.some((p) => p.id.toString() === selectedProduct)
     );
+
+    // Determinar se deve mostrar navegação
+    const shouldShowNavigation = filteredPdfs.length > 1 || filteredLetters.length > 1;
+    const totalDocuments = filteredPdfs.length > 0 ? filteredPdfs.length : filteredLetters.length;
+
+    // Resetar o índice quando o produto muda ou quando há PDFs disponíveis
+    useEffect(() => {
+      setCurrentLetterIndex(0);
+    }, [selectedProduct, filteredPdfs.length]);
+
+    // Resetar o índice quando não há documentos disponíveis
+    useEffect(() => {
+      if (currentLetterIndex >= totalDocuments && totalDocuments > 0) {
+        setCurrentLetterIndex(0);
+      }
+    }, [filteredPdfs.length, filteredLetters.length, currentLetterIndex, totalDocuments]);
+
+    // Garantir que o índice não exceda o número de documentos
+    const safeCurrentLetterIndex = Math.min(currentLetterIndex, totalDocuments - 1);
+    const currentLetter = filteredLetters[safeCurrentLetterIndex];
+    const currentPdf = filteredPdfs[safeCurrentLetterIndex];
 
     const handleCancel = () => {
       setIsModalOpen(false);
@@ -281,23 +306,10 @@ export const ValidationStep = memo(
       }
     };
 
-    const handleConfirmAndSend = async () => {
-      setInternalLoadingConfirmAndSend(true);
-      try {
-        // TODO: Implementar chamada à API para criar ticket no Zendesk
-        // TODO: Implementar envio de e-mail
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.success("Carta enviada com sucesso!");
-      } catch (error) {
-        console.error("Erro ao enviar carta:", error);
-        toast.error("Erro ao enviar a carta. Tente novamente.");
-      } finally {
-        setInternalLoadingConfirmAndSend(false);
-      }
-    };
-
     const handleNextLetter = () => {
-      if (currentLetterIndex < filteredLetters.length - 1) {
+      // Determinar qual array usar para navegação (PDFs têm prioridade)
+      const maxIndex = filteredPdfs.length > 0 ? filteredPdfs.length - 1 : filteredLetters.length - 1;
+      if (currentLetterIndex < maxIndex) {
         setCurrentLetterIndex(currentLetterIndex + 1);
       }
     };
@@ -307,9 +319,6 @@ export const ValidationStep = memo(
         setCurrentLetterIndex(currentLetterIndex - 1);
       }
     };
-
-    const currentLetter = filteredLetters[currentLetterIndex];
-    const currentPdf = filteredPdfs[currentLetterIndex];
 
     // Renderiza o esqueleto se estiver carregando dados
     if (!products.length && !vanTypes.length) {
@@ -332,37 +341,37 @@ export const ValidationStep = memo(
         {/* <h2 className="text-2xl font-semibold text-black mb-1">
           5. Revisar e Validar
         </h2> */}
-        <p className="text-base text-gray-700 mb-6">
+        <p className="text-sm xs:text-base text-gray-700 mb-4 xs:mb-6">
           Revise os dados preenchidos e o conteúdo da carta gerada antes de
           finalizar.
         </p>
 
         {/* Status da geração de PDFs */}
         {pdfGenerationId && (
-          <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-            <h4 className="font-semibold text-black mb-2">Status da Geração:</h4>
+          <div className="mb-4 xs:mb-6 p-3 xs:p-4 bg-gray-100 rounded-lg">
+            <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">Status da Geração:</h4>
             {statusError ? (
-              <p className="text-red-600">{statusError}</p>
+              <p className="text-red-600 text-sm xs:text-base">{statusError}</p>
             ) : pdfStatus === 'pending' ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8D44AD] mr-2"></div>
-                <span className="text-gray-700">Gerando PDFs...</span>
+                <span className="text-gray-700 text-sm xs:text-base">Gerando PDFs...</span>
               </div>
-            ) : pdfStatus === 'ready' ? (
-              <p className="text-green-600">PDFs prontos!</p>
+            ) : pdfStatus === 'done' ? (
+              <p className="text-green-600 text-sm xs:text-base">PDFs prontos!</p>
             ) : (
-              <p className="text-gray-700">Status: {pdfStatus}</p>
+              <p className="text-gray-700 text-sm xs:text-base">Status: {pdfStatus}</p>
             )}
           </div>
         )}
 
         {/* Seletor de Produto */}
         {selectedProducts.length > 1 && products.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-black mb-3">
+          <div className="mb-4 xs:mb-6">
+            <h3 className="text-base xs:text-lg font-semibold text-black mb-2 xs:mb-3">
               Selecione o Produto:
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 xs:gap-3">
               {products
                 .filter((product) =>
                   selectedProducts.includes(product.id.toString())
@@ -375,7 +384,7 @@ export const ValidationStep = memo(
                       setCurrentLetterIndex(0);
                     }}
                     className={`
-                  px-4 py-2 rounded-full text-sm font-medium transition-colors
+                  px-3 xs:px-4 py-1.5 xs:py-2 rounded-full text-xs xs:text-sm font-medium transition-colors
                   ${
                     selectedProduct === product.id.toString()
                       ? "bg-[#8D44AD] text-white"
@@ -391,42 +400,42 @@ export const ValidationStep = memo(
         )}
 
         {/* Container principal para a carta e botões de navegação */}
-        <div className="relative flex items-center justify-center mb-6">
+        <div className="relative flex flex-col sm:flex-row items-center justify-center mb-4 xs:mb-6 gap-2 xs:gap-4">
           {/* Botão de Navegação Anterior */}
-          {(filteredPdfs.length > 1 || filteredLetters.length > 1) && (
+          {shouldShowNavigation && (
             <Button
               type="button"
-              className="absolute left-0 z-10 p-2 bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] disabled:opacity-50 transition-colors duration-200 -translate-y-1/2 top-1/2"
+              className="sm:absolute left-0 z-10 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8D44AD] disabled:opacity-50 transition-all duration-200 sm:-translate-y-1/2 sm:top-1/2"
               onClick={handlePreviousLetter}
-              disabled={currentLetterIndex === 0}
+              disabled={safeCurrentLetterIndex === 0}
               aria-label="Carta anterior"
             >
-              <ChevronLeftIcon className="h-6 w-6" aria-hidden="true" />
+              <ChevronLeftIcon className="h-5 w-5 xs:h-6 xs:w-6" aria-hidden="true" />
             </Button>
           )}
 
           {/* Exibir PDF se disponível, senão exibir carta tradicional */}
-          <div className="flex-grow max-w-full px-12 py-4">
+          <div className="flex-grow max-w-full px-2 xs:px-4 py-2 xs:py-4">
             {loadingPdf ? (
-              <div className="flex items-center justify-center p-8">
+              <div className="flex items-center justify-center p-6 xs:p-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8D44AD]"></div>
-                <span className="ml-2 text-gray-600">Verificando status dos PDFs...</span>
+                <span className="ml-2 text-gray-600 text-sm xs:text-base">Verificando status dos PDFs...</span>
               </div>
             ) : currentPdf ? (
               <div>
-                <h4 className="font-semibold text-black mb-2">
+                <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">
                   PDF: {currentPdf.filename}
                   {(filteredPdfs.length > 1) &&
-                    ` (${currentLetterIndex + 1} de ${filteredPdfs.length})`}
+                    ` (${safeCurrentLetterIndex + 1} de ${filteredPdfs.length})`}
                 </h4>
                 <PDFViewer blob={currentPdf.blob} filename={currentPdf.filename} />
               </div>
             ) : currentLetter ? (
               <div>
-                <h4 className="font-semibold text-black mb-2">
+                <h4 className="font-semibold text-black mb-1 xs:mb-2 text-sm xs:text-base">
                   Carta: {currentLetter.type} - {currentLetter.productName}
                   {filteredLetters.length > 1 &&
-                    ` (${currentLetterIndex + 1} de ${filteredLetters.length})`}
+                    ` (${safeCurrentLetterIndex + 1} de ${filteredLetters.length})`}
                 </h4>
                 {currentLetter.type === "Finnet" && (
                   <FinnetLetterDisplay data={currentLetter} />
@@ -435,37 +444,37 @@ export const ValidationStep = memo(
                   <NexxeraLetterDisplay data={currentLetter} />
                 )}
                 {!["Finnet", "Nexxera"].includes(currentLetter.type) && (
-                  <div className="whitespace-pre-wrap text-sm text-gray-800">
+                  <div className="whitespace-pre-wrap text-xs xs:text-sm text-gray-800">
                     {currentLetter.content}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center p-8 text-gray-600">
+              <div className="text-center p-6 xs:p-8 text-gray-600 text-sm xs:text-base">
                 Nenhum documento disponível para visualização.
               </div>
             )}
           </div>
 
           {/* Botão de Navegação Próximo */}
-          {(filteredPdfs.length > 1 || filteredLetters.length > 1) && (
+          {shouldShowNavigation && (
             <Button
               type="button"
-              className="absolute right-0 z-10 p-2 bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] disabled:opacity-50 transition-colors duration-200 -translate-y-1/2 top-1/2"
+              className="sm:absolute right-0 z-10 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center bg-white rounded-full shadow-md text-[#8D44AD] hover:bg-[#f3eaff] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8D44AD] disabled:opacity-50 transition-all duration-200 sm:-translate-y-1/2 sm:top-1/2"
               onClick={handleNextLetter}
-              disabled={currentLetterIndex === (filteredPdfs.length > 0 ? filteredPdfs.length - 1 : filteredLetters.length - 1)}
+              disabled={safeCurrentLetterIndex >= totalDocuments - 1}
               aria-label="Próxima carta"
             >
-              <ChevronRightIcon className="h-6 w-6" aria-hidden="true" />
+              <ChevronRightIcon className="h-5 w-5 xs:h-6 xs:w-6" aria-hidden="true" />
             </Button>
           )}
         </div>
 
         {/* Botões de Ação */}
-        <div className="flex justify-between items-center mt-8">
+        <div className="flex flex-row justify-between items-center mt-6 xs:mt-8 gap-3 xs:gap-4">
           <Button
             type="button"
-            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-10 py-2 font-semibold transition hover:bg-[#f3eaff] hover:text-[#8D44AD] disabled:opacity-50 shadow-none"
+            className="border-2 border-[#8D44AD] text-[#8D44AD] bg-white rounded-full px-6 xs:px-10 py-2 min-h-[44px] font-semibold text-base xs:text-lg transition hover:bg-[#f3eaff] hover:text-[#8D44AD] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8D44AD] disabled:opacity-50 shadow-none flex-1"
             onClick={onBack}
             disabled={loadingPdf || loadingConfirmAndSend || loadingPdfs}
           >
@@ -475,7 +484,7 @@ export const ValidationStep = memo(
           {/* Botão Confirmar e Enviar Carta */}
           <Button
             type="button"
-            className="bg-[#8D44AD] text-white rounded-full px-10 py-2 font-semibold shadow-md hover:bg-[#7d379c] transition disabled:opacity-50"
+            className="bg-[#8D44AD] text-white rounded-full px-6 xs:px-10 py-2 min-h-[44px] font-semibold text-base xs:text-lg shadow-md hover:bg-[#7d379c] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8D44AD] transition disabled:opacity-50 flex-1"
             onClick={() => setIsModalOpen(true)}
             disabled={
               loadingPdf ||
@@ -483,10 +492,13 @@ export const ValidationStep = memo(
               loadingPdfs ||
               selectedProducts.length === 0 ||
               selectedVanTypes.length === 0 ||
-              (filteredLetters.length === 0 && filteredPdfs.length === 0)
+              (filteredLetters.length === 0 && filteredPdfs.length === 0) ||
+              pdfStatus !== 'done' // Só habilita se PDFs estiverem prontos
             }
             title={
-              selectedProducts.length === 0 || selectedVanTypes.length === 0
+              pdfStatus !== 'done'
+                ? "Aguarde a geração dos PDFs antes de enviar."
+                : selectedProducts.length === 0 || selectedVanTypes.length === 0
                 ? "Selecione produtos e tipos de VAN para continuar."
                 : (filteredLetters.length === 0 && filteredPdfs.length === 0)
                 ? "Nenhuma carta gerada para os produtos e tipos de VAN selecionados."
