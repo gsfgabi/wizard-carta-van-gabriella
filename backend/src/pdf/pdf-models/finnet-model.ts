@@ -26,7 +26,7 @@ export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Bu
   const docDefinition = {
     content: [
       {
-        text: `Ao BANCO ${name_bank} \n\nA/C ${manager_name}`,
+        text: `Ao ${name_bank || "Banco do Brasil"} \n\nA/C ${manager_name}`,
         style: 'headerLeft',
         margin: [0, 0, 0, 10],
       },
@@ -66,12 +66,12 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
       },
       { text: 'Produtos Financeiros', bold: true },
       {
-        text: `( ) Pagamentos\n( ) Boletos\n( ) DDA\n( ) Extrato`,
+        text: `(x) Pagamentos\n( ) Boletos\n(x) DDA\n(x) Extrato`,
         margin: [0, 0, 0, 10],
       },
       { text: 'Ambiente:', bold: true, margin: [0, 0, 0, 0] },
       {
-        text: `(X) Arquivo em produção\n\nCNAB:\n( ) 240\n( ) 400`,
+        text: `(X) Arquivo em produção\n\nCNAB:\n(x) 240\n( ) 400`,
         margin: [0, 0, 0, 10],
       },
       {
