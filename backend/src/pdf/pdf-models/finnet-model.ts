@@ -7,6 +7,7 @@ import { GeneratePdfsDto } from 'src/pdf/dto/generate-pdfs.dto';
 
 export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Buffer> {
   const {
+    name_bank,
     manager_name,
     corporate_name,
     responsible_person_name,
@@ -18,12 +19,14 @@ export async function generatePdfBufferFinnet(data: GeneratePdfsDto): Promise<Bu
     responsible_person_cellphone,
     manager_email,
     manager_cellphone,
+    name_responsible_person_tecnospeed,
+    email_responsible_person_tecnospeed
   } = data;
 
   const docDefinition = {
     content: [
       {
-        text: `Ao BANCO \n\nA/C ${manager_name}`,
+        text: `Ao BANCO ${name_bank} \n\nA/C ${manager_name}`,
         style: 'headerLeft',
         margin: [0, 0, 0, 10],
       },
@@ -68,7 +71,7 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
       },
       { text: 'Ambiente:', bold: true, margin: [0, 0, 0, 0] },
       {
-        text: `( ) Arquivo em produção\n\nCNAB:\n( ) 240\n( ) 400`,
+        text: `(X) Arquivo em produção\n\nCNAB:\n( ) 240\n( ) 400`,
         margin: [0, 0, 0, 10],
       },
       {
@@ -108,9 +111,9 @@ Solicitamos que esta Instituição disponibilize o suporte necessário para viab
       {
         text: [
           { text: 'Nome: ', bold: true },
-          '[VARIÁVEL NOME RESPONSÁVEL TECNOSPEED]\n',
+          `${name_responsible_person_tecnospeed}\n`,
           { text: 'E-mail: ', bold: true },
-          '[VARIÁVEL E-MAIL RESPONSÁVEL TECNOSPEED]',
+          `${email_responsible_person_tecnospeed}`,
         ],
         margin: [0, 0, 0, 10],
       },

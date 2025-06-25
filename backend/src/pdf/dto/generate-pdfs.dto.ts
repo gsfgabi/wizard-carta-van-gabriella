@@ -31,6 +31,15 @@ export class GeneratePdfsDto {
   @ApiProperty()
   corporate_name: string;
 
+  @ApiProperty()
+  url_logo: string;
+
+  @ApiProperty()
+  bank_city: string;
+
+  @ApiProperty()
+  bank_state: string;
+
   @IsNotEmpty()
   @ApiProperty()
   responsible_person_name: string;
@@ -71,6 +80,9 @@ export class GeneratePdfsDto {
   @ApiProperty()
   id_cnabs: string;
 
+  @ApiProperty()
+  type_cnabs: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductDto)
@@ -81,4 +93,16 @@ export class GeneratePdfsDto {
   @IsInt({ each: true })
   @ApiProperty()
   id_van_types: number[];
+
+  @ApiProperty()
+  contact_preference: string;
+
+  @ApiProperty()
+  name_responsible_person_tecnospeed: string;
+
+  @ApiProperty()
+  email_responsible_person_tecnospeed: string;
+
+  @ApiProperty()
+  name_bank: string;
 }
