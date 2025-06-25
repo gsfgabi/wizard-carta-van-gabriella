@@ -16,4 +16,13 @@ export class LoginDto {
 export class LoginResponseDto {
   @ApiProperty()
   access_token: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  company_name: string;
+
+  @ApiProperty()
+  url_image: string;
 }
